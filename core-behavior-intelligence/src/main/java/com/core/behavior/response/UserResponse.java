@@ -1,21 +1,38 @@
 package com.core.behavior.response;
 
 
+import com.core.behavior.model.UserActiviti;
+import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
+import java.util.Collection;
 import lombok.Data;
+
+//import org.springframework.web.bind.annotation.ModelAttribute;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Data
+@ApiModel(description = "Represents a user of application")
 public class UserResponse implements Serializable{ 
+    
     private String id;
     private String firstName;
     private String lastName;
     private String url;
     private String email;
-    private String pictureUrl;
-    private String password;
+    private String pictureUrl; 
+    private boolean isAuthenticated;
+    
+    public UserResponse(){}
+    public UserResponse(UserActiviti entity){
+        this.id = entity.getId();
+        this.firstName = entity.getFirstName();
+        this.lastName = entity.getLastName();
+        this.url = null;
+        this.email = entity.getEmail();        
+        this.pictureUrl = entity.getPicture();
+    }    
     
 }
