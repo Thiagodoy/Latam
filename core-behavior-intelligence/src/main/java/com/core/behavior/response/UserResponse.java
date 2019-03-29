@@ -5,6 +5,7 @@ import com.core.behavior.model.UserActiviti;
 import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import lombok.Data;
 
 //import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,7 +26,10 @@ public class UserResponse implements Serializable{
     private String pictureUrl; 
     private boolean isAuthenticated;
     
+    private List<GroupResponse> groups;
+    
     public UserResponse(){}
+    
     public UserResponse(UserActiviti entity){
         this.id = entity.getId();
         this.firstName = entity.getFirstName();

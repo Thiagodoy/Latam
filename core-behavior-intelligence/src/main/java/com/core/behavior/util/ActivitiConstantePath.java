@@ -12,6 +12,8 @@ public class ActivitiConstantePath {
     
     public static final String PATH_POST_USER = "/identity/users";
     public static final String PATH_GET_USER = "/identity/users";
+    public static final String PATH_GET_GROUP = "/identity/groups";
+    public static final String PATH_POST_GROUP = "/identity/groups/{groupId}/members";
     public static final String PATH_GET_SINGLE_USER = "/identity/users/{id}";
     public static final String PATH_DELETE_USER = "/identity/users/{id}";
     public static final String PATH_PUT_USER = "/identity/users/{id}";

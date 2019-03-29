@@ -2,7 +2,6 @@ package com.core.behavior.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 
 /**
  *
@@ -11,8 +10,6 @@ import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Data
-public class ActivitiException extends Exception {
-    private HttpStatus code;
-    private String messageError;
+public class ActivitiException extends RuntimeException {       
     private Long codeMessage;
 }
