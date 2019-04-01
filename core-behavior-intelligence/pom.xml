@@ -75,12 +75,14 @@
             <artifactId>jjwt</artifactId>
             <version>0.7.0</version>
         </dependency>
+       
+        <!-- https://mvnrepository.com/artifact/org.beanio/beanio -->
         <dependency>
-            <groupId>com.core</groupId>
-            <artifactId>behavior</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
+            <groupId>org.beanio</groupId>
+            <artifactId>beanio</artifactId>
+            <version>2.1.0</version>
         </dependency>
+
     </dependencies>
 
     <build>
