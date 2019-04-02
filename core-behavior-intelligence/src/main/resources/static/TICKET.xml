@@ -1,0 +1,56 @@
+<beanio xmlns="http://www.beanio.org/2012/03" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
+  
+    <stream name="ticket" format="csv">       
+        
+        <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />    
+        <!-- record layout... -->        
+        <record name="registro" class="com.core.behavior.model.Ticket">
+            <field type="date" required="true" typeHandler="dateHandler" name="dataEmissao"/>
+            <field type="date" required="true" typeHandler="dateHandler" name="dataVoo"/>
+            <field type="string" required="true" name="horaVoo"/>
+            <field type="string" required="true" name="ciaBilhete"/>
+            <field type="string" required="true" name="trechoTkt"/>
+            <field type="string" required="true" name="atoOrigem"/>
+            <field type="string" required="true" name="atoDestino"/>
+            <field type="long" required="true" name="nroCupom"/>
+            <field type="long" required="true" name="bilhete"/>
+            <field type="string" required="true" name="tipoVenda"/>
+            <field type="string" required="true" name="classeCabine"/>
+            <field type="string" required="true" name="ciaVoo"/>
+            <field type="bigdecimal" required="true" name="valorBrl"/>
+            <field type="string" required="false" name="clienteEmpresa"/>
+            <field type="string" required="false" name="cnpjClienteEmpresa"/>
+            <field type="long" required="true" name="iataAgenciaEmissora"/>
+            <field type="string" required="false" name="baseVenda"/>
+            <field type="long" required="false" name="qtdePax"/>
+            <field type="long" required="false" name="numVoo"/>
+            <field type="string" required="true" name="agenciaConsolidada"/>
+            <field type="date" required="true" typeHandler="dateHandler" name="dataExtracao"/>
+            <field type="string" required="false" name="horaEmissao"/>
+            <field type="date" required="false" typeHandler="dateHandler"  name="dataReserva"/>
+            <field type="string" required="false"  name="horaReserva"/>
+            <field type="string" required="true" name="baseTarifaria"/>   
+            <field type="string" required="false" name="familiaTarifaria"/>
+            <field type="string" required="true" name="classeTarifa"/>
+            <field type="string" required="true" name="classeServico"/>
+            <field type="string" required="false" name="OndDirecional"/>
+            <field type="string" required="true" name="tourCode"/>
+            <field type="string" required="true" name="rtOn"/>
+            <field type="bigdecimal" required="true" name="valorUs"/>
+            <field type="bigdecimal" required="true" name="tarifaPublica"/> 
+            <field type="bigdecimal" required="true" name="tarifaPublicUs"/>
+            <field type="string" required="false" name="pnrAgencia"/>
+            <field type="string" required="false" name="pnrCiaArea"/>
+            <field type="string" required="false" name="selfBookingOffiline"/>
+            <field type="string" required="true" name="nomePax"/>
+            <field type="string" required="true" name="tipoPax"/>
+            <field type="long" required="false" name="cpfPax"/>
+            <field type="string" required="false" name="tierFidelidadePax"/>
+            <field type="string" required="true" name="tipoPagamento"/>
+            <field type="long" required="true" name="digitoVerificadorCC"/>
+            <field type="string" required="false" name="nomeCliente"/>                                 
+        </record>
+    </stream>  
+</beanio>

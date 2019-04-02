@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.Data;
 
@@ -159,4 +160,10 @@ public class Ticket {
     @Column(name = "createdAt")
     private LocalDateTime createdAt;
 
+    
+    @PrePersist
+    public void setCreatedDate(){
+        this.createdAt = LocalDateTime.now();
+    }
+    
 }

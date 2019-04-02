@@ -38,10 +38,8 @@ public class FileService {
 
         final String nameFile = file.getName();
 
-        InputStream stream = null;
-        Scanner scanner = null;
-        stream = new FileInputStream(file);
-        scanner = new Scanner(stream, "UTF-8");
+        InputStream stream = new FileInputStream(file);
+        Scanner scanner = new Scanner(stream, "UTF-8");
 
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(company);
@@ -68,6 +66,10 @@ public class FileService {
     
     public List<com.core.behavior.model.File> listFilesOfPending(){    
         return fileRepository.findByStatus(StatusEnum.UPLOADED);
+    }
+    
+    public void update(com.core.behavior.model.File file){
+        this.fileRepository.save(file);
     }
 
 }
