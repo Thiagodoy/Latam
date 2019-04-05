@@ -61,7 +61,7 @@ public class FileService {
         
         
         if(fileRepository.findByName(file.getName()).isPresent()){
-            file.deleteOnExit();
+            file.delete();
             throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
         }
         

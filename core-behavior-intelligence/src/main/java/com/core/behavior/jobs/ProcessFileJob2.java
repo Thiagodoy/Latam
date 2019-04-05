@@ -65,12 +65,14 @@ public class ProcessFileJob2 extends QuartzJobBean {
                 fileModel = dto.getFile();
                 fileModel.setStatus(StatusEnum.SUCCESS);
                 fileService.saveFile(fileModel);
+                file.delete();
             }
         } catch (Exception e) {
             Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, null, e);
             logService.logGeneric(fileModel.getId(), e.getLocalizedMessage());
             fileModel.setStatus(StatusEnum.ERROR);
             fileService.saveFile(fileModel);
+            file.delete();
         }
     }
 
