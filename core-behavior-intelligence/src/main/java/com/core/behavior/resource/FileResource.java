@@ -43,7 +43,7 @@ public class FileResource {
 
     @RequestMapping(value = "/{company}/{userId}", method = RequestMethod.POST)
     @ApiOperation(value = "Upload of files")
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+     @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"})
     public ResponseEntity uploadFile(
             @PathVariable String company,
             @PathVariable String userId,
@@ -59,7 +59,7 @@ public class FileResource {
 
     }
 
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"}) 
     @RequestMapping(value = "/errors/{id}/{type}", method = RequestMethod.GET)
     public ResponseEntity downloadErrors(
             @PathVariable long id,
@@ -79,8 +79,8 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
         }
     }
-
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+    
+@CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"}) 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(
             @RequestParam(name = "fileName", required = false) String fileName,
@@ -103,7 +103,7 @@ public class FileResource {
         }
 
     }
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"})
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity delete(@PathVariable Long id){
         try {

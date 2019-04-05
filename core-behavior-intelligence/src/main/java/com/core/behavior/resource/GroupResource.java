@@ -29,66 +29,61 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/group")
 public class GroupResource {
 
-    
     @Autowired
     private GroupActivitiService service;
-    
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+
+    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
     @RequestMapping(method = RequestMethod.GET)
-    @ApiResponse(response = Page.class,code = 200,message = "Ok")    
+    @ApiResponse(response = Page.class, code = 200, message = "Ok")
     public ResponseEntity getGroup(
             @RequestParam(required = false) String id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String type,
-            @RequestParam(name = "page", defaultValue = "1",required = true) int page,
-            @RequestParam(name = "size", defaultValue = "10",required = true ) int size){        
-        
-        
-        try {            
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));             
+            @RequestParam(name = "page", defaultValue = "1", required = true) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = true) int size) {
+
+        try {
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
             return ResponseEntity.ok(service.getGroup(id, name, type, pageRequest));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(null, MessageCode.SERVER_ERROR));
-        }       
+        }
     }
-    
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"}) 
+
+    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
     @RequestMapping(method = RequestMethod.POST)
-    @ApiResponse(code = 200,message = "Ok")    
-    public ResponseEntity save(@RequestBody GroupRequest request){
-        try {                                  
+    @ApiResponse(code = 200, message = "Ok")
+    public ResponseEntity save(@RequestBody GroupRequest request) {
+        try {
             service.saveGroup(request);
-            return ResponseEntity.ok().build();                        
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(null, MessageCode.SERVER_ERROR));
-        }  
+        }
     }
-    
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+
+    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
     @RequestMapping(method = RequestMethod.PUT)
-    @ApiResponse(code = 200,message = "Ok")    
-    public ResponseEntity update(@RequestBody GroupRequest request){
-        try {                                  
+    @ApiResponse(code = 200, message = "Ok")
+    public ResponseEntity update(@RequestBody GroupRequest request) {
+        try {
             service.updateGroup(request);
-            return ResponseEntity.ok().build();                        
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(null, MessageCode.SERVER_ERROR));
-        }  
+        }
     }
-    
-    @CrossOrigin(origins = {"http://localhost:8002","https://82cc7f55.ngrok.io"})  
+
+    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-    @ApiResponse(code = 200,message = "Ok")    
-    public ResponseEntity delete(@PathVariable("id")String id){
-        try {                                  
+    @ApiResponse(code = 200, message = "Ok")
+    public ResponseEntity delete(@PathVariable("id") String id) {
+        try {
             service.deleteGroup(id);
-            return ResponseEntity.ok().build();                        
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.<String>build(e.getMessage(), MessageCode.SERVER_ERROR));
-        }  
+        }
     }
-    
-  
-    
-    
+
 }
