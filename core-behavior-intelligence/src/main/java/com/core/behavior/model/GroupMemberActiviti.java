@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "act_id_membership")
+@Table(schema = "activiti", name = "act_id_membership")
 @IdClass(GroupMemberActiviti.IdClass.class)
 public class GroupMemberActiviti implements Serializable {
     

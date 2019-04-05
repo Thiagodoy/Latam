@@ -2,8 +2,6 @@ package com.core.behavior.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -16,7 +14,7 @@ import lombok.NoArgsConstructor;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Entity
-@Table(name = "act_id_info")
+@Table(schema = "activiti",name = "act_id_info")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

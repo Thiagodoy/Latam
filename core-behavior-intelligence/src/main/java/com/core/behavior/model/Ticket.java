@@ -20,7 +20,6 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 @Table(schema = "behavior", name = "ticket")
 @IdClass(Ticket.IdClass.class)
 @Data
-@SelectBeforeUpdate(value = false)
 public class Ticket {
 
        

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Entity
-@Table(name="act_id_group")
+@Table(schema = "activiti",name="act_id_group")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

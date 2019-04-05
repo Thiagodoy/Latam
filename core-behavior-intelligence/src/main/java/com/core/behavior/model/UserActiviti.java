@@ -18,7 +18,7 @@ import lombok.Data;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Entity
-@Table(name = "act_id_user")
+@Table(schema = "activiti", name = "act_id_user")
 @Data
 public class UserActiviti {
 
