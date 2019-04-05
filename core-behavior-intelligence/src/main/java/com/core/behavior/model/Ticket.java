@@ -1,16 +1,16 @@
 package com.core.behavior.model;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 /**
  *
@@ -18,16 +18,18 @@ import lombok.Data;
  */
 @Entity
 @Table(schema = "behavior", name = "ticket")
+@IdClass(Ticket.IdClass.class)
 @Data
+@SelectBeforeUpdate(value = false)
 public class Ticket {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+       
+    
 
     @Column(name = "DATA_EMISSAO", nullable = false)
     private Date dataEmissao;
 
+    @Id
     @Column(name = "DATA_VOO", nullable = false)
     private Date dataVoo;
 
@@ -49,6 +51,7 @@ public class Ticket {
     @Column(name = "NUMERO_CUPOM", nullable = false)
     private Long nroCupom;
 
+    @Id
     @Column(name = "BILHETE", nullable = false)
     private Long bilhete;
 
@@ -62,7 +65,7 @@ public class Ticket {
     private String ciaVoo;
 
     @Column(name = "VALOR_BRL", nullable = false)
-    private BigDecimal valorBrl;
+    private Double valorBrl;
 
     @Column(name = "CLIENTE_EMPRESA")
     private String clienteEmpresa;
@@ -87,83 +90,91 @@ public class Ticket {
 
     @Column(name = "DATA_EXTRACAO", nullable = false)
     private Date dataExtracao;
-    
+
     @Column(name = "HORA_EMISSAO")
     private String horaEmissao;
-    
+
     @Column(name = "DATA_RESERVA")
     private Date dataReserva;
-    
+
     @Column(name = "HORA_RESERVA")
     private String horaReserva;
-    
+
     @Column(name = "BASE_TARIFARIA", nullable = false)
-    private String baseTarifaria;    
-    
+    private String baseTarifaria;
+
     @Column(name = "FAMILIA_TARIFARIA")
     private String familiaTarifaria;
-    
-    @Column(name = "CLASSE_TARIFA",nullable = false)
+
+    @Column(name = "CLASSE_TARIFA", nullable = false)
     private String classeTarifa;
-    
-    @Column(name = "CLASSE_SERVIÇO",nullable = false)
+
+    @Column(name = "CLASSE_SERVICO", nullable = false)
     private String classeServico;
-    
+
     @Column(name = "OnD_DIRECIONAL")
     private String OndDirecional;
-    
+
     @Column(name = "TOUR_CODE", nullable = false)
     private String tourCode;
-    
-    @Column(name = "RT_OW",nullable = false)
+
+    @Column(name = "RT_OW", nullable = false)
     private String rtOn;
-    
+
     @Column(name = "VALOR_US$", nullable = false)
-    private BigDecimal valorUs;
-    
+    private Double valorUs;
+
     @Column(name = "TARIFA_PUBLICA_R$", nullable = false)
-    private BigDecimal tarifaPublica;   
-    
+    private Double tarifaPublica;
+
     @Column(name = "TARIFA_PUBLICA_US$")
-    private BigDecimal tarifaPublicUs;
-    
+    private Double tarifaPublicUs;
+
     @Column(name = "PNR_AGENCIA")
     private String pnrAgencia;
-    
+
     @Column(name = "PNR_CIA_AEREA")
     private String pnrCiaArea;
-    
+
     @Column(name = "SELFBOOKING_OFFLINE")
     private String selfBookingOffiline;
-    
+
     @Column(name = "NOME_PAX", nullable = false)
     private String nomePax;
-    
+
     @Column(name = "TIPO_PAX", nullable = false)
     private String tipoPax;
-    
+
     @Column(name = "CPF_PAX")
     private Long cpfPax;
-    
+
     @Column(name = "TIER_FIDELIDADE_PAX")
     private String tierFidelidadePax;
-    
+
     @Column(name = "TIPO_PAGAMENTO", nullable = false)
     private String tipoPagamento;
-    
+
     @Column(name = "DIGITO_VERIFICADOR_CC")
     private Long digitoVerificadorCC;
-    
+
     @Column(name = "NOME_CLIENTE")
     private String nomeCliente;
-    
-    @Column(name = "createdAt")
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    
+    @Column(name = "file_id", nullable = false)
+    private Long fileId;
+
     @PrePersist
-    public void setCreatedDate(){
+    public void setCreatedDate() {
         this.createdAt = LocalDateTime.now();
     }
     
+     @Data
+    public static class IdClass implements Serializable {
+        private Long bilhete;
+        private Date dataVoo;
+    }
+
 }

@@ -8,7 +8,9 @@ package com.core.behavior.repository;
 import com.core.behavior.model.File;
 import com.core.behavior.util.StatusEnum;
 import java.util.List;
-import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface FileRepository extends CrudRepository<File, Long>{
+public interface FileRepository extends JpaRepository<File, Long> , JpaSpecificationExecutor<File>{
     
     List<File> findByStatus(StatusEnum status);
+    Optional<File> findByName(String name);
 }

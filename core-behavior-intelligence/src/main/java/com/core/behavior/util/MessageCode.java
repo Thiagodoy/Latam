@@ -9,4 +9,5 @@ public class MessageCode {
     public static final long USER_NOT_FOUND_ERROR = 1;
     public static final long USER_PASSWORD_ERROR = 2;
     public static final long SERVER_ERROR = 500;
+    public static final Long FILE_NAME_REPETED = 1987L;
 }

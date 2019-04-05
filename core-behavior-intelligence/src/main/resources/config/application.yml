@@ -5,7 +5,8 @@ server:
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
 
-    
+
+      
 behavior:           
     datasource:
         socketTimeout: 30000
@@ -18,7 +19,7 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?useTimezone=true&serverTimezone=UTC           
+            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC          
             dataSourceUser: root
             dataSourcePassword: root
             port: 3306            

@@ -47,7 +47,7 @@ public class File {
     @Column(name = "status")
     private StatusEnum status;
 
-    @OneToMany(mappedBy = "fileId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "fileId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy(value = "lineNumber ASC")
     private List<FileLines> lines;
 

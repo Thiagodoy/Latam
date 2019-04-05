@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -23,4 +26,7 @@ public class Utils {
         return convFile;
     }
     
+     public static LocalDateTime convertDateToLOcalDateTime(Date date){
+         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+     }
 }

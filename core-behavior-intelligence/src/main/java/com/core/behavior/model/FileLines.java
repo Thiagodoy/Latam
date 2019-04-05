@@ -2,7 +2,9 @@ package com.core.behavior.model;
 
 import com.core.behavior.util.StatusEnum;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -46,6 +48,18 @@ public class FileLines implements Serializable{
    
    @Column(name = "createdAt")
    private LocalDateTime createdAt;    
+   
+    @Override
+    public String toString() {
+       return MessageFormat.format("\n[LineNumber] -> {1} [content] -> {2} \n", this.id,this.lineNumber, this.content); 
+    }   
+
+    public String toStringCsv() {
+       return MessageFormat.format("[LineNumber], [{1}] \n [{2}] \n", this.id,this.lineNumber, this.content); 
+    }
+   
+   
+   
     
             
    public FileLines(Long fileId, StatusEnum status, String content, Long lineNumber){

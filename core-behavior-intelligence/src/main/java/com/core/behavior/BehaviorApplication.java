@@ -8,19 +8,18 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
 @EnableConfigurationProperties({ActivitiProxyProperties.class, BehaviorProperties.class})
 @EnableAutoConfiguration
+@EnableJpaRepositories 
 public class BehaviorApplication {
 
     public static void main(String[] args) {
