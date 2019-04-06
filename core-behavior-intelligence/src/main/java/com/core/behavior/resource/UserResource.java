@@ -42,8 +42,7 @@ public class UserResource {
     
     
     @RequestMapping(value = "/login",method = RequestMethod.POST)
-    @ApiOperation(value = "Login", response = UserResponse.class)
-    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"})
+    @ApiOperation(value = "Login", response = UserResponse.class)   
     public ResponseEntity login(@RequestBody LoginRequest user){
         try {
             return ResponseEntity.ok(service.login(user));
@@ -57,8 +56,7 @@ public class UserResource {
     
     
     @RequestMapping(method = RequestMethod.GET)
-    @ApiOperation(value = "List users",response = PageResponse.class)
-   @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"}) 
+    @ApiOperation(value = "List users",response = PageResponse.class)   
     public ResponseEntity listAllUser(
             @RequestParam(name = "firstName",required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName,
@@ -78,8 +76,7 @@ public class UserResource {
     
     
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
-    @ApiOperation(value = "Get a user by id",response = UserResponse.class)
-    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"}) 
+    @ApiOperation(value = "Get a user by id",response = UserResponse.class)    
     public ResponseEntity getUser(@PathVariable("id") String id){
         try {            
             return ResponseEntity.ok(service.getUser(id));
@@ -92,8 +89,7 @@ public class UserResource {
     
     
     @RequestMapping(value = "/{id}",method = RequestMethod.DELETE)
-    @ApiOperation(value = "Delete a user")
-    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"}) 
+    @ApiOperation(value = "Delete a user")    
     public ResponseEntity deleteUser(@PathVariable("id") String id){
         service.deleteUser(id);
         return ResponseEntity.ok().build();
@@ -101,8 +97,7 @@ public class UserResource {
     
     
     @RequestMapping(value = "",method = RequestMethod.PUT)
-    @ApiOperation(value = "Update a user")
-    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"})
+    @ApiOperation(value = "Update a user")    
     public ResponseEntity updateUser(@RequestBody  UserRequest user){
         service.updateUser(user);
         return ResponseEntity.ok().build();
@@ -110,8 +105,7 @@ public class UserResource {
     
     
     @RequestMapping(method = RequestMethod.POST)
-    @ApiOperation(value = "Save a user")
-    @CrossOrigin(origins = {"http://localhost:8002","http://10.93.1.166:8080"})
+    @ApiOperation(value = "Save a user")    
     public ResponseEntity saveUser(@RequestBody UserRequest user){
         
         try {

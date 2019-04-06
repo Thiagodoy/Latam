@@ -32,7 +32,7 @@ public class GroupResource {
     @Autowired
     private GroupActivitiService service;
 
-    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
+    
     @RequestMapping(method = RequestMethod.GET)
     @ApiResponse(response = Page.class, code = 200, message = "Ok")
     public ResponseEntity getGroup(
@@ -50,7 +50,7 @@ public class GroupResource {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
+    
     @RequestMapping(method = RequestMethod.POST)
     @ApiResponse(code = 200, message = "Ok")
     public ResponseEntity save(@RequestBody GroupRequest request) {
@@ -62,7 +62,7 @@ public class GroupResource {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
+    
     @RequestMapping(method = RequestMethod.PUT)
     @ApiResponse(code = 200, message = "Ok")
     public ResponseEntity update(@RequestBody GroupRequest request) {
@@ -74,7 +74,7 @@ public class GroupResource {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:8002", "http://10.93.1.166:8080"})
+    
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
     @ApiResponse(code = 200, message = "Ok")
     public ResponseEntity delete(@PathVariable("id") String id) {

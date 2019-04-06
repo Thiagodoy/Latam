@@ -54,22 +54,24 @@ public class ProcessFileJob2 extends QuartzJobBean {
 
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();
+                fileModel = dto.getFile();
 
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(dto.getFile().getId());
                 });
 
-                List<Ticket>returned = ticketService.saveAll(dto.getTicket());
+                //int[]returned = ticketService.saveBatch(dto.getTicket());
+                List<Ticket> returned = ticketService.saveAll(dto.getTicket());
                 System.out.println("returned ->" + returned.size());
                 System.out.println("getTicket ->" + dto.getTicket().size());
-                fileModel = dto.getFile();
+
                 fileModel.setStatus(StatusEnum.SUCCESS);
                 fileService.saveFile(fileModel);
                 file.delete();
             }
         } catch (Exception e) {
             Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, null, e);
-            logService.logGeneric(fileModel.getId(), e.getLocalizedMessage());
+            logService.logGeneric((fileModel != null ? fileModel.getId() : 0l), e.getLocalizedMessage());
             fileModel.setStatus(StatusEnum.ERROR);
             fileService.saveFile(fileModel);
             file.delete();

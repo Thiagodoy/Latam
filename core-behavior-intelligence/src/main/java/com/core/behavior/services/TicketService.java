@@ -33,6 +33,7 @@ public class TicketService {
     @Autowired
     private DataSource dataSource;
 
+    @Transactional
     public int[] saveBatch(List<Ticket> tickets) {
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -92,42 +93,55 @@ public class TicketService {
                 new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setString(2, tickets.get(i).getOndDirecional());
-                ps.setString(3, tickets.get(i).getAgenciaConsolidada());
-                ps.setString(1, tickets.get(i).getAtoDestino());
+                ps.setString(1, tickets.get(i).getOndDirecional());
+                ps.setString(2, tickets.get(i).getAgenciaConsolidada());
+                ps.setString(3, tickets.get(i).getAtoDestino());
                 ps.setString(4, tickets.get(i).getAtoOrigem());
-                ps.setString(2, tickets.get(i).getBaseTarifaria());
-                ps.setString(3, tickets.get(i).getBaseVenda());
-                ps.setLong(4, tickets.get(i).getBilhete());
-                ps.setString(3, tickets.get(i).getCiaBilhete());
-                ps.setString(4, tickets.get(i).getCiaVoo());
-                ps.setString(1, tickets.get(i).getClasseCabine());
-                ps.setString(2, tickets.get(i).getClasseServico());
-                ps.setString(3, tickets.get(i).getClasseTarifa());
-                ps.setString(4, tickets.get(i).getClienteEmpresa());
-                ps.setString(1, tickets.get(i).getCnpjClienteEmpresa());
-                ps.setLong(2, tickets.get(i).getCpfPax());
-                ps.setDate(3, new Date(tickets.get(i).getDataEmissao().getTime()));
-                ps.setDate(4, new Date(tickets.get(i).getDataExtracao().getTime()));
-                ps.setDate(3, new Date(tickets.get(i).getDataReserva().getTime()));
-                ps.setDate(4, new Date(tickets.get(i).getDataVoo().getTime()));
-                ps.setLong(1, tickets.get(i).getDigitoVerificadorCC());
-                ps.setString(2, tickets.get(i).getFamiliaTarifaria());
-                ps.setString(3, tickets.get(i).getHoraEmissao());
-                ps.setString(4, tickets.get(i).getHoraReserva());
-                ps.setString(1, tickets.get(i).getHoraEmissao());
-               // ps.setString(2, tickets.get(i).getFirstName());
-               // ps.setString(3, tickets.get(i).getLastName());
-               // ps.setString(4, tickets.get(i).getAddress();
-               // ps.setString(3, tickets.get(i).getLastName());
-                //ps.setString(4, tickets.get(i).getAddress();
-                //ps.setInt(1, tickets.get(i).getId());
-               /// ps.setString(2, tickets.get(i).getFirstName());
-               // ps.setString(3, tickets.get(i).getLastName());
-               // ps.setString(4, tickets.get(i).getAddress();
-               // ps.setInt(1, tickets.get(i).getId());
-               // ps.setString(2, tickets.get(i).getFirstName());
-                //ps.setString(3, tickets.get(i).getLastName());
+                ps.setString(5, tickets.get(i).getBaseTarifaria());
+                ps.setString(6, tickets.get(i).getBaseVenda());
+                ps.setLong(7, checkLong(tickets.get(i).getBilhete()));
+                ps.setString(8, tickets.get(i).getCiaBilhete());
+                ps.setString(9, tickets.get(i).getCiaVoo());
+                ps.setString(10, tickets.get(i).getClasseCabine());
+                ps.setString(11, tickets.get(i).getClasseServico());
+                ps.setString(12, tickets.get(i).getClasseTarifa());
+                ps.setString(13, tickets.get(i).getClienteEmpresa());
+                ps.setString(14, tickets.get(i).getCnpjClienteEmpresa());
+                ps.setLong(15, checkLong(tickets.get(i).getCpfPax()));
+                ps.setDate(16, checDate(tickets.get(i).getDataEmissao()));
+                ps.setDate(17, checDate(tickets.get(i).getDataExtracao()));
+                ps.setDate(18, checDate(tickets.get(i).getDataReserva()));
+                ps.setDate(19, checDate(tickets.get(i).getDataVoo()));
+                ps.setLong(20, checkLong(tickets.get(i).getDigitoVerificadorCC()));
+                ps.setString(21, tickets.get(i).getFamiliaTarifaria());
+                ps.setString(22, tickets.get(i).getHoraEmissao());
+                ps.setString(23, tickets.get(i).getHoraReserva());                
+                ps.setString(24, tickets.get(i).getHoraVoo());
+                ps.setLong(25, checkLong(tickets.get(i).getIataAgenciaEmissora()));
+                ps.setString(26, tickets.get(i).getNomeCliente());
+                ps.setString(27, tickets.get(i).getNomePax());
+                ps.setLong(28, checkLong(tickets.get(i).getNroCupom()));
+                ps.setLong(29, checkLong(tickets.get(i).getNumVoo()));
+                ps.setString(30, tickets.get(i).getPnrAgencia());
+                ps.setString(31, tickets.get(i).getPnrCiaArea());
+                ps.setLong(32, checkLong(tickets.get(i).getQtdePax()));
+                ps.setString(33, tickets.get(i).getRtOn());
+                ps.setString(34, tickets.get(i).getSelfBookingOffiline());
+                ps.setDouble(35, checkDouble(tickets.get(i).getTarifaPublicUs()));
+                ps.setDouble(36, checkDouble(tickets.get(i).getTarifaPublica()));
+                ps.setString(37, tickets.get(i).getTierFidelidadePax());
+                ps.setString(38, tickets.get(i).getTipoPagamento());
+                ps.setString(39, tickets.get(i).getTipoPax());
+                ps.setString(40, tickets.get(i).getTipoVenda());
+                ps.setString(41, tickets.get(i).getTourCode());
+                ps.setString(42, tickets.get(i).getTrechoTkt());
+                ps.setDouble(43, checkDouble(tickets.get(i).getValorBrl()));
+                ps.setDouble(44, checkDouble(tickets.get(i).getValorUs()));
+                ps.setDate(45, new Date(new java.util.Date().getTime()));
+                ps.setLong(46, checkLong(tickets.get(i).getFileId()));
+                ps.setLong(47, checkLong(tickets.get(i).getFileId()));
+                 
+                
 
             }
 
@@ -144,47 +158,16 @@ public class TicketService {
         return ticketRepository.saveAll(list);
     }
 
-    @Transactional
-    public <T extends Ticket> List<T> bulkSave(Collection<T> entities) {
-        final List<T> savednotEntities = new ArrayList<T>(entities.size());
-        int i = 0;
-        for (T t : entities) {
-            try {
-                entityManager.persist(t);
-
-            } catch (Exception e) {
-
-                savednotEntities.add(t);
-            }
-            i++;
-            if (i % 1000 == 0) {
-                // Flush a batch of inserts and release memory.
-                entityManager.flush();
-                entityManager.clear();
-            }
-        }
-
-        System.out.println("registros repetidos ->" + savednotEntities.size());
-
-        return savednotEntities;
+    public long checkLong(Long value){
+        return value != null ? value : 0;
     }
-
-    private <T extends Ticket> T persistOrMerge(T t) {
-
-        try {
-            entityManager.persist(t);
-            return t;
-        } catch (Exception e) {
-
-            return null;
-        }
-//        if (true) {
-//            entityManager.persist(t);
-//            return t;
-//        } else {
-//            return entityManager.merge(t);
-//        }
-
+    
+    public double checkDouble(Double value){
+        return value != null ? value : 0.0;
+    }
+    
+    public Date checDate(java.util.Date value){
+        return value != null ? new Date(value.getTime()) : null;
     }
 
 }
