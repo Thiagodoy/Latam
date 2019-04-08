@@ -1,11 +1,11 @@
 package com.core.behavior.services;
 
 import com.core.behavior.activiti.response.PageResponse;
-import com.core.behavior.model.GroupActiviti;
-import com.core.behavior.repository.GroupActivitiRepository;
+import com.core.activiti.model.GroupActiviti;
+import com.core.activiti.repository.GroupActivitiRepository;
 import com.core.behavior.request.GroupRequest;
 import com.core.behavior.response.GroupResponse;
-import com.core.behavior.specifications.GroupActivitiSpecification;
+import com.core.activiti.specifications.GroupActivitiSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Service
-public class GroupActivitiService extends ActivitiService {
+public class GroupActivitiService {
 
     @Autowired
     private GroupActivitiRepository repository;

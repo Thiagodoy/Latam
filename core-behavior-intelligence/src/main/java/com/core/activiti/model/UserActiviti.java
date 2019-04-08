@@ -1,5 +1,6 @@
-package com.core.behavior.model;
+package com.core.activiti.model;
 
+import com.core.activiti.model.GroupMemberActiviti;
 import com.core.behavior.request.UserRequest;
 import java.util.ArrayList;
 import java.util.Arrays;

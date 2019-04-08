@@ -3,19 +3,28 @@ package com.core.behavior.configuration;
 import com.core.behavior.properties.BehaviorProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
+@EnableJpaRepositories(basePackages = {"com.core.behavior.repository"},
+         entityManagerFactoryRef = "behaviorEntityManager", 
+        transactionManagerRef = "behaviorTransactionManager") 
 @Configuration
-public class DataBaseConfiguration implements EnvironmentAware {
+public class BehaviorDataBaseConfiguration implements EnvironmentAware {
 
     @Autowired
     private BehaviorProperties behaviorProperties;
@@ -27,8 +36,29 @@ public class DataBaseConfiguration implements EnvironmentAware {
         this.environment = e;
     }
 
+    
     @Bean
-    public DataSource dataSource() {
+    public LocalContainerEntityManagerFactoryBean behaviorEntityManager() {
+        LocalContainerEntityManagerFactoryBean em
+          = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSourceBehavior());
+        em.setPackagesToScan(
+          new String[] { "com.core.behavior.model", "com.core.behavior.repository" });
+ 
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto",
+          environment.getProperty("hibernate.hbm2ddl.auto"));
+        properties.put("hibernate.dialect",
+          environment.getProperty("hibernate.dialect"));
+        em.setJpaPropertyMap(properties);
+ 
+        return em;
+    }
+    
+    @Bean
+    public DataSource dataSourceBehavior() {
 
         DataSource dataSource;
 
@@ -49,6 +79,16 @@ public class DataBaseConfiguration implements EnvironmentAware {
         dataSource = new HikariDataSource(hikariConfig);
 
         return dataSource;
+    }
+    
+     @Bean
+    public PlatformTransactionManager behaviorTransactionManager() {
+  
+        JpaTransactionManager transactionManager
+          = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(
+          behaviorEntityManager().getObject());
+        return transactionManager;
     }
 
 }

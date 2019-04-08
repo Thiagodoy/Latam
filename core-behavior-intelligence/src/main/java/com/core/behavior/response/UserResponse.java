@@ -1,7 +1,7 @@
 package com.core.behavior.response;
 
 
-import com.core.behavior.model.UserActiviti;
+import com.core.activiti.model.UserActiviti;
 import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.Collection;

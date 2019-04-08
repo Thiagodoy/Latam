@@ -1,4 +1,4 @@
-package com.core.behavior.model;
+package com.core.activiti.model;
 
 import java.io.Serializable;
 import javax.persistence.Column;

@@ -131,21 +131,21 @@ public class FileService {
         
          List<Specification<File>> predicates = new ArrayList<>();
         
-        if(fileName != null && fileName.length() > 0){
-           predicates.add(FileSpecification.fileName(fileName));
-        }
-        
-        if(userId != null && userId.length() > 0){
-            predicates.add(FileSpecification.userId(userId));
-        }
-        
-        if(company != null && company.length() > 0){
-            predicates.add(FileSpecification.company(company));
-        }
-        
-        if(createdAt != null){
-            predicates.add( FileSpecification.dateCreated(createdAt));
-        }
+//        if(fileName != null && fileName.length() > 0){
+//           predicates.add(FileSpecification.fileName(fileName));
+//        }
+//        
+//        if(userId != null && userId.length() > 0){
+//            predicates.add(FileSpecification.userId(userId));
+//        }
+//        
+//        if(company != null && company.length() > 0){
+//            predicates.add(FileSpecification.company(company));
+//        }
+//        
+//        if(createdAt != null){
+//            predicates.add( FileSpecification.dateCreated(createdAt));
+//        }
         
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
         

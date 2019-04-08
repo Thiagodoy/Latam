@@ -46,7 +46,7 @@ public class FileLines implements Serializable{
    @Column(name = "line_number", nullable = false)
    private Long lineNumber;
    
-   @Column(name = "createdAt")
+   @Column(name = "created_at")
    private LocalDateTime createdAt;    
    
     @Override

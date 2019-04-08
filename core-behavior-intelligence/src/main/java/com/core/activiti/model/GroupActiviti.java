@@ -1,4 +1,4 @@
-package com.core.behavior.model;
+package com.core.activiti.model;
 
 import com.core.behavior.request.GroupRequest;
 import javax.persistence.Column;

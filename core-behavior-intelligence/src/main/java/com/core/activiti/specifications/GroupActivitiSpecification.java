@@ -1,7 +1,7 @@
-package com.core.behavior.specifications;
+package com.core.activiti.specifications;
 
-import com.core.behavior.model.GroupActiviti;
-import com.core.behavior.model.GroupActiviti_;
+import com.core.activiti.model.GroupActiviti;
+import com.core.activiti.model.GroupActiviti_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**

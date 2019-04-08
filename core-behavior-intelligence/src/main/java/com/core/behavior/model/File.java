@@ -34,10 +34,10 @@ public class File {
     @Column(name = "name", unique = true)
     private String name;
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdDate;
 
-    @Column(name = "userId", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private String userId;
     
     @Column(name = "company")

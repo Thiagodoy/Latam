@@ -1,6 +1,6 @@
 package com.core.behavior.response;
 
-import com.core.behavior.model.GroupActiviti;
+import com.core.activiti.model.GroupActiviti;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

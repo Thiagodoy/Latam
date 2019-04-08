@@ -1,6 +1,6 @@
-package com.core.behavior.repository;
+package com.core.activiti.repository;
 
-import com.core.behavior.model.UserActiviti;
+import com.core.activiti.model.UserActiviti;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;

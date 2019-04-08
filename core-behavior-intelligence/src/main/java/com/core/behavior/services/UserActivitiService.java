@@ -1,34 +1,25 @@
 package com.core.behavior.services;
 
-import com.core.behavior.activiti.request.UserActivitiRequest;
-import com.core.behavior.activiti.response.PageResponse;
 import com.core.behavior.exception.ActivitiException;
-import com.core.behavior.model.GroupActiviti;
-import com.core.behavior.model.UserActiviti;
-import com.core.behavior.repository.GroupActivitiRepository;
-import com.core.behavior.repository.UserActivitiRepository;
+import com.core.activiti.model.GroupActiviti;
+import com.core.activiti.model.UserActiviti;
+import com.core.activiti.repository.GroupActivitiRepository;
+import com.core.activiti.repository.UserActivitiRepository;
 import com.core.behavior.request.LoginRequest;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
-import com.core.behavior.specifications.UserActivitiSpecification;
-import com.core.behavior.util.ActivitiConstantePath;
+import com.core.activiti.specifications.UserActivitiSpecification;
 import com.core.behavior.util.MessageCode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /**

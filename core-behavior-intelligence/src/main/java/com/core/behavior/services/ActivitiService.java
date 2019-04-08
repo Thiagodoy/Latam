@@ -1,7 +1,7 @@
 package com.core.behavior.services;
 
 import com.core.behavior.properties.ActivitiProxyProperties;
-import com.core.behavior.repository.UserActivitiRepository;
+import com.core.activiti.repository.UserActivitiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestTemplate;

@@ -1,8 +1,6 @@
 package com.core.behavior.resource;
 
-import com.core.behavior.activiti.response.PageResponse;
 import com.core.behavior.request.GroupRequest;
-import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.GroupActivitiService;
 import com.core.behavior.util.MessageCode;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

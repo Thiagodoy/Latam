@@ -3,9 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.repository;
+package com.core.activiti.repository;
 
-import com.core.behavior.model.GroupMemberActiviti;
+import com.core.activiti.model.GroupActiviti;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Repository;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Repository
-public interface GroupMemberAcitvitiRepository extends CrudRepository<GroupMemberActiviti, GroupMemberActiviti.IdClass>{
-    
+public interface GroupActivitiRepository extends JpaRepository<GroupActiviti, String>, JpaSpecificationExecutor<GroupActiviti> {
     
 }
