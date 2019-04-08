@@ -81,13 +81,7 @@
             <groupId>org.beanio</groupId>
             <artifactId>beanio</artifactId>
             <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.core</groupId>
-            <artifactId>behavior</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
+        </dependency>       
     </dependencies>
 
     <build>
