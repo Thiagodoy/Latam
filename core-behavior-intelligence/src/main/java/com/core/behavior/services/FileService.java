@@ -5,7 +5,6 @@ import com.core.behavior.model.File;
 import com.core.behavior.model.FileLines;
 import com.core.behavior.repository.FileLineRepository;
 import com.core.behavior.repository.FileRepository;
-import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
@@ -47,10 +46,15 @@ public class FileService {
     private LogService logService;
 
     @Autowired
+    private FileProcessStatusService fileProcessStatusService;
+    
+    @Autowired
+    private FileProcessStatusService fileProcessStatusService1;
+
+    @Autowired
     private SchedulerFactoryBean bean;
-    
-    
-    public File findById(Long id){
+
+    public File findById(Long id) {
         return fileRepository.findById(id).get();
     }
 
@@ -58,14 +62,11 @@ public class FileService {
     public void persistFile(MultipartFile fileInput, String userId, String company) throws IOException, SchedulerException, Exception {
 
         java.io.File file = Utils.convertToFile(fileInput);
-        
-        
-        if(fileRepository.findByName(file.getName()).isPresent()){
+
+        if (fileRepository.findByName(file.getName()).isPresent()) {
             file.delete();
             throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
         }
-        
-        
 
         JobDataMap data = new JobDataMap();
         data.put(ProcessFileJob2.DATA_USER_ID, userId);
@@ -110,6 +111,9 @@ public class FileService {
     }
 
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
+        
+        
+        fileProcessStatusService1.generateProcessStatus(idFile);
 
         StringBuilder buffer = new StringBuilder();
         List<FileLines> linesErrors = fileLineRepository.findByFileIdAndStatus(idFile, StatusEnum.ERROR);
@@ -126,11 +130,11 @@ public class FileService {
     public void deleteFile(Long id) {
         fileRepository.deleteById(id);
     }
-    
-    public Page<File>list(String fileName, String userId,String company,LocalDateTime createdAt, Pageable page){
-        
-         List<Specification<File>> predicates = new ArrayList<>();
-        
+
+    public Page<File> list(String fileName, String userId, String company, LocalDateTime createdAt, Pageable page) {
+
+        List<Specification<File>> predicates = new ArrayList<>();
+
 //        if(fileName != null && fileName.length() > 0){
 //           predicates.add(FileSpecification.fileName(fileName));
 //        }
@@ -146,10 +150,14 @@ public class FileService {
 //        if(createdAt != null){
 //            predicates.add( FileSpecification.dateCreated(createdAt));
 //        }
-        
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
-        
-        return fileRepository.findAll(specification, page);
+        Page<File> fileResponse = fileRepository.findAll(specification, page);
+
+        fileResponse.getContent().stream().forEach(ff -> {
+            ff.setStatusProcess(fileProcessStatusService.getStatusFile(ff.getId()));
+        });
+
+        return fileResponse;
     }
 
 }

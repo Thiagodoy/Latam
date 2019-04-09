@@ -159,10 +159,10 @@ public class Ticket {
     @Column(name = "NOME_CLIENTE")
     private String nomeCliente;
 
-    @Column(name = "created_at")
+    @Column(name = "CREATED_AT")
     private LocalDateTime createdAt;
 
-    @Column(name = "file_id", nullable = false)
+    @Column(name = "FILE_ID", nullable = false)
     private Long fileId;
 
     @PrePersist

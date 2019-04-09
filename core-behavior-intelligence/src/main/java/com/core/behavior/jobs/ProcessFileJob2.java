@@ -1,15 +1,17 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
-import com.core.behavior.model.Ticket;
+import com.core.behavior.model.FileLines;
 import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +38,9 @@ public class ProcessFileJob2 extends QuartzJobBean {
     private FileService fileService;
 
     @Autowired
+    private FileProcessStatusService fileProcessStatusService;
+
+    @Autowired
     private TicketService ticketService;
 
     public static final String DATA_USER_ID = "userId";
@@ -48,33 +53,48 @@ public class ProcessFileJob2 extends QuartzJobBean {
         File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
         String user = jec.getJobDetail().getJobDataMap().getString(DATA_USER_ID);
         String company = jec.getJobDetail().getJobDataMap().getString(DATA_COMPANY);
-        com.core.behavior.model.File fileModel = null;
+
+        com.core.behavior.model.File f = new com.core.behavior.model.File();
+        f.setCompany(company);
+        f.setName(file.getName());
+        f.setUserId(user);
+        f.setStatus(StatusEnum.PROCESSING);
+        f.setLines(new ArrayList<FileLines>());
+        f.setCreatedDate(LocalDateTime.now());
+
+        f = fileService.saveFile(f);
+
         try {
-            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, Constantes.STREAM_TICKET, Constantes.FILE_BEAN_TICKET, user, company);
+            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, Constantes.FILE_BEAN_TICKET, user, company);
 
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();
-                fileModel = dto.getFile();
+                f = dto.getFile();
 
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(dto.getFile().getId());
+                    try {
+                        ticketService.save(t);
+                    } catch (Exception e) {
+                        System.out.println("Errro -> " + e.getMessage());
+                    }
                 });
 
-                //int[]returned = ticketService.saveBatch(dto.getTicket());
-                List<Ticket> returned = ticketService.saveAll(dto.getTicket());
-                System.out.println("returned ->" + returned.size());
-                System.out.println("getTicket ->" + dto.getTicket().size());
-
-                fileModel.setStatus(StatusEnum.SUCCESS);
-                fileService.saveFile(fileModel);
-                file.delete();
+                f.setStatus(StatusEnum.SUCCESS);
+                fileService.saveFile(f);
+               
             }
         } catch (Exception e) {
             Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, null, e);
-            logService.logGeneric((fileModel != null ? fileModel.getId() : 0l), e.getLocalizedMessage());
-            fileModel.setStatus(StatusEnum.ERROR);
-            fileService.saveFile(fileModel);
+            logService.logGeneric((f != null ? f.getId() : 0l), e.getLocalizedMessage());
+            f.setStatus(StatusEnum.ERROR);
+            fileService.saveFile(f);
+           
+        } finally {
             file.delete();
+            if (f != null) {
+                fileProcessStatusService.generateProcessStatus(f.getId());
+            }
         }
     }
 

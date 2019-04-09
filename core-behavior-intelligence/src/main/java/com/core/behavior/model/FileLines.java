@@ -51,11 +51,11 @@ public class FileLines implements Serializable{
    
     @Override
     public String toString() {
-       return MessageFormat.format("\n[LineNumber] -> {1} [content] -> {2} \n", this.id,this.lineNumber, this.content); 
+       return MessageFormat.format("\n[LineNumber] -> {0} [content] -> {1} \n", this.lineNumber, this.content); 
     }   
 
     public String toStringCsv() {
-       return MessageFormat.format("[LineNumber], [{1}] \n [{2}] \n", this.id,this.lineNumber, this.content); 
+       return MessageFormat.format("[LineNumber], [{0}] \n [{1}] \n", this.lineNumber, this.content); 
     }
    
    

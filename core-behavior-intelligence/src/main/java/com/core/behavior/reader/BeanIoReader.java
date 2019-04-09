@@ -1,15 +1,22 @@
 package com.core.behavior.reader;
 
 import com.core.behavior.dto.FileParsedDTO;
+import com.core.behavior.jobs.ProcessFileJob2;
 import com.core.behavior.model.FileLines;
+import com.core.behavior.model.Log;
 import com.core.behavior.services.FileLinesService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,12 +43,11 @@ public class BeanIoReader {
     @Autowired
     private FileLinesService fileLinesService;
 
-    public <T> Optional<T> parse(File file, String str, String xmlParser, String company, String user) {
+    public <T> Optional<T> parse(File file,com.core.behavior.model.File f, String str, String xmlParser, String company, String user) {
 
         beanErrorHandler = new BeanErrorHandler(fileLinesService, logService, fileService);
         BeanReader reader = null;
-        T record = null;
-        com.core.behavior.model.File f = null;
+        T record = null;        
         try {
             StreamFactory factory = StreamFactory.newInstance();
             InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
@@ -49,15 +55,10 @@ public class BeanIoReader {
 
             reader = factory.createReader(str, file);
 
-            f = new com.core.behavior.model.File();
-            f.setCompany(company);
-            f.setName(file.getName());
-            f.setUserId(user);
-            f.setStatus(StatusEnum.PROCESSING);
-            f.setLines(new ArrayList<FileLines>());
-            f.setCreatedDate(LocalDateTime.now());
-
-            f = fileService.saveFile(f);
+            long totalLines = this.countLineNumber(file);            
+            f.setQtdTotalLines(totalLines);                                    
+            fileService.saveFile(f);
+            
             beanErrorHandler.setFileId(f.getId());
             reader.setErrorHandler(beanErrorHandler);
 
@@ -74,6 +75,39 @@ public class BeanIoReader {
         reader.close();
 
         return Optional.ofNullable(record);
+    }
+
+    private void generateStatusFile(List<Log>logs){
+        
+        
+        
+        
+        
+        
+        
+    }    
+    
+    private long countLineNumber(File file) {
+
+        long count = 0;
+
+        try {
+            FileReader reader = new FileReader(file);
+            LineNumberReader readerLine = new LineNumberReader(reader);
+
+            while (readerLine.readLine() != null) {
+                count++;
+            }
+
+            return count;
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return 0l;
     }
 
 }

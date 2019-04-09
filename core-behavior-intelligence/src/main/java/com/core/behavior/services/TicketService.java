@@ -24,6 +24,11 @@ public class TicketService {
     public List<Ticket> saveAll(List<Ticket> list) {
         return ticketRepository.saveAll(list);
     }
+    
+     @Transactional()
+    public Ticket save(Ticket ti) {
+        return ticketRepository.save(ti);
+    }
 
     public long checkLong(Long value){
         return value != null ? value : 0;

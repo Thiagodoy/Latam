@@ -34,11 +34,13 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
     private List<Log> logs = new ArrayList<>();
 
     private Long fileId;
+    private Map<String, Long>mapErrors;
 
     public BeanErrorHandler(FileLinesService fileLinesService, LogService logService,FileService fileService) {
         this.fileLinesService = fileLinesService;
         this.logService = logService;
         this.fileService = fileService;
+     
     }
 
     @Override
@@ -51,7 +53,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
             boolean hasRecordErrorsField = recordContext.hasRecordErrors();
             long id = 0;
             if (hasErrorsField || hasRecordErrorsField) {
-                FileLines fileLines = new FileLines(fileId, StatusEnum.ERROR, recordContext.getRecordText(), (long) e.getRecordContext().getLineNumber());
+                FileLines fileLines = new FileLines(fileId, StatusEnum.ERROR, recordContext.getRecordText(), (long) recordContext.getLineNumber());
                 fileLines = fileLinesService.save(fileLines);
                 id = fileLines.getId();
             }
@@ -89,13 +91,11 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
         }
         logService.saveAll(logs);
         
-        if(!logs.isEmpty()){
-        
+        if(!logs.isEmpty()){        
             File file = fileService.findById(fileId);
             file.setStatus(StatusEnum.ERROR);
-            fileService.saveFile(file);
-        
+            fileService.saveFile(file);        
         }
-    }
-
+    }   
+   
 }

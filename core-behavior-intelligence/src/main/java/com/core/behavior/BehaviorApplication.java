@@ -20,6 +20,8 @@ public class BehaviorApplication {
     public static void main(String[] args) {
         SpringApplication.run(BehaviorApplication.class, args);
     }
+    
+    
 
 //    @Bean
 //    public WebMvcConfigurer corsConfigurer() {

@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Data;
 
 /**
@@ -39,9 +40,12 @@ public class File {
 
     @Column(name = "user_id", nullable = false)
     private String userId;
-    
+
     @Column(name = "company")
     private String company;
+
+    @Column(name = "qtd_total_lines")
+    private Long qtdTotalLines;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -50,5 +54,8 @@ public class File {
     @OneToMany(mappedBy = "fileId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy(value = "lineNumber ASC")
     private List<FileLines> lines;
+
+    @Transient
+    private List<FileStatus> statusProcess;
 
 }
