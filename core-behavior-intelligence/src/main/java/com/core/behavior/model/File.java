@@ -3,17 +3,13 @@ package com.core.behavior.model;
 import com.core.behavior.util.StatusEnum;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
@@ -49,13 +45,22 @@ public class File {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private StatusEnum status;
+    private StatusEnum status;    
+    
+    @Column(name = "repeated_lines")
+    private Long repeatedLine;
+    
+    @Column(name = "execution_time")
+    private Long executionTime;
+    
+    @Column(name = "parse_time")
+    private Long parseTime;
+    
+    @Column(name = "persist_time")
+    private Long persistTime;
 
-    @OneToMany(mappedBy = "fileId", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy(value = "lineNumber ASC")
-    private List<FileLines> lines;
 
     @Transient
-    private List<FileStatus> statusProcess;
+    private List<FileProcessStatus> statusProcess;
 
 }

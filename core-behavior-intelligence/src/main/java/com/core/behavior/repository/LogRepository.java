@@ -8,7 +8,7 @@ package com.core.behavior.repository;
 import com.core.behavior.model.Log;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
+
 
 /**
  *
@@ -16,6 +16,5 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface LogRepository extends JpaRepository<Log, Long>{
     
-    
-    List<Log> findByFileLineId(Long id);
+    List<Log> findByFileId(Long fileId);
 }

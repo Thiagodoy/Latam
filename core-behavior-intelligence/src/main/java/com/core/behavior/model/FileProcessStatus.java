@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
                     @ColumnResult(name = "qtd_total_lines", type = Long.class),
                 }))
 
-@NamedNativeQuery(name = "FileStatus.getProcessStatus", resultSetMapping = "FileStatus",
+@NamedNativeQuery(name = "FileProcessStatus.getProcessStatus", resultSetMapping = "FileStatus",
         query = "select field_name,\n" +
 " count(1) as qtd_erro,\n" +
 " (truncate((count(1)/b.qtd_total_lines)*100,2)) as percentual_erro,\n" +
@@ -48,7 +48,7 @@ import lombok.NoArgsConstructor;
 @Table(schema = "behavior", name = "file_status")
 @Data
 @NoArgsConstructor
-public class FileStatus {
+public class FileProcessStatus {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,7 +73,7 @@ public class FileStatus {
    @Column(name = "percentual_hit")
    private Double percentualHit; 
 
-    public FileStatus(Long fileId, String fieldName, Long qtdErrors, Long qtdTotalLines, Double percentualError, Double percentualHit) {
+    public FileProcessStatus(Long fileId, String fieldName, Long qtdErrors, Long qtdTotalLines, Double percentualError, Double percentualHit) {
         this.fileId = fileId;
         this.fieldName = fieldName;
         this.qtdErrors = qtdErrors;

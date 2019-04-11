@@ -2,7 +2,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
   
-    <stream name="ticket" format="csv">       
+    <stream name="ticket" format="csv"  >  
+        
+        <parser>
+           <property name="delimiter" value=";" />
+        </parser>
         
         <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />  
         <typeHandler name="doubleHandler" class="com.core.behavior.reader.DoubleHandler" />    
@@ -10,7 +14,7 @@
         
               
         <group name="file" class="com.core.behavior.dto.FileParsedDTO">            
-            <record  name="header" class="com.core.behavior.dto.Header" minOccurs="1" maxOccurs="1" order="1" >
+            <record  name="header" class="com.core.behavior.dto.HeaderDTO"  minOccurs="1" maxOccurs="1" order="1" >
                 <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
                 <field name="headerDataVoo" trim="true" type="string"  literal="DATA_VOO"/>
                 <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_VOO"/>
@@ -58,50 +62,50 @@
             </record>
             
             <record name="ticket" class="com.core.behavior.model.Ticket" minOccurs="1" maxOccurs="unbounded" collection="list" order="2">
-                <field type="date" required="true" format="MM/dd/yyyy" name="dataEmissao"/>
-                <field type="date" required="true" format="MM/dd/yyyy" name="dataVoo"/>
-                <field type="string" required="true" trim="true" name="horaVoo" regex="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])"/>
-                <field type="string" required="true" name="ciaBilhete"/>
-                <field type="string" required="true" name="trechoTkt"/>
-                <field type="string" required="true" name="atoOrigem"/>
-                <field type="string" required="true" name="atoDestino"/>
-                <field type="long" required="true" name="nroCupom"/>
-                <field type="long" required="true" name="bilhete"/>
-                <field type="string" required="true" name="tipoVenda"/>
-                <field type="string" required="true" name="classeCabine"/>
-                <field type="string" required="true" name="ciaVoo"/>
-                <field type="double" typeHandler="doubleHandler"  required="true" name="valorBrl"/>
-                <field type="string" required="false" name="clienteEmpresa"/>
-                <field type="string" required="false" name="cnpjClienteEmpresa"/>
-                <field type="long" required="true" name="iataAgenciaEmissora"/>
-                <field type="string" required="false" name="baseVenda"/>
-                <field type="long" required="false" name="qtdePax"/>
-                <field type="long" required="false" name="numVoo"/>
-                <field type="string" required="true" name="agenciaConsolidada"/>
-                <field type="date" required="true" typeHandler="dateHandler" name="dataExtracao"/>
-                <field type="string" required="false" name="horaEmissao"/>
-                <field type="date" required="false" typeHandler="dateHandler"  name="dataReserva"/>
-                <field type="string" required="false"  name="horaReserva"/>
-                <field type="string" required="true" name="baseTarifaria"/>   
-                <field type="string" required="false" name="familiaTarifaria"/>
-                <field type="string" required="true" name="classeTarifa"/>
-                <field type="string" required="true" name="classeServico"/>
-                <field type="string" required="false" name="OndDirecional"/>
-                <field type="string" required="true" name="tourCode"/>
-                <field type="string" required="true" name="rtOn"/>
-                <field type="double" typeHandler="doubleHandler" required="true" name="valorUs"/>
-                <field type="double" typeHandler="doubleHandler" required="true" name="tarifaPublica"/> 
-                <field type="double" typeHandler="doubleHandler" required="true" name="tarifaPublicUs"/>
-                <field type="string" required="false" name="pnrAgencia"/>
-                <field type="string" required="false" name="pnrCiaArea"/>
-                <field type="string" required="false" name="selfBookingOffiline"/>
-                <field type="string" required="true" name="nomePax"/>
-                <field type="string" required="true" name="tipoPax"/>
-                <field type="long" required="false" name="cpfPax"/>
-                <field type="string" required="false" name="tierFidelidadePax"/>
-                <field type="string" required="true" name="tipoPagamento"/>
-                <field type="long" required="true" name="digitoVerificadorCC"/>
-                <field type="string" required="false" name="nomeCliente"/>                                 
+                <field type="date" required="true" trim="true" typeHandler="dateHandler" name="dataEmissao"/>
+                <field type="date" required="true" trim="true" typeHandler="dateHandler" name="dataVoo"/>
+                <field type="string" required="true" trim="true" name="horaVoo" regex="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\s)?(AM|PM|am|pm)?"/>
+                <field type="string" required="true" trim="true" name="ciaBilhete"/>
+                <field type="string" required="true" trim="true" name="trechoTkt"/>
+                <field type="string" required="true" trim="true" name="atoOrigem"/>
+                <field type="string" required="true" trim="true" name="atoDestino"/>
+                <field type="long" required="true" trim="true" name="nroCupom"/>
+                <field type="long" required="true" trim="true" name="bilhete"/>
+                <field type="string" required="true" trim="true" name="tipoVenda"/>
+                <field type="string" required="true" trim="true" name="classeCabine"/>
+                <field type="string" required="true" trim="true" name="ciaVoo"/>
+                <field type="double" typeHandler="doubleHandler" trim="true" required="true" name="valorBrl"/>
+                <field type="string" required="false" name="clienteEmpresa" trim="true"/>
+                <field type="string" required="false" name="cnpjClienteEmpresa" trim="true"/>
+                <field type="long" required="true" name="iataAgenciaEmissora" trim="true" />
+                <field type="string" required="false" name="baseVenda" trim="true" />
+                <field type="long" required="false" name="qtdePax" trim="true"/>
+                <field type="long" required="false" name="numVoo" trim="true" />
+                <field type="string" required="true" name="agenciaConsolidada" trim="true" />
+                <field type="date" required="true" typeHandler="dateHandler" name="dataExtracao" trim="true"/>
+                <field type="string" required="false" name="horaEmissao" trim="true"/>
+                <field type="date" required="false" typeHandler="dateHandler"  name="dataReserva" trim="true"/>
+                <field type="string" required="false"  name="horaReserva" trim="true"/>
+                <field type="string" required="true" name="baseTarifaria" trim="true"/>   
+                <field type="string" required="false" name="familiaTarifaria" trim="true"/>
+                <field type="string" required="true" name="classeTarifa" trim="true"/>
+                <field type="string" required="true" name="classeServico" trim="true"/>
+                <field type="string" required="false" name="OndDirecional" trim="true"/>
+                <field type="string" required="true" name="tourCode" trim="true"/>
+                <field type="string" required="true" name="rtOn" trim="true"/>
+                <field type="double" typeHandler="doubleHandler" required="true" name="valorUs" trim="true"/>
+                <field type="double" typeHandler="doubleHandler" required="true" name="tarifaPublica" trim="true"/> 
+                <field type="double" typeHandler="doubleHandler" required="true" name="tarifaPublicUs" trim="true"/>
+                <field type="string" required="false" name="pnrAgencia" trim="true"/>
+                <field type="string" required="false" name="pnrCiaArea" trim="true"/>
+                <field type="string" required="false" name="selfBookingOffiline" trim="true"/>
+                <field type="string" required="true" name="nomePax" trim="true"/>
+                <field type="string" required="true" name="tipoPax" trim="true"/>
+                <field type="long" required="false" name="cpfPax" trim="true"/>
+                <field type="string" required="false" name="tierFidelidadePax" trim="true"/>
+                <field type="string" required="true" name="tipoPagamento" trim="true"/>
+                <field type="long" required="true" name="digitoVerificadorCC" trim="true"/>
+                <field type="string" required="false" name="nomeCliente" trim="true"/>                                 
             </record>
         </group>
     </stream>  

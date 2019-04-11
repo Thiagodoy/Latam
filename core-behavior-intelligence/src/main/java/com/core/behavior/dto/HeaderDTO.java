@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Header {
+public class HeaderDTO {
 
     private String headerDataEmissao;
     private String headerDataVoo;

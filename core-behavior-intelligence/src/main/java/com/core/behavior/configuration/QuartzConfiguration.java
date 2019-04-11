@@ -5,6 +5,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.quartz.impl.matchers.GroupMatcher;
 
 /**
  *
@@ -17,9 +18,7 @@ public class QuartzConfiguration {
 
         Scheduler scheduler = bean.getScheduler();
 
-        scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), (t) -> {
-            return t.getGroup().equals("process-file");
-        });
+        scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), GroupMatcher.jobGroupEquals("fg_jobgroup_01"));
 
         scheduler.start();
 

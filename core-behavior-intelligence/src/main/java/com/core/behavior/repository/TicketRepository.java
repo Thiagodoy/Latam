@@ -5,7 +5,9 @@
  */
 package com.core.behavior.repository;
 
+import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
-    
+    List<TicketDuplicityDTO>listDuplicityByFileId(Long fileId);
     
     
 }
