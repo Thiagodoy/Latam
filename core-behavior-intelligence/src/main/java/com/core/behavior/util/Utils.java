@@ -1,13 +1,13 @@
 package com.core.behavior.util;
 
 import com.core.behavior.annotations.PositionParameter;
-import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -17,10 +17,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.beanio.StreamFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -103,7 +108,7 @@ public class Utils {
         }
 
         String retono = "(" + parameters.stream().collect(Collectors.joining(",")) + ")";
-       // Logger.getLogger(Utils.class.getName()).log(Level.INFO,retono);
+        // Logger.getLogger(Utils.class.getName()).log(Level.INFO,retono);
         return retono;
     }
 
@@ -123,6 +128,46 @@ public class Utils {
             parameters.put(index, "'" + value.toString() + "'");
         }
 
+    }
+
+    public static String getContenFromLayout(EmailLayoutEnum layout) throws IOException {
+
+        StreamFactory factory = StreamFactory.newInstance();
+        InputStream stream = null;
+
+        switch (layout) {
+            case CONGRATS:
+                stream = factory.getClass().getClassLoader().getResourceAsStream("static/CONGRAT-EMAIL.html");
+
+                break;
+        }
+
+        String theString = IOUtils.toString(stream, "UTF-8");
+
+        return theString;
+
+    }
+
+    public static  File loadLogo()
+            throws IOException {
+        StreamFactory factory = StreamFactory.newInstance();
+        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream("static/logo.png");;
+
+        File targetFile = File.createTempFile("logo", ".png");
+
+        FileUtils.copyInputStreamToFile(initialStream, targetFile);
+        return targetFile;
+    }
+    
+    public static String generatePasswordRandom(){
+    
+        Random rd = new Random(5);
+          
+        int value = rd.nextInt();
+        int value2 = rd.nextInt();
+        return  "%$" + value + "##!" + value2 + "+";     
+        
+       
     }
 
 }

@@ -12,6 +12,7 @@ import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.response.UserResponse;
 import com.core.behavior.services.UserActivitiService;
+import com.core.behavior.services.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +39,9 @@ public class UserResource {
     
     @Autowired
     private UserActivitiService service;
+    
+    @Autowired
+    private UserInfoService infoService;
     
     
     @RequestMapping(value = "/login",method = RequestMethod.POST)
@@ -88,15 +91,15 @@ public class UserResource {
     }
     
     
-    @RequestMapping(value = "/{id}",method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE)
     @ApiOperation(value = "Delete a user")    
-    public ResponseEntity deleteUser(@PathVariable("id") String id){
+    public ResponseEntity deleteUser( @RequestParam(name = "id",required = true) String id){
         service.deleteUser(id);
         return ResponseEntity.ok().build();
     }
     
     
-    @RequestMapping(value = "",method = RequestMethod.PUT)
+    @RequestMapping(method = RequestMethod.PUT)
     @ApiOperation(value = "Update a user")    
     public ResponseEntity updateUser(@RequestBody  UserRequest user){
         service.updateUser(user);
@@ -111,13 +114,41 @@ public class UserResource {
         try {
             service.saveUsers(user);
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
             service.deleteUser(user.getEmail());
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(null, ex.getCodeMessage()));
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }       
        
     } 
+    
+    
+    @RequestMapping(value = "/userExists/{cpfCnpj}",method = RequestMethod.GET)
+    @ApiOperation(value = "Verify if a user exists on data base")    
+    public ResponseEntity verifyCpfCnpj(@PathVariable("cpfCnpj") String cpfCnpj){
+        
+        try {            
+            return ResponseEntity.ok(infoService.checkCpfCnpj(cpfCnpj));            
+        } catch (Exception ex) {
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
+        }       
+       
+    } 
+    
+    @RequestMapping(value = "/resendPassword",method = RequestMethod.GET)
+    @ApiOperation(value = "Resend data of acess")    
+    public ResponseEntity resendAcess( @RequestParam(name = "email",required = true) String email){
+        
+        try {            
+            service.resendAccess(email);
+            return ResponseEntity.ok().build();            
+        } catch (Exception ex) {
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
+        }       
+       
+    }
     
     
 }

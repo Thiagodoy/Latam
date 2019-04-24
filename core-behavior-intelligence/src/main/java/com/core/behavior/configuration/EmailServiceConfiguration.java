@@ -19,7 +19,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
  */
 @Configuration
 public class EmailServiceConfiguration {
-    
+
     @Autowired
     private EmailServiceProperties properties;
 

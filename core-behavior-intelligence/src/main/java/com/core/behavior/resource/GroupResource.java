@@ -28,6 +28,8 @@ public class GroupResource {
 
     @Autowired
     private GroupActivitiService service;
+    
+    
 
     
     @RequestMapping(method = RequestMethod.GET)
@@ -75,7 +77,7 @@ public class GroupResource {
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
     @ApiResponse(code = 200, message = "Ok")
     public ResponseEntity delete(@PathVariable("id") String id) {
-        try {
+        try {           
             service.deleteGroup(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

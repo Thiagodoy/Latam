@@ -48,9 +48,10 @@ activiti:
 email:
     host: smtp.gmail.com
     port: 587
-    username: behavior@gmail.com
+    username: behavior47@gmail.com
     password: beh@vior2019
     auth: true  
+    protocol: smtp
     starttls:
            enable: true
            required: true
@@ -59,6 +60,6 @@ email:
            
 amazonproperties:
         endpointUrl: https://s3.us-east-2.amazonaws.com
-        accessKey: AKIAJO4TTXS5MMCRTRNA
-        secretKey: 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
-        bucketName: store-flat-file           
+        accessKey: AKIAT4PQFE4EX2R5KXTK
+        secretKey: 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
+        bucketName: behint-files          

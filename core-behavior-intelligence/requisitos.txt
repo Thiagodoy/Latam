@@ -1,0 +1,15 @@
+* na api de escala"Get Escala" exibir o tempo de descanso de acordo da ultima Jornada
+* retornar na api de hora extra a hora que ela pode ser iniciada(Exibir o tempo que pode ser iniciada)
+* Criar a api de apontamentos  separadas de acordo com o contexto
+* remover a data da hora extra. Não permitir a api buscar por extras agendadas para outro dia.
+* Ajustar a api  de configuracao de para consultar um parametro especifico,
+* Ajustar a resposta da Atividade para "APROVADO" ou "REPROVADO"
+* requisito 12 verificar**************??????????***************
+* criar uma api de listar as variaveis
+* olhar o requisito 17 e se eventualmente colocar osa dados no "GET ESCALA"
+
+* <VN-RGN> - <0011>	A solicitação de pausa manual para Descanso, Lanche ou Refeição não deve ser permitida quando houver pausa programada 
+Quando houver pelo menos uma pausa obrigatória planejada o sistema deve aplicar somente a pausa programada pelo planejamento. Somente no caso de não haver nenhuma pausa planejada que será possível solicitar essa pausa de forma manual.
+
+* <VN-RGN> - <0012>	As pausas obrigatórias devem ocorrer após 60 minutos do início do trabalho e antes dos 60 minutos do encerramento da jornada
+As pausas obrigatórias deverão acontecer nesse intervalo conforme regulamentação da NR17.

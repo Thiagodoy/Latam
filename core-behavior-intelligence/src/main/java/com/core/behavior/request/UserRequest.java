@@ -1,5 +1,6 @@
 package com.core.behavior.request;
 
+import com.core.activiti.model.UserInfo;
 import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
@@ -18,5 +19,5 @@ public class UserRequest implements Serializable {
     private String photo;
     private List<String>groups; 
     private String company;
-    
+    private List<UserInfo>info;
 }

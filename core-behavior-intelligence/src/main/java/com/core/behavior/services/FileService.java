@@ -1,5 +1,6 @@
 package com.core.behavior.services;
 
+import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.File;
 
@@ -47,6 +48,11 @@ public class FileService {
 
     @Autowired
     private SchedulerFactoryBean bean;
+    
+    
+    @Autowired
+    private ClientAws clientAws;
+    
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
@@ -56,6 +62,12 @@ public class FileService {
     public void persistFile(MultipartFile fileInput, String userId, String company) throws IOException, SchedulerException, Exception {
 
         java.io.File file = Utils.convertToFile(fileInput);
+        
+        
+        clientAws.uploadFile(file, "FRONTUR");
+        
+        
+        
 
         if (fileRepository.findByName(file.getName()).isPresent()) {
             file.delete();

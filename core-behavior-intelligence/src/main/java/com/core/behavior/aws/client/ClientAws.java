@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.EncryptedPutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.core.behavior.properties.AmazonProperties;
 import java.io.File;
 import java.io.IOException;
@@ -45,11 +46,10 @@ public class ClientAws {
 
     }
 
-    public String uploadFile(File file) throws IOException {
-        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(), file.getName(), file);        
-        this.amazonS3.putObject(request);
-        
-        return "";
+    public String uploadFile(File file, String folder) throws IOException {
+        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" +file.getName(), file);        
+        PutObjectResult result = this.amazonS3.putObject(request);
+        return result.getETag();        
     }
 
 }
