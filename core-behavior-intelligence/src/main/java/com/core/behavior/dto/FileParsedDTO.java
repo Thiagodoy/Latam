@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 public class FileParsedDTO {
-    private Header header;
+    private HeaderDTO header;
     private List<Ticket> ticket;
     private File file;    
     

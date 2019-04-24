@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.repository;
+package com.core.activiti.repository;
 
-import com.core.behavior.model.Log;
+import com.core.activiti.model.UserInfo;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-public interface LogRepository extends JpaRepository<Log, Long>{
-    
-    List<Log> findByFileId(Long fileId);
+public interface UserInfoRepository extends JpaRepository<UserInfo, String> {    
+    Optional<UserInfo> findByKeyAndValue(String key,String value);
+    List<UserInfo> findByUserId(String userId);
 }

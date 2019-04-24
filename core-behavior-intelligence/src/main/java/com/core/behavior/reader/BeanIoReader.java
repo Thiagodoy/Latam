@@ -1,15 +1,15 @@
 package com.core.behavior.reader;
 
-import com.core.behavior.dto.FileParsedDTO;
-import com.core.behavior.model.FileLines;
-import com.core.behavior.services.FileLinesService;
+import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.io.LineNumberReader;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,17 +31,16 @@ public class BeanIoReader {
     private FileService fileService;
 
     @Autowired
-    private LogService logService;
+    private LogService logService;    
 
-    @Autowired
-    private FileLinesService fileLinesService;
+    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String company, String user) {
 
-    public <T> Optional<T> parse(File file, String str, String xmlParser, String company, String user) {
-
-        beanErrorHandler = new BeanErrorHandler(fileLinesService, logService, fileService);
+        long start = System.currentTimeMillis();
+        long end;
+        
+        beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
         T record = null;
-        com.core.behavior.model.File f = null;
         try {
             StreamFactory factory = StreamFactory.newInstance();
             InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
@@ -49,31 +48,53 @@ public class BeanIoReader {
 
             reader = factory.createReader(str, file);
 
-            f = new com.core.behavior.model.File();
-            f.setCompany(company);
-            f.setName(file.getName());
-            f.setUserId(user);
-            f.setStatus(StatusEnum.PROCESSING);
-            f.setLines(new ArrayList<FileLines>());
-            f.setCreatedDate(LocalDateTime.now());
+            long totalLines = this.countLineNumber(file);
+            f.setQtdTotalLines(totalLines);
+            fileService.saveFile(f);
 
-            f = fileService.saveFile(f);
             beanErrorHandler.setFileId(f.getId());
             reader.setErrorHandler(beanErrorHandler);
 
-            record = (T) reader.read();
-            FileParsedDTO dto = (FileParsedDTO) record;
-            dto.setFile(f);
+            record = (T) reader.read();           
 
+            if (beanErrorHandler.getLogs().size() > 0) {
+                logService.saveBatch(beanErrorHandler.getLogs());
+            }
+            end = System.currentTimeMillis();
+            fileService.setParseTime(f.getId(), (end - start)/1000);
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.ERROR);
             f = fileService.saveFile(f);
+            logService.logGeneric(f.getId(), ex.getLocalizedMessage());
         }
 
         reader.close();
 
         return Optional.ofNullable(record);
+    }
+
+    private long countLineNumber(File file) {
+
+        long count = 0;
+
+        try {
+            FileReader reader = new FileReader(file);
+            LineNumberReader readerLine = new LineNumberReader(reader);
+
+            while (readerLine.readLine() != null) {
+                count++;
+            }
+
+            return --count;
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return 0l;
     }
 
 }

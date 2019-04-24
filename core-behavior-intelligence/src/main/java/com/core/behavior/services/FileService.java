@@ -1,11 +1,10 @@
 package com.core.behavior.services;
 
-import com.core.behavior.jobs.ProcessFileJob2;
+import com.core.behavior.aws.client.ClientAws;
+import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.File;
-import com.core.behavior.model.FileLines;
-import com.core.behavior.repository.FileLineRepository;
+
 import com.core.behavior.repository.FileRepository;
-import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
@@ -38,19 +37,24 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileService {
 
     @Autowired
-    private FileRepository fileRepository;
+    private FileRepository fileRepository;    
 
     @Autowired
-    private FileLineRepository fileLineRepository;
-
+    private FileProcessStatusService fileProcessStatusService; 
+    
     @Autowired
     private LogService logService;
+    
 
     @Autowired
     private SchedulerFactoryBean bean;
     
     
-    public File findById(Long id){
+    @Autowired
+    private ClientAws clientAws;
+    
+
+    public File findById(Long id) {
         return fileRepository.findById(id).get();
     }
 
@@ -60,21 +64,24 @@ public class FileService {
         java.io.File file = Utils.convertToFile(fileInput);
         
         
-        if(fileRepository.findByName(file.getName()).isPresent()){
+        clientAws.uploadFile(file, "FRONTUR");
+        
+        
+        
+
+        if (fileRepository.findByName(file.getName()).isPresent()) {
             file.delete();
             throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
         }
-        
-        
 
         JobDataMap data = new JobDataMap();
-        data.put(ProcessFileJob2.DATA_USER_ID, userId);
-        data.put(ProcessFileJob2.DATA_COMPANY, company);
-        data.put(ProcessFileJob2.DATA_FILE, file);
+        data.put(ProcessFileJob.DATA_USER_ID, userId);
+        data.put(ProcessFileJob.DATA_COMPANY, company);
+        data.put(ProcessFileJob.DATA_FILE, file);
 
         JobDetail detail = JobBuilder
-                .newJob(ProcessFileJob2.class)
-                .withIdentity("WRITE-JOB-" + file.getName())
+                .newJob(ProcessFileJob.class)
+                .withIdentity("WRITE-JOB-" + file.getName(),"process-file")
                 .withDescription("Processing files")
                 .usingJobData(data)
                 .build();
@@ -93,12 +100,7 @@ public class FileService {
     @Transactional
     public com.core.behavior.model.File saveFile(com.core.behavior.model.File f) {
         return fileRepository.save(f);
-    }
-
-    @Transactional
-    private void saveLines(List<FileLines> lines) {
-        fileLineRepository.saveAll(lines);
-    }
+    }    
 
     public List<com.core.behavior.model.File> listFilesOfPending() {
         return fileRepository.findByStatus(StatusEnum.UPLOADED);
@@ -110,15 +112,14 @@ public class FileService {
     }
 
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
-
-        StringBuilder buffer = new StringBuilder();
-        List<FileLines> linesErrors = fileLineRepository.findByFileIdAndStatus(idFile, StatusEnum.ERROR);
-        linesErrors.forEach((line) -> {
-            buffer.append(line);
-            logService.findByLineId(line.getId()).forEach((log) -> {
-                buffer.append(isCsv ? log.toStringCsv() : log.toString());
-            });
-        });
+        
+   
+       StringBuilder buffer = new StringBuilder();
+       
+       logService.listByFileId(idFile).forEach(l->{       
+           buffer.append(l);       
+       });
+       
         return buffer;
     }
 
@@ -127,10 +128,38 @@ public class FileService {
         fileRepository.deleteById(id);
     }
     
-    public Page<File>list(String fileName, String userId,String company,LocalDateTime createdAt, Pageable page){
-        
-         List<Specification<File>> predicates = new ArrayList<>();
-        
+    @Transactional
+    public void setStatus(Long fileId, StatusEnum status){
+        File file = fileRepository.findById(fileId).get();
+        file.setStatus(status);
+        fileRepository.save(file);
+    }
+    
+    @Transactional
+    public void setExecutionTime(Long fileId, Long time){
+        File file = fileRepository.findById(fileId).get();
+        file.setExecutionTime(time);
+        fileRepository.save(file);
+    }
+    
+    @Transactional
+    public void setParseTime(Long fileId, Long time){
+        File file = fileRepository.findById(fileId).get();
+        file.setParseTime(time);
+        fileRepository.save(file);
+    }
+    
+    @Transactional
+    public void setPersistTime(Long fileId, Long time){
+        File file = fileRepository.findById(fileId).get();
+        file.setPersistTime(time);
+        fileRepository.save(file);
+    }
+
+    public Page<File> list(String fileName, String userId, String company, LocalDateTime createdAt, Pageable page) {
+
+        List<Specification<File>> predicates = new ArrayList<>();
+
 //        if(fileName != null && fileName.length() > 0){
 //           predicates.add(FileSpecification.fileName(fileName));
 //        }
@@ -146,10 +175,14 @@ public class FileService {
 //        if(createdAt != null){
 //            predicates.add( FileSpecification.dateCreated(createdAt));
 //        }
-        
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
-        
-        return fileRepository.findAll(specification, page);
+        Page<File> fileResponse = fileRepository.findAll(specification, page);
+
+        fileResponse.getContent().stream().forEach(ff -> {
+            ff.setStatusProcess(fileProcessStatusService.getStatusFile(ff.getId()));
+        });
+
+        return fileResponse;
     }
 
 }

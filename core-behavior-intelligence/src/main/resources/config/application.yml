@@ -42,4 +42,24 @@ activiti:
             dataSourceUser: root
             dataSourcePassword: 12345678
             port: 3306            
-            connectionTestQuery: SELECT 1              
+            connectionTestQuery: SELECT 1 
+            
+            
+email:
+    host: smtp.gmail.com
+    port: 587
+    username: behavior47@gmail.com
+    password: beh@vior2019
+    auth: true  
+    protocol: smtp
+    starttls:
+           enable: true
+           required: true
+           
+           
+           
+amazonproperties:
+        endpointUrl: https://s3.us-east-2.amazonaws.com
+        accessKey: AKIAT4PQFE4EX2R5KXTK
+        secretKey: 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
+        bucketName: behint-files          

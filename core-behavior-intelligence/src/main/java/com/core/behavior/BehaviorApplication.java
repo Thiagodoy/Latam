@@ -2,24 +2,28 @@ package com.core.behavior;
 
 import com.core.behavior.properties.ActivitiProperties;
 import com.core.behavior.properties.ActivitiProxyProperties;
+import com.core.behavior.properties.AmazonProperties;
 import com.core.behavior.properties.BehaviorProperties;
+import com.core.behavior.properties.EmailServiceProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
-@EnableSwagger2
-@EnableConfigurationProperties({ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class})
+@EnableConfigurationProperties({ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class, AmazonProperties.class, EmailServiceProperties.class})
 @EnableAutoConfiguration
 @ComponentScan()
+@EnableWebMvc
 public class BehaviorApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BehaviorApplication.class, args);
     }
+    
+    
 
 //    @Bean
 //    public WebMvcConfigurer corsConfigurer() {

@@ -1,179 +1,258 @@
 package com.core.behavior.model;
 
+import com.core.behavior.annotations.PositionParameter;
+import com.core.behavior.dto.TicketDuplicityDTO;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.PrePersist;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.SelectBeforeUpdate;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
+
+
+
+
+
+@SqlResultSetMapping(name = "TicketDuplicity",
+        classes = @ConstructorResult(
+                targetClass = TicketDuplicityDTO.class,
+                columns = {
+                    @ColumnResult(name = "field_name",  type = String.class),                    
+                    @ColumnResult(name = "qtd_erro", type = Long.class),
+                    @ColumnResult(name = "percentual_erro", type = Double.class),                    
+                    @ColumnResult(name = "percentual_acerto", type = Double.class),                    
+                    @ColumnResult(name = "qtd_total_lines", type = Long.class),
+                }))
+
+@NamedNativeQuery(name = "Ticket.listDuplicityByFileId", resultSetMapping = "TicketDuplicity",
+        query = "select field_name,\n" +
+" count(1) as qtd_erro,\n" +
+" (truncate((count(1)/b.qtd_total_lines)*100,2)) as percentual_erro,\n" +
+" (100 - (truncate((count(1)/b.qtd_total_lines)*100,2))) as percentual_acerto, \n" +
+" b.qtd_total_lines \n" +
+" from behavior.log a \n" +
+" left join behavior.file b on a.file_id = b.id   \n" +
+" where file_id = :fileId \n" +
+" group by field_name, b.qtd_total_lines")
+
 @Entity
 @Table(schema = "behavior", name = "ticket")
 @IdClass(Ticket.IdClass.class)
 @Data
 public class Ticket {
 
-       
+
+    @PositionParameter(value = 0)
+    @Column(name = "OnD_DIRECIONAL")
+    public String OndDirecional;
     
-
-    @Column(name = "DATA_EMISSAO", nullable = false)
-    private Date dataEmissao;
-
-    @Id
-    @Column(name = "DATA_VOO", nullable = false)
-    private Date dataVoo;
-
-    @Column(name = "HORA_VOO", nullable = false)
-    private String horaVoo;
-
-    @Column(name = "CIA_BILHETE", nullable = false)
-    private String ciaBilhete;
-
-    @Column(name = "TRECHO_TKT", nullable = false)
-    private String trechoTkt;
-
-    @Column(name = "ATO_ORIGEM", nullable = false)
-    private String atoOrigem;
-
+    @PositionParameter(value = 1)
+    @Column(name = "AGENCIA_CONSOLIDADA")
+    public String agenciaConsolidada;
+    
+    @PositionParameter(value = 2)
     @Column(name = "ATO_DESTINO", nullable = false)
-    private String atoDestino;
-
-    @Column(name = "NUMERO_CUPOM", nullable = false)
-    private Long nroCupom;
-
+    public String atoDestino;
+    
+    @PositionParameter(value = 3)
+    @Column(name = "ATO_ORIGEM", nullable = false)
+    public String atoOrigem;
+    
+    @PositionParameter(value = 4)
+    @Column(name = "BASE_TARIFARIA", nullable = false)
+    public String baseTarifaria;
+    
+    @PositionParameter(value = 5)
+    @Column(name = "BASE_VENDA")
+    public String baseVenda;
+    
+    @PositionParameter(value = 6)
     @Id
     @Column(name = "BILHETE", nullable = false)
-    private Long bilhete;
-
-    @Column(name = "TIPO_VENDA", nullable = false)
-    private String tipoVenda;
-
-    @Column(name = "CLASSE_CABINE", nullable = false)
-    private String classeCabine;
-
+    public Long bilhete;
+    
+    @PositionParameter(value = 7)
+    @Column(name = "CIA_BILHETE", nullable = false)
+    public String ciaBilhete;
+    
+    @PositionParameter(value = 8)
     @Column(name = "CIA_VOO", nullable = false)
-    private String ciaVoo;
-
-    @Column(name = "VALOR_BRL", nullable = false)
-    private Double valorBrl;
-
-    @Column(name = "CLIENTE_EMPRESA")
-    private String clienteEmpresa;
-
-    @Column(name = "CNPJ_CLIENTE_EMPRESA")
-    private String cnpjClienteEmpresa;
-
-    @Column(name = "IATA_AGENCIA_EMISSORA", nullable = false)
-    private Long iataAgenciaEmissora;
-
-    @Column(name = "BASE_VENDA")
-    private String baseVenda;
-
-    @Column(name = "QTDE_PAX")
-    private Long qtdePax;
-
-    @Column(name = "NUM_VOO")
-    private Long numVoo;
-
-    @Column(name = "AGENCIA_CONSOLIDADA")
-    private String agenciaConsolidada;
-
-    @Column(name = "DATA_EXTRACAO", nullable = false)
-    private Date dataExtracao;
-
-    @Column(name = "HORA_EMISSAO")
-    private String horaEmissao;
-
-    @Column(name = "DATA_RESERVA")
-    private Date dataReserva;
-
-    @Column(name = "HORA_RESERVA")
-    private String horaReserva;
-
-    @Column(name = "BASE_TARIFARIA", nullable = false)
-    private String baseTarifaria;
-
-    @Column(name = "FAMILIA_TARIFARIA")
-    private String familiaTarifaria;
-
-    @Column(name = "CLASSE_TARIFA", nullable = false)
-    private String classeTarifa;
-
+    public String ciaVoo;
+    @PositionParameter(value = 9)
+    @Column(name = "CLASSE_CABINE", nullable = false)
+    public String classeCabine;
+    
+    @PositionParameter(value = 10)
     @Column(name = "CLASSE_SERVICO", nullable = false)
-    private String classeServico;
+    public String classeServico;
 
-    @Column(name = "OnD_DIRECIONAL")
-    private String OndDirecional;
+    @PositionParameter(value = 11)
+    @Column(name = "CLASSE_TARIFA", nullable = false)
+    public String classeTarifa;
 
-    @Column(name = "TOUR_CODE", nullable = false)
-    private String tourCode;
+    @PositionParameter(value = 12)
+    @Column(name = "CLIENTE_EMPRESA")
+    public String clienteEmpresa;
 
-    @Column(name = "RT_OW", nullable = false)
-    private String rtOn;
-
-    @Column(name = "VALOR_US$", nullable = false)
-    private Double valorUs;
-
-    @Column(name = "TARIFA_PUBLICA_R$", nullable = false)
-    private Double tarifaPublica;
-
-    @Column(name = "TARIFA_PUBLICA_US$")
-    private Double tarifaPublicUs;
-
-    @Column(name = "PNR_AGENCIA")
-    private String pnrAgencia;
-
-    @Column(name = "PNR_CIA_AEREA")
-    private String pnrCiaArea;
-
-    @Column(name = "SELFBOOKING_OFFLINE")
-    private String selfBookingOffiline;
-
-    @Column(name = "NOME_PAX", nullable = false)
-    private String nomePax;
-
-    @Column(name = "TIPO_PAX", nullable = false)
-    private String tipoPax;
-
+    @PositionParameter(value = 13)
+    @Column(name = "CNPJ_CLIENTE_EMPRESA")
+    public String cnpjClienteEmpresa;
+    
+    @PositionParameter(value = 14)
     @Column(name = "CPF_PAX")
-    private Long cpfPax;
+    public Long cpfPax;
+    
+    @PositionParameter(value = 15)
+    @Column(name = "DATA_EMISSAO", nullable = false)
+    public Date dataEmissao;
 
-    @Column(name = "TIER_FIDELIDADE_PAX")
-    private String tierFidelidadePax;
+    @PositionParameter(value = 16)
+    @Column(name = "DATA_EXTRACAO", nullable = false)
+    public Date dataExtracao;
 
-    @Column(name = "TIPO_PAGAMENTO", nullable = false)
-    private String tipoPagamento;
-
+    @PositionParameter(value = 17)
+    @Column(name = "DATA_RESERVA")
+    public Date dataReserva;
+    
+    @PositionParameter(value = 18)
+    @Id
+    @Column(name = "DATA_VOO", nullable = false)    
+    public Date dataVoo;
+    
+    @PositionParameter(value = 19)
     @Column(name = "DIGITO_VERIFICADOR_CC")
-    private Long digitoVerificadorCC;
+    public Long digitoVerificadorCC;
+    
+    @PositionParameter(value = 20)
+    @Column(name = "FAMILIA_TARIFARIA")
+    public String familiaTarifaria;
+    
+    @PositionParameter(value = 21)
+    @Column(name = "HORA_EMISSAO")
+    public String horaEmissao;
 
+    @PositionParameter(value = 22)
+    @Column(name = "HORA_RESERVA")
+    public String horaReserva;
+    
+    @PositionParameter(value = 23)
+    @Column(name = "HORA_VOO", nullable = false)
+    public String horaVoo;    
+
+    @PositionParameter(value = 24)
+    @Column(name = "IATA_AGENCIA_EMISSORA", nullable = false)
+    public Long iataAgenciaEmissora;
+
+    @PositionParameter(value = 25)
     @Column(name = "NOME_CLIENTE")
-    private String nomeCliente;
+    public String nomeCliente;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @PositionParameter(value = 26)
+    @Column(name = "NOME_PAX", nullable = false)
+    public String nomePax;
 
-    @Column(name = "file_id", nullable = false)
-    private Long fileId;
+    @PositionParameter(value = 27)
+    @Column(name = "NUMERO_CUPOM", nullable = false)
+    public Long nroCupom;
 
-    @PrePersist
-    public void setCreatedDate() {
+    @PositionParameter(value = 28)
+    @Column(name = "NUM_VOO")
+    public Long numVoo;
+    
+    @PositionParameter(value = 29)
+    @Column(name = "PNR_AGENCIA")
+    public String pnrAgencia;
+
+    @PositionParameter(value = 30)
+    @Column(name = "PNR_CIA_AEREA")
+    public String pnrCiaArea;
+
+    @PositionParameter(value = 31)
+    @Column(name = "QTDE_PAX")
+    public Long qtdePax;    
+
+    @PositionParameter(value = 32)
+    @Column(name = "RT_OW", nullable = false)
+    public String rtOn;
+    
+    @PositionParameter(value = 33)
+    @Column(name = "SELFBOOKING_OFFLINE")
+    public String selfBookingOffiline;
+    
+    @PositionParameter(value = 34)
+    @Column(name = "TARIFA_PUBLICA_US$")
+    public Double tarifaPublicUs;
+    
+    @PositionParameter(value = 35)
+    @Column(name = "TARIFA_PUBLICA_R$", nullable = false)
+    public Double tarifaPublica;
+    
+    @PositionParameter(value = 36)
+    @Column(name = "TIER_FIDELIDADE_PAX")
+    public String tierFidelidadePax;
+
+    @PositionParameter(value = 37)
+    @Column(name = "TIPO_PAGAMENTO", nullable = false)
+    public String tipoPagamento;
+
+    @PositionParameter(value = 38)
+    @Column(name = "TIPO_PAX", nullable = false)
+    public String tipoPax;
+
+    @PositionParameter(value = 39)
+    @Column(name = "TIPO_VENDA", nullable = false)
+    public String tipoVenda;
+
+    @PositionParameter(value = 40)
+    @Column(name = "TOUR_CODE", nullable = false)
+    public String tourCode;    
+
+    @PositionParameter(value = 41)
+    @Column(name = "TRECHO_TKT", nullable = false)
+    public String trechoTkt;
+
+    @PositionParameter(value = 42)
+    @Column(name = "VALOR_BRL", nullable = false)
+    public Double valorBrl;
+
+    @PositionParameter(value = 43)
+    @Column(name = "VALOR_US$", nullable = false)
+    public Double valorUs;
+
+
+    @PositionParameter(value = 44)
+    @Column(name = "CREATED_AT")
+    public LocalDateTime createdAt;
+
+    @PositionParameter(value = 45)
+    @Column(name = "FILE_ID", nullable = false)
+    public Long fileId;
+    
+    @PositionParameter(value = 46)
+    @Column(name = "ID", nullable = false)
+    public Long id;
+
+    
+    public Ticket() {
         this.createdAt = LocalDateTime.now();
     }
     
      @Data
     public static class IdClass implements Serializable {
-        private Long bilhete;
-        private Date dataVoo;
+        public Long bilhete;
+        public Date dataVoo;
     }
 
 }

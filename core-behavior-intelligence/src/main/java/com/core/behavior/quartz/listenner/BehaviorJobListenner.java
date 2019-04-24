@@ -21,7 +21,7 @@ public class BehaviorJobListenner implements JobListener{
 
     @Override
     public void jobToBeExecuted(JobExecutionContext jec) {
-       
+        System.out.println("JOB WILL EXECUTED" + jec.getJobDetail().getKey().getName());
     }
 
     @Override
@@ -31,13 +31,7 @@ public class BehaviorJobListenner implements JobListener{
 
     @Override
     public void jobWasExecuted(JobExecutionContext jec, JobExecutionException jee) {
-        JobKey jobkey = jec.getJobDetail().getKey();
-        try {
-            boolean jobDeleted = jec.getScheduler().deleteJob(jobkey);
-            System.out.println("deletado -> " + jobDeleted);
-        } catch (SchedulerException ex) {
-            Logger.getLogger(BehaviorJobListenner.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         System.out.println("JOB WILL EXECUTED" + jec.getJobDetail().getKey().getName());       
     }
 
 }

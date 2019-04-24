@@ -1,8 +1,10 @@
 package com.core.activiti.model;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,8 +48,13 @@ public class UserInfo {
         this.key = key;
         this.value = value;
         this.userId = userId;    
-        this.id = String.valueOf(hashCode());
-        
+        this.id = String.valueOf(hashCode());       
                 
-    }        
+    }    
+
+    @PostConstruct
+    @PrePersist
+    public void setIdG(){    
+        this.id = String.valueOf(hashCode());
+    }
 }

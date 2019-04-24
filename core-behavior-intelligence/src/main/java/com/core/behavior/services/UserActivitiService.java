@@ -10,12 +10,19 @@ import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
 import com.core.activiti.specifications.UserActivitiSpecification;
+import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
+import com.core.behavior.util.Utils;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,13 +36,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserActivitiService {
 
-   
-
     @Autowired
     private UserActivitiRepository userActivitiRepository;
 
     @Autowired
     private GroupActivitiRepository groupActivitiRepository;
+
+    @Autowired
+    private UserInfoService infoService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public void deleteUser(String idUser) {
@@ -51,16 +62,17 @@ public class UserActivitiService {
 
     }
 
-    public UserResponse getUser(String id){
-        
-        Optional<UserActiviti> opt = userActivitiRepository.findById(id);      
-        
-        if(!opt.isPresent()){
+    public UserResponse getUser(String id) {
+
+        Optional<UserActiviti> opt = userActivitiRepository.findById(id);
+
+        if (!opt.isPresent()) {
             throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
-        }      
-        
+        }
+
         return getResponseUsers(Arrays.asList(opt.get())).get(0);
     }
+
     public UserResponse login(LoginRequest request) {
 
         UserActiviti user = userActivitiRepository.findById(request.getEmail()).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
@@ -83,9 +95,38 @@ public class UserActivitiService {
         return response;
     }
 
-    public void saveUsers(UserRequest user) {
+    @Transactional
+    public void saveUsers(UserRequest user) throws MessagingException, IOException {
+
+        String password = Utils.generatePasswordRandom();
+        user.setPassword(DigestUtils.md5Hex(password));
         UserActiviti userActiviti = new UserActiviti(user);
         userActivitiRepository.save(userActiviti);
+
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":name", user.getFirstName());
+        parameter.put(":email", user.getEmail());
+        parameter.put(":password", password);
+
+        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
+
+    }
+
+    @Transactional
+    public void resendAccess(String id) throws MessagingException, IOException {
+
+        UserActiviti userActiviti = userActivitiRepository.findById(id).get();
+        String password = Utils.generatePasswordRandom();
+        userActiviti.setPassword(DigestUtils.md5Hex(password));
+
+        userActivitiRepository.save(userActiviti);
+
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":email", userActiviti.getEmail());
+        parameter.put(":password", password);
+
+        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
     }
 
     public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, Pageable page) {
@@ -105,12 +146,12 @@ public class UserActivitiService {
         }
 
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
-        
-       return  userActivitiRepository.findAll(specification,page);
-       
+
+        return userActivitiRepository.findAll(specification, page);
+
     }
 
-    private  List<UserResponse> getResponseUsers(List<UserActiviti> list) {
+    private List<UserResponse> getResponseUsers(List<UserActiviti> list) {
 
         List<UserResponse> responses = new ArrayList();
 

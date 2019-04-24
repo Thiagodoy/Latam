@@ -5,9 +5,7 @@
  */
 package com.core.behavior.repository;
 
-import com.core.behavior.model.FileLines;
-import com.core.behavior.util.StatusEnum;
-import java.util.List;
+import com.core.behavior.model.Agency;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,10 +14,6 @@ import org.springframework.stereotype.Repository;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Repository
-public interface FileLineRepository extends JpaRepository<FileLines, Long> {
-    
-    
-    List<FileLines> findByFileIdAndStatus(Long idFile, StatusEnum status);
-    
+public interface AgencyRepository extends JpaRepository<Agency, Long>{
     
 }

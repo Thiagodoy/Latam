@@ -1,5 +1,6 @@
 package com.core.behavior.model;
 
+import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.util.TypeErrorEnum;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -12,7 +13,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,38 +25,49 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(schema = "behavior", name = "log")
 @Data
-@NoArgsConstructor
+
 @AllArgsConstructor
 public class Log implements Serializable {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @PositionParameter(value = 7)
+    public Long id;
 
+    @PositionParameter(value = 1)
     @Column(name = "file_id")
-    private Long fileId;
+    public Long fileId;   
 
-    @Column(name = "file_line_id")
-    private Long fileLineId;
-
+    @PositionParameter(value = 3)
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private TypeErrorEnum type;
+    public TypeErrorEnum type;
 
+    @PositionParameter(value = 0)
     @Column(name = "field_name")
-    private String fieldName;
+    public String fieldName;
 
+    @PositionParameter(value = 2)
     @Column(name = "message_error")
-    private String messageError;
+    public String messageError;
     
+    @PositionParameter(value = 4)
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public LocalDateTime createdAt;
+    
+    @PositionParameter(value = 6)
+    @Column(name = "record_content")
+    public String recordContent;
+    
+    @PositionParameter(value = 5)
+    @Column(name = "line_number")
+    public Long lineNumber;
 
     @Override
     public String toString() {
-        MessageFormat formmater =  new MessageFormat("[{0} {1}] -> {2} \n", new Locale("pt", "BR"));
-        return formmater.format(new Object[]{this.type, this.fieldName, this.messageError});
+        MessageFormat formmater =  new MessageFormat("[CONTENT LINE] -> {0}\n[{1} {2}] -> {3} \n", new Locale("pt", "BR"));
+        return formmater.format(new Object[]{this.recordContent, this.type, this.fieldName, this.messageError});
     }   
 
     public String toStringCsv() {
@@ -64,8 +75,8 @@ public class Log implements Serializable {
         return formmater.format(new Object[]{this.type, this.fieldName, this.messageError});
     }
     
-    @PrePersist
-    public void setCreatedAt(){
+    public Log(){
         this.createdAt = LocalDateTime.now();
     }
+    
 }
