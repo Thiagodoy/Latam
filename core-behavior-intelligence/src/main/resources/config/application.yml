@@ -21,7 +21,7 @@ behavior:
         sqlserver:
             dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC          
             dataSourceUser: root
-            dataSourcePassword: root
+            dataSourcePassword: 12345678
             port: 3306            
             connectionTestQuery: SELECT 1  
             
@@ -40,6 +40,6 @@ activiti:
         sqlserver:
             dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC          
             dataSourceUser: root
-            dataSourcePassword: root
+            dataSourcePassword: 12345678
             port: 3306            
             connectionTestQuery: SELECT 1              
