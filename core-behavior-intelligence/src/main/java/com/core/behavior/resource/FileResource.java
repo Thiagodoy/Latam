@@ -42,16 +42,18 @@ public class FileResource {
     @Autowired
     private FileService fileService;
 
-    @RequestMapping(value = "/{company}/{userId}", method = RequestMethod.POST)
+    @RequestMapping(value = "/{company}/{userId}/{uploadAws}/{uploadFtp}/{processFile}", method = RequestMethod.POST)
     @ApiOperation(value = "Upload of files")
     public ResponseEntity uploadFile(
-            @PathVariable Long company,
-            @PathVariable String userId,
+            @PathVariable(name = "company") Long company,
+            @PathVariable(name = "userId") String userId,
+            @PathVariable(name = "uploadAws") boolean uploadAws,
+            @PathVariable(name = "uploadFtp") boolean uploadFtp,
+            @PathVariable(name = "processFile") boolean processFile,            
             @RequestPart(value = "file") MultipartFile file) {
 
         try {
-
-            fileService.persistFile(file, userId, company, true, true, true);
+            fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok("File Uploaded success!");
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(ex.getMessage());
@@ -112,6 +114,7 @@ public class FileResource {
             @RequestParam(name = "dateCreated", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
             @RequestParam(name = "company", required = false) String company,
+            @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -120,7 +123,7 @@ public class FileResource {
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 
-            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest);
+            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);

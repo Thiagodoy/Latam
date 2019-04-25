@@ -3,6 +3,7 @@ package com.core.behavior.services;
 import com.core.behavior.exception.ActivitiException;
 import com.core.activiti.model.GroupActiviti;
 import com.core.activiti.model.UserActiviti;
+import com.core.activiti.model.UserInfo;
 import com.core.activiti.repository.GroupActivitiRepository;
 import com.core.activiti.repository.UserActivitiRepository;
 import com.core.behavior.request.LoginRequest;
@@ -127,6 +128,34 @@ public class UserActivitiService {
         emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
     }
 
+    @Transactional
+    public void fogotAcess(String id) throws MessagingException, IOException {
+
+        Optional<UserActiviti> opt = userActivitiRepository.findById(id);
+
+        if (!opt.isPresent()) {
+            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+        }
+
+        UserActiviti userActiviti = opt.get();
+        String password = Utils.generatePasswordRandom();
+        userActiviti.setPassword(DigestUtils.md5Hex(password));
+
+        Optional<UserInfo> op = userActiviti.getInfo().stream().filter(i -> i.getKey().equals("primeiro_acesso")).findFirst();
+        if (op.isPresent()) {
+            op.get().setValue("true");
+        }
+
+        userActivitiRepository.save(userActiviti);
+
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":email", userActiviti.getEmail());
+        parameter.put(":password", password);
+
+        emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+    }
+
     public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, Pageable page) {
 
         List<Specification<UserActiviti>> predicates = new ArrayList<>();
@@ -173,7 +202,7 @@ public class UserActivitiService {
 
     }
 
-    @Transactional 
+    @Transactional
     public void changePassword(ChangePasswordRequest request) {
 
         Optional<UserActiviti> opt = userActivitiRepository.findById(request.getEmail());
@@ -185,12 +214,22 @@ public class UserActivitiService {
         if (!opt.get().getPassword().equals(request.getPassword())) {
             throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
         }
-        
+
         UserActiviti user = opt.get();
-        
+
         user.setPassword(request.getNewPassword());
 
+        if (request.isFirstAccess()) {
+
+            Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals("primeiro_acesso")).findFirst();
+
+            if (op.isPresent()) {
+                op.get().setValue("false");
+            }
+        }
+
         userActivitiRepository.save(user);
+
     }
 
 }

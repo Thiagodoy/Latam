@@ -6,7 +6,7 @@ import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 
 import com.core.behavior.repository.FileRepository;
-import com.core.behavior.util.MessageCode;
+import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -55,6 +55,9 @@ public class FileService {
 
     @Autowired
     private ClientAws clientAws;
+    
+    @Autowired
+    private FileService fileService;
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
@@ -78,26 +81,35 @@ public class FileService {
         Agency agency = agencyService.findById(id);
 
         if (uploadAws) {            
-            String folder = agency.getS3Path().split("\\")[1];
+            String folder = agency.getS3Path().split("\\\\")[1];
             clientAws.uploadFile(file, folder);
+        
+            com.core.behavior.model.File f = new com.core.behavior.model.File();
+            f.setCompany(id.toString());
+            f.setName(file.getName());
+            f.setUserId(userId);
+            f.setStatus(StatusEnum.UPLOADED);
+            f.setCreatedDate(LocalDateTime.now());
+
+            f = fileService.saveFile(f);
         }
 
-        if (uploadFtp) {
-            clientAws.uploadFile(file, "FRONTUR");
-        }
+//        if (uploadFtp) {
+//           clientAws.uploadFile(file, "FRONTUR");;
+//        };
 
         Optional<File> opt = fileRepository.findByName(file.getName());
         
         
+//        
+//        if (opt.isPresent() && (!(opt.get().getStatus().equals(StatusEnum.ERROR) && !(opt.get().getStatus().equals(StatusEnum.UPLOADED))))) {
+//            file.delete();
+//            throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
+//        }
         
-        if (opt.isPresent() && !(opt.get().getStatus().equals(StatusEnum.ERROR))) {
-            file.delete();
-            throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
-        }
-        
-        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
-            fileRepository.delete(opt.get());
-        }
+//        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
+//            fileRepository.delete(opt.get());
+//        }
 
         if (processFile) {
 
@@ -183,7 +195,7 @@ public class FileService {
         fileRepository.save(file);
     }
 
-    public Page<File> list(String fileName, String userId, String company, LocalDateTime createdAt, Pageable page) {
+    public Page<File> list(String fileName, String userId, String company, LocalDateTime createdAt, Pageable page, String status) {
 
         List<Specification<File>> predicates = new ArrayList<>();
 
@@ -202,6 +214,13 @@ public class FileService {
 //        if(createdAt != null){
 //            predicates.add( FileSpecification.dateCreated(createdAt));
 //        }
+
+          if(status != null){
+              predicates.add( FileSpecification.status(StatusEnum.UPLOADED));
+          }else{
+              predicates.add( FileSpecification.disLikestatus(StatusEnum.UPLOADED));
+          }  
+
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
         Page<File> fileResponse = fileRepository.findAll(specification, page);
 
