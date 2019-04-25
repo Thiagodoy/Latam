@@ -43,18 +43,7 @@ public class UserResource {
     @Autowired
     private UserInfoService infoService;
     
-    
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
-    @ApiOperation(value = "Login", response = UserResponse.class)   
-    public ResponseEntity login(@RequestBody LoginRequest user){
-        try {
-            return ResponseEntity.ok(service.login(user));
-        } catch (ActivitiException ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
-            return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
-        }
-       
-    }    
+   
     
     
     
@@ -149,6 +138,8 @@ public class UserResource {
         }       
        
     }
+    
+    
     
     
 }

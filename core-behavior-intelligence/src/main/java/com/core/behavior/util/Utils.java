@@ -22,9 +22,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
 import org.beanio.StreamFactory;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +39,7 @@ public class Utils {
     private static List<Field> fields;
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
-
+    private static Tika tika;
     public static enum TypeField {
         TICKET, LOG
     };
@@ -58,6 +58,8 @@ public class Utils {
                 .stream()
                 .filter(f -> f.isAnnotationPresent(PositionParameter.class))
                 .collect(Collectors.toList());
+        
+        tika =  new Tika();
 
     }
 
@@ -151,7 +153,7 @@ public class Utils {
     public static  File loadLogo()
             throws IOException {
         StreamFactory factory = StreamFactory.newInstance();
-        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream("static/logo.png");;
+        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream("static/logo.png");
 
         File targetFile = File.createTempFile("logo", ".png");
 
@@ -161,13 +163,17 @@ public class Utils {
     
     public static String generatePasswordRandom(){
     
-        Random rd = new Random(5);
+        Random rd = new Random();
           
-        int value = rd.nextInt();
-        int value2 = rd.nextInt();
+        int value = rd.nextInt(10);
+        int value2 = rd.nextInt(10);
         return  "%$" + value + "##!" + value2 + "+";     
         
        
     }
 
+    public static String getMimeType(File file) throws IOException{
+        return tika.detect(file);
+    }
+    
 }

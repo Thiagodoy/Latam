@@ -10,6 +10,7 @@ import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
 import com.core.activiti.specifications.UserActivitiSpecification;
+import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
@@ -41,9 +42,6 @@ public class UserActivitiService {
 
     @Autowired
     private GroupActivitiRepository groupActivitiRepository;
-
-    @Autowired
-    private UserInfoService infoService;
 
     @Autowired
     private EmailService emailService;
@@ -173,6 +171,26 @@ public class UserActivitiService {
 
         return responses;
 
+    }
+
+    @Transactional 
+    public void changePassword(ChangePasswordRequest request) {
+
+        Optional<UserActiviti> opt = userActivitiRepository.findById(request.getEmail());
+
+        if (!opt.isPresent()) {
+            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+        }
+
+        if (!opt.get().getPassword().equals(request.getPassword())) {
+            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
+        }
+        
+        UserActiviti user = opt.get();
+        
+        user.setPassword(request.getNewPassword());
+
+        userActivitiRepository.save(user);
     }
 
 }

@@ -12,6 +12,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.EncryptedPutObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.core.behavior.properties.AmazonProperties;
@@ -47,9 +48,17 @@ public class ClientAws {
     }
 
     public String uploadFile(File file, String folder) throws IOException {
-        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" +file.getName(), file);        
+        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" + file.getName(), file);        
         PutObjectResult result = this.amazonS3.putObject(request);
         return result.getETag();        
+    }
+    
+    public File downloadFile(String fileName,String folder) throws IOException{
+        GetObjectRequest request = new GetObjectRequest(amazonConfiguration.getBucketName(), folder + "/" + fileName);
+        File fileTemp = File.createTempFile("down", "load");
+        this.amazonS3.getObject(request, fileTemp);
+        
+        return fileTemp;
     }
 
 }

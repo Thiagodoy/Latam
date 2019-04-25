@@ -5,23 +5,24 @@
  */
 package com.core.behavior.resource;
 
-import ch.qos.logback.classic.pattern.Util;
 import com.core.behavior.model.File;
 import com.core.behavior.services.FileService;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,22 +43,48 @@ public class FileResource {
     private FileService fileService;
 
     @RequestMapping(value = "/{company}/{userId}", method = RequestMethod.POST)
-    @ApiOperation(value = "Upload of files")     
+    @ApiOperation(value = "Upload of files")
     public ResponseEntity uploadFile(
-            @PathVariable String company,
+            @PathVariable Long company,
             @PathVariable String userId,
             @RequestPart(value = "file") MultipartFile file) {
 
         try {
 
-            fileService.persistFile(file,userId, company);            
+            fileService.persistFile(file, userId, company, true, true, true);
             return ResponseEntity.ok("File Uploaded success!");
         } catch (Exception ex) {
             return ResponseEntity.status(500).body(ex.getMessage());
         }
 
     }
-    
+
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @ApiOperation(value = "Download of files")
+    public ResponseEntity downloadFile(
+            @RequestParam(name = "fileName") String fileName,
+            @RequestParam(name = "company") Long company,
+            HttpServletResponse response) {
+
+        try {
+
+            java.io.File file = fileService.downloadFile(fileName, company);
+            
+            String mimeType = Utils.getMimeType(file);
+            response.setContentType(mimeType);
+            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            InputStream in = new FileInputStream(file);
+            org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
+            response.flushBuffer();
+            file.delete();
+            return ResponseEntity.ok().build();
+
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(ex);
+        }
+
+    }
+
     @RequestMapping(value = "/errors/{id}/{type}", method = RequestMethod.GET)
     public ResponseEntity downloadErrors(
             @PathVariable long id,
@@ -77,7 +104,6 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
         }
     }
-    
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(
@@ -86,29 +112,29 @@ public class FileResource {
             @RequestParam(name = "dateCreated", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
             @RequestParam(name = "company", required = false) String company,
-            @RequestParam(name = "page",defaultValue = "0") int page,
+            @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
-            
+
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
-            
+
             Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
         }
 
     }
-    
+
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity delete(@PathVariable Long id){
+    public ResponseEntity delete(@PathVariable Long id) {
         try {
             fileService.deleteFile(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
         }
     }
 
