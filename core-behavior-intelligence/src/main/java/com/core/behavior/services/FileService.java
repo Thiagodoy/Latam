@@ -2,6 +2,7 @@ package com.core.behavior.services;
 
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.ProcessFileJob;
+import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 
 import com.core.behavior.repository.FileRepository;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
@@ -37,70 +39,96 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileService {
 
     @Autowired
-    private FileRepository fileRepository;    
+    private FileRepository fileRepository;
 
     @Autowired
-    private FileProcessStatusService fileProcessStatusService; 
-    
+    private FileProcessStatusService fileProcessStatusService;
+
     @Autowired
     private LogService logService;
-    
+
+    @Autowired
+    private AgencyService agencyService;
 
     @Autowired
     private SchedulerFactoryBean bean;
-    
-    
+
     @Autowired
     private ClientAws clientAws;
-    
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
     }
 
+    
+    public java.io.File downloadFile(String fileName, Long companyId) throws IOException{
+        
+         Agency agency = agencyService.findById(companyId);
+         String folder = agency.getS3Path().split("\\\\")[1]; 
+        
+        return clientAws.downloadFile(fileName, folder);
+    }
+    
+    
     @Transactional
-    public void persistFile(MultipartFile fileInput, String userId, String company) throws IOException, SchedulerException, Exception {
+    public void persistFile(MultipartFile fileInput, String userId, Long id, boolean uploadAws, boolean uploadFtp, boolean processFile) throws IOException, SchedulerException, Exception {
 
         java.io.File file = Utils.convertToFile(fileInput);
-        
-        
-        clientAws.uploadFile(file, "FRONTUR");
-        
-        
-        
 
-        if (fileRepository.findByName(file.getName()).isPresent()) {
+        Agency agency = agencyService.findById(id);
+
+        if (uploadAws) {            
+            String folder = agency.getS3Path().split("\\")[1];
+            clientAws.uploadFile(file, folder);
+        }
+
+        if (uploadFtp) {
+            clientAws.uploadFile(file, "FRONTUR");
+        }
+
+        Optional<File> opt = fileRepository.findByName(file.getName());
+        
+        
+        
+        if (opt.isPresent() && !(opt.get().getStatus().equals(StatusEnum.ERROR))) {
             file.delete();
             throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
         }
+        
+        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
+            fileRepository.delete(opt.get());
+        }
 
-        JobDataMap data = new JobDataMap();
-        data.put(ProcessFileJob.DATA_USER_ID, userId);
-        data.put(ProcessFileJob.DATA_COMPANY, company);
-        data.put(ProcessFileJob.DATA_FILE, file);
+        if (processFile) {
 
-        JobDetail detail = JobBuilder
-                .newJob(ProcessFileJob.class)
-                .withIdentity("WRITE-JOB-" + file.getName(),"process-file")
-                .withDescription("Processing files")
-                .usingJobData(data)
-                .build();
+            JobDataMap data = new JobDataMap();
+            data.put(ProcessFileJob.DATA_USER_ID, userId);
+            data.put(ProcessFileJob.DATA_COMPANY, id);
+            data.put(ProcessFileJob.DATA_FILE, file);
 
-        SimpleTrigger trigger = TriggerBuilder
-                .newTrigger()
-                .withIdentity("trigger-" + file.getName(), "process-file")
-                .startAt(new Date())
-                .withSchedule(simpleSchedule())
-                .build();
+            JobDetail detail = JobBuilder
+                    .newJob(ProcessFileJob.class)
+                    .withIdentity("WRITE-JOB-" + file.getName(), "process-file")
+                    .withDescription("Processing files")
+                    .usingJobData(data)
+                    .build();
 
-        bean.getScheduler().scheduleJob(detail, trigger);
+            SimpleTrigger trigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity("trigger-" + file.getName(), "process-file")
+                    .startAt(new Date())
+                    .withSchedule(simpleSchedule())
+                    .build();
+
+            bean.getScheduler().scheduleJob(detail, trigger);
+        }
 
     }
 
     @Transactional
     public com.core.behavior.model.File saveFile(com.core.behavior.model.File f) {
         return fileRepository.save(f);
-    }    
+    }
 
     public List<com.core.behavior.model.File> listFilesOfPending() {
         return fileRepository.findByStatus(StatusEnum.UPLOADED);
@@ -112,14 +140,13 @@ public class FileService {
     }
 
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
-        
-   
-       StringBuilder buffer = new StringBuilder();
-       
-       logService.listByFileId(idFile).forEach(l->{       
-           buffer.append(l);       
-       });
-       
+
+        StringBuilder buffer = new StringBuilder();
+
+        logService.listByFileId(idFile).forEach(l -> {
+            buffer.append(l);
+        });
+
         return buffer;
     }
 
@@ -127,30 +154,30 @@ public class FileService {
     public void deleteFile(Long id) {
         fileRepository.deleteById(id);
     }
-    
+
     @Transactional
-    public void setStatus(Long fileId, StatusEnum status){
+    public void setStatus(Long fileId, StatusEnum status) {
         File file = fileRepository.findById(fileId).get();
         file.setStatus(status);
         fileRepository.save(file);
     }
-    
+
     @Transactional
-    public void setExecutionTime(Long fileId, Long time){
+    public void setExecutionTime(Long fileId, Long time) {
         File file = fileRepository.findById(fileId).get();
         file.setExecutionTime(time);
         fileRepository.save(file);
     }
-    
+
     @Transactional
-    public void setParseTime(Long fileId, Long time){
+    public void setParseTime(Long fileId, Long time) {
         File file = fileRepository.findById(fileId).get();
         file.setParseTime(time);
         fileRepository.save(file);
     }
-    
+
     @Transactional
-    public void setPersistTime(Long fileId, Long time){
+    public void setPersistTime(Long fileId, Long time) {
         File file = fileRepository.findById(fileId).get();
         file.setPersistTime(time);
         fileRepository.save(file);

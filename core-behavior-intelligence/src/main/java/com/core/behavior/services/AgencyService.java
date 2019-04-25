@@ -3,9 +3,10 @@ package com.core.behavior.services;
 import com.core.behavior.model.Agency;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.request.AgencyRequest;
-import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,8 +19,12 @@ public class AgencyService {
     @Autowired
     private AgencyRepository agencyRepository;
 
-    public List<Agency> list() {
-        return agencyRepository.findAll();
+    public Page<Agency> list(Pageable page) {
+        return agencyRepository.findAll(page);
+    }
+    
+    public Agency findById(Long id){
+        return agencyRepository.findById(id).get();
     }
 
     @Transactional

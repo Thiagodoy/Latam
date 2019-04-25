@@ -26,5 +26,7 @@ public class AgencyRequest {
 
     private Long flagApproved;    
     
+    
+    private String s3Path;
 
 }

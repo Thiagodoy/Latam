@@ -48,6 +48,9 @@ public class Agency {
     @Column(name = "flag_approved")
     private Long flagApproved;
     
+    @Column(name = "s3_path")
+    private String s3Path;
+    
     
     public Agency(AgencyRequest request){
         this.name = request.getName();
@@ -58,6 +61,7 @@ public class Agency {
         this.odFlag = request.getOdFlag();
         this.flagMonthly = request.getFlagMonthly();
         this.flagApproved = request.getFlagApproved();
+        this.s3Path = request.getS3Path();
     }
 
 }

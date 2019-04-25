@@ -2,6 +2,7 @@ package com.core.behavior.response;
 
 
 import com.core.activiti.model.UserActiviti;
+import com.core.activiti.model.UserInfo;
 import io.swagger.annotations.ApiModel;
 import java.io.Serializable;
 import java.util.Collection;
@@ -27,6 +28,7 @@ public class UserResponse implements Serializable{
     private boolean isAuthenticated;
     
     private List<GroupResponse> groups;
+    private List<UserInfo> info;
     
     public UserResponse(){}
     
@@ -37,6 +39,7 @@ public class UserResponse implements Serializable{
         this.url = null;
         this.email = entity.getEmail();        
         this.pictureUrl = entity.getPicture();
+        this.info = entity.getInfo();
     }    
     
 }
