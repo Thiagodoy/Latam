@@ -54,7 +54,7 @@ public class ProcessFileJob extends QuartzJobBean {
         
         File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
         String user = jec.getJobDetail().getJobDataMap().getString(DATA_USER_ID);
-        String company = jec.getJobDetail().getJobDataMap().getString(DATA_COMPANY);
+        Long company = jec.getJobDetail().getJobDataMap().getLong(DATA_COMPANY);
 
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(company);
@@ -66,7 +66,7 @@ public class ProcessFileJob extends QuartzJobBean {
         f = fileService.saveFile(f);
         final long idFile = f.getId();
         try {
-            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, Constantes.FILE_BEAN_TICKET, user, company);
+            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, Constantes.FILE_BEAN_TICKET, user);
 
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();                

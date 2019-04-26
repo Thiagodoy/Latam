@@ -29,8 +29,8 @@ public class FileSpecification {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(File_.createdDate), dateCreated);
     }
 
-    public static Specification<File> company(String company) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(root.get(File_.company), company);
+    public static Specification<File> company(Long company) {
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(File_.company), company);
     }  
     
     public static Specification<File> status(StatusEnum status) {

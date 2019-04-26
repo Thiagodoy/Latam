@@ -60,8 +60,8 @@ public class UserResource {
             PageRequest pageRequest = PageRequest.of(page, size,Sort.by("id"));
             return ResponseEntity.ok(service.listAllUser(firstName,lastName,email,pageRequest));
         } catch (Exception ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
-            return ResponseEntity.status(500).body(ex);
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+           return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }
         
     }
@@ -73,8 +73,8 @@ public class UserResource {
         try {            
             return ResponseEntity.ok(service.getUser(id));
         } catch (Exception ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
-            return ResponseEntity.status(500).body(ex);
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+           return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }
         
     }
@@ -104,7 +104,7 @@ public class UserResource {
             service.saveUsers(user);
             return ResponseEntity.ok().build();
         } catch (Exception ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             service.deleteUser(user.getEmail());
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }       
@@ -119,7 +119,7 @@ public class UserResource {
         try {            
             return ResponseEntity.ok(infoService.checkCpfCnpj(cpfCnpj));            
         } catch (Exception ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }       
        
@@ -133,7 +133,7 @@ public class UserResource {
             service.resendAccess(email);
             return ResponseEntity.ok().build();            
         } catch (Exception ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }       
        

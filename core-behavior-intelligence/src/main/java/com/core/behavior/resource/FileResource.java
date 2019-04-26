@@ -6,6 +6,7 @@
 package com.core.behavior.resource;
 
 import com.core.behavior.model.File;
+import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
@@ -15,8 +16,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,8 +57,9 @@ public class FileResource {
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok("File Uploaded success!");
-        } catch (Exception ex) {
-            return ResponseEntity.status(500).body(ex.getMessage());
+        } catch (Exception e) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
 
     }
@@ -82,7 +85,8 @@ public class FileResource {
             return ResponseEntity.ok().build();
 
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(ex);
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }
 
     }
@@ -103,7 +107,8 @@ public class FileResource {
             return ResponseEntity.ok(fileService.generateFileErrors(id, isCsv));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
 
@@ -113,7 +118,7 @@ public class FileResource {
             @RequestParam(name = "userId", required = false) String userId,
             @RequestParam(name = "dateCreated", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
-            @RequestParam(name = "company", required = false) String company,
+            @RequestParam(name = "company", required = false) Long company,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -126,7 +131,8 @@ public class FileResource {
             Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
 
     }
@@ -137,7 +143,8 @@ public class FileResource {
             fileService.deleteFile(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
 
