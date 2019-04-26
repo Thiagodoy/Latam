@@ -202,8 +202,8 @@ public class FileService {
 //            predicates.add(FileSpecification.userId(userId));
 //        }
 //        
-        if (company != null ) {
-            predicates.add(FileSpecification.company(company));
+        if (company != null &&(!company.equals(142l) || !company.equals(143l)) ) {            
+                predicates.add(FileSpecification.company(company));
         }
 //        
 //        if(createdAt != null){
