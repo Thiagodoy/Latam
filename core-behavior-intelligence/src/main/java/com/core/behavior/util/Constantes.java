@@ -13,4 +13,8 @@ public class Constantes {
     public static final String STREAM_HEADER = "header";
     public static final String STREAM_TICKET = "ticket";
     
+    public static final String FIRST_ACCESS = "primeiro_acesso";
+    public static final String LAST_ACCESS = "ultimo_acesso";
+    public static final String EXPIRATION_ACCESS = "acesso_expirado";
+    
 }

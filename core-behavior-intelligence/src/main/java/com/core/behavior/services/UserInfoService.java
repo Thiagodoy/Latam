@@ -4,6 +4,7 @@ import com.core.activiti.model.UserInfo;
 import com.core.activiti.repository.UserInfoRepository;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,16 @@ public class UserInfoService {
     
     public List<UserInfo>findByUser(String id){
         return infoRepository.findByUserId(id);
+    }
+    
+    @Transactional
+    public void save(UserInfo userInfo){
+        infoRepository.save(userInfo);
+    }
+    
+    @Transactional
+    public void delete(String id){
+        infoRepository.deleteById(id);
     }
     
     

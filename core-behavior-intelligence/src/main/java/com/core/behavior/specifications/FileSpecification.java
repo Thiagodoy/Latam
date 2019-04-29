@@ -41,6 +41,10 @@ public class FileSpecification {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.notEqual(root.get(File_.status), status);
     }
     
+    public static Specification<File> dateBetweem(LocalDateTime start, LocalDateTime end) {
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.between(root.get(File_.createdDate), start, end );
+    }
+    
        
 
 }

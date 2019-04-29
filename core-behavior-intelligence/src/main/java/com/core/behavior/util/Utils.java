@@ -1,6 +1,9 @@
 package com.core.behavior.util;
 
+import com.core.activiti.model.UserActiviti;
+import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
+import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import java.io.File;
@@ -176,6 +179,14 @@ public class Utils {
 
     public static String getMimeType(File file) throws IOException{
         return tika.detect(file);
+    }
+    
+    public static String valueFromUserInfo(UserActiviti user,String key){
+        return  user.getInfo()
+                .stream()
+                .filter(t -> t.getKey().equals(Constantes.LAST_ACCESS))
+                .findFirst()
+                .orElseThrow(() -> new ActivitiException(MessageCode.USER_INFO_NOT_FOUND_ERROR)).getValue();
     }
     
 }

@@ -127,10 +127,10 @@ public class UserResource {
     
     @RequestMapping(value = "/resendPassword",method = RequestMethod.GET)
     @ApiOperation(value = "Resend data of acess")    
-    public ResponseEntity resendAcess( @RequestParam(name = "email",required = true) String email){
+    public ResponseEntity resendAcess( @RequestParam(name = "email",required = true) String email, @RequestParam(name = "master",required = false) String isMaster){
         
         try {            
-            service.resendAccess(email);
+            service.resendAccess(email, Boolean.valueOf(isMaster));
             return ResponseEntity.ok().build();            
         } catch (Exception ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

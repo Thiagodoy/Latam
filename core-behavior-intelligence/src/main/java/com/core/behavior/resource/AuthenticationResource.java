@@ -66,7 +66,7 @@ public class AuthenticationResource {
     @ApiOperation(value = "Send email with new password")   
     public ResponseEntity login(@RequestBody ForgotAcessRequest request){
         try {            
-            service.fogotAcess(request.getEmail());            
+            service.forgotAccess(request.getEmail());            
             return ResponseEntity.ok().build();
         } catch (ActivitiException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);

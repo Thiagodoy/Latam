@@ -10,12 +10,15 @@ import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import static oracle.jrockit.jfr.events.Bits.longValue;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -190,7 +193,7 @@ public class FileService {
         fileRepository.save(file);
     }
 
-    public Page<File> list(String fileName, String userId, Long company, LocalDateTime createdAt, Pageable page, String status) {
+    public Page<File> list(String fileName, String userId, Long company, LocalDateTime createdAt, Pageable page, String status, Long start, Long end) {
 
         List<Specification<File>> predicates = new ArrayList<>();
 
@@ -202,9 +205,9 @@ public class FileService {
 //            predicates.add(FileSpecification.userId(userId));
 //        }
 //        
-        if (company != null &&(!company.equals(142l) || !company.equals(143l)) ) {            
+            if (company != null) {
                 predicates.add(FileSpecification.company(company));
-        }
+            }
 //        
 //        if(createdAt != null){
 //            predicates.add( FileSpecification.dateCreated(createdAt));
@@ -214,6 +217,12 @@ public class FileService {
             predicates.add(FileSpecification.status(StatusEnum.UPLOADED));
         } else {
             predicates.add(FileSpecification.disLikestatus(StatusEnum.UPLOADED));
+        }
+
+        if (start != null && end != null) {
+            LocalDateTime lstart = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault());
+            LocalDateTime lend = LocalDateTime.ofInstant(Instant.ofEpochMilli(end), ZoneId.systemDefault());
+            predicates.add(FileSpecification.dateBetweem(lstart, lend));
         }
 
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
