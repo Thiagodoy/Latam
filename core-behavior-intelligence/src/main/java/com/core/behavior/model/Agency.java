@@ -3,6 +3,8 @@ package com.core.behavior.model;
 import com.core.behavior.request.AgencyRequest;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Agency {
     
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
     private Long id;
@@ -62,6 +65,7 @@ public class Agency {
         this.flagMonthly = request.getFlagMonthly();
         this.flagApproved = request.getFlagApproved();
         this.s3Path = request.getS3Path();
+        this.id = request.getId();
     }
 
 }

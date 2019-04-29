@@ -140,7 +140,9 @@ public class Utils {
         switch (layout) {
             case CONGRATS:
                 stream = factory.getClass().getClassLoader().getResourceAsStream("static/CONGRAT-EMAIL.html");
-
+                break;
+            case FORGOT:
+                stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
                 break;
         }
 

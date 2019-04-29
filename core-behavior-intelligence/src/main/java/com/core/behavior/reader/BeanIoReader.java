@@ -33,7 +33,7 @@ public class BeanIoReader {
     @Autowired
     private LogService logService;    
 
-    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String company, String user) {
+    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String user) {
 
         long start = System.currentTimeMillis();
         long end;

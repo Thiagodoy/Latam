@@ -6,7 +6,7 @@ import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 
 import com.core.behavior.repository.FileRepository;
-import com.core.behavior.util.MessageCode;
+import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -56,20 +56,21 @@ public class FileService {
     @Autowired
     private ClientAws clientAws;
 
+    @Autowired
+    private FileService fileService;
+
     public File findById(Long id) {
         return fileRepository.findById(id).get();
     }
 
-    
-    public java.io.File downloadFile(String fileName, Long companyId) throws IOException{
-        
-         Agency agency = agencyService.findById(companyId);
-         String folder = agency.getS3Path().split("\\\\")[1]; 
-        
+    public java.io.File downloadFile(String fileName, Long companyId) throws IOException {
+
+        Agency agency = agencyService.findById(companyId);
+        String folder = agency.getS3Path().split("\\\\")[1];
+
         return clientAws.downloadFile(fileName, folder);
     }
-    
-    
+
     @Transactional
     public void persistFile(MultipartFile fileInput, String userId, Long id, boolean uploadAws, boolean uploadFtp, boolean processFile) throws IOException, SchedulerException, Exception {
 
@@ -77,28 +78,34 @@ public class FileService {
 
         Agency agency = agencyService.findById(id);
 
-        if (uploadAws) {            
-            String folder = agency.getS3Path().split("\\")[1];
+        if (uploadAws) {
+            String folder = agency.getS3Path().split("\\\\")[1];
             clientAws.uploadFile(file, folder);
-        }
 
-        if (uploadFtp) {
-            clientAws.uploadFile(file, "FRONTUR");
-        }
+            com.core.behavior.model.File f = new com.core.behavior.model.File();
+            f.setCompany(id);
+            f.setName(file.getName());
+            f.setUserId(userId);
+            f.setStatus(StatusEnum.UPLOADED);
+            f.setCreatedDate(LocalDateTime.now());
 
-        Optional<File> opt = fileRepository.findByName(file.getName());
-        
-        
-        
-        if (opt.isPresent() && !(opt.get().getStatus().equals(StatusEnum.ERROR))) {
+            f = fileService.saveFile(f);
             file.delete();
-            throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
-        }
-        
-        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
-            fileRepository.delete(opt.get());
         }
 
+//        if (uploadFtp) {
+//           clientAws.uploadFile(file, "FRONTUR");;
+//        };
+        Optional<File> opt = fileRepository.findByName(file.getName());
+
+//        
+//        if (opt.isPresent() && (!(opt.get().getStatus().equals(StatusEnum.ERROR) && !(opt.get().getStatus().equals(StatusEnum.UPLOADED))))) {
+//            file.delete();
+//            throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
+//        }
+//        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
+//            fileRepository.delete(opt.get());
+//        }
         if (processFile) {
 
             JobDataMap data = new JobDataMap();
@@ -183,7 +190,7 @@ public class FileService {
         fileRepository.save(file);
     }
 
-    public Page<File> list(String fileName, String userId, String company, LocalDateTime createdAt, Pageable page) {
+    public Page<File> list(String fileName, String userId, Long company, LocalDateTime createdAt, Pageable page, String status) {
 
         List<Specification<File>> predicates = new ArrayList<>();
 
@@ -195,13 +202,20 @@ public class FileService {
 //            predicates.add(FileSpecification.userId(userId));
 //        }
 //        
-//        if(company != null && company.length() > 0){
-//            predicates.add(FileSpecification.company(company));
-//        }
+        if (company != null &&(!company.equals(142l) || !company.equals(143l)) ) {            
+                predicates.add(FileSpecification.company(company));
+        }
 //        
 //        if(createdAt != null){
 //            predicates.add( FileSpecification.dateCreated(createdAt));
 //        }
+
+        if (status != null) {
+            predicates.add(FileSpecification.status(StatusEnum.UPLOADED));
+        } else {
+            predicates.add(FileSpecification.disLikestatus(StatusEnum.UPLOADED));
+        }
+
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
         Page<File> fileResponse = fileRepository.findAll(specification, page);
 

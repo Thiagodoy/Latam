@@ -1,9 +1,10 @@
 package com.core.behavior.resource;
 
 import com.core.behavior.request.AgencyRequest;
+import com.core.behavior.response.Response;
 import com.core.behavior.services.AgencyService;
-import com.core.behavior.services.EmailService;
-import com.core.behavior.util.EmailLayoutEnum;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,20 +26,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AgencyResource {
 
     @Autowired
-    private EmailService emailService;
-    
-    @Autowired
     private AgencyService agencyService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity list(@RequestParam(name = "page") int page,
+    @RequestMapping(value ="", method = RequestMethod.GET)
+    public ResponseEntity list(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "code", required = false) String code,
+            @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size,Sort.by("id"));
-            return ResponseEntity.ok(agencyService.list(pageRequest));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
+            return ResponseEntity.ok(agencyService.list(name, code, pageRequest));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e.getMessage());
+            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
 
     }
@@ -49,7 +51,8 @@ public class AgencyResource {
             agencyService.save(request);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e.getMessage());
+            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
 
@@ -59,18 +62,19 @@ public class AgencyResource {
             agencyService.save(request);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e.getMessage());
+            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity delete(@PathVariable Long id) {
         try {
-             emailService.send(EmailLayoutEnum.CONGRATS,"Acesso", null, "thiagodoy@hotmail.com","aloysio.carvalho@bandtec.com.br","luis.maisnet@gmail.com ");
-            //agencyService.delete(id);
+            agencyService.delete(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(e.getMessage());
+            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
 

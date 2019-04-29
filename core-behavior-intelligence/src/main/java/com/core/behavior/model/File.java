@@ -1,6 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.util.StatusEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.Column;
@@ -31,6 +32,8 @@ public class File {
     @Column(name = "name", unique = true)
     private String name;
 
+   
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdDate;
 
@@ -38,7 +41,7 @@ public class File {
     private String userId;
 
     @Column(name = "company")
-    private String company;
+    private Long company;
 
     @Column(name = "qtd_total_lines")
     private Long qtdTotalLines;
