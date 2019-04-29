@@ -64,7 +64,7 @@ public class AuthenticationResource {
       
     @RequestMapping(value = "/forgot",method = RequestMethod.POST)
     @ApiOperation(value = "Send email with new password")   
-    public ResponseEntity login(@RequestBody ForgotAcessRequest request){
+    public ResponseEntity forgotAccess(@RequestBody ForgotAcessRequest request){
         try {            
             service.forgotAccess(request.getEmail());            
             return ResponseEntity.ok().build();

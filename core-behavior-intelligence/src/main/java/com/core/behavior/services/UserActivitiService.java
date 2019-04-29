@@ -53,8 +53,7 @@ public class UserActivitiService {
     private EmailService emailService;
 
     @Autowired
-    private UserInfoService infoService;   
-    
+    private UserInfoService infoService;
 
     @Transactional
     public void deleteUser(String idUser) {
@@ -132,6 +131,13 @@ public class UserActivitiService {
         UserResponse response = new UserResponse(user);
         response.setGroups(listGroupsResponse);
 
+        UserInfo userLastAccess = user.getInfo().stream().filter(f -> f.getKey().equals(Constantes.LAST_ACCESS)).findFirst().get();
+
+        DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        userLastAccess.setValue(formatterDate.format(LocalDate.now()));
+        
+        infoService.save(userLastAccess);
+
         return response;
     }
 
@@ -157,18 +163,18 @@ public class UserActivitiService {
 
         UserActiviti userActiviti = userActivitiRepository.findById(id).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
 
-        Optional<UserInfo> opt = userActiviti.getInfo().stream().filter(u->u.getKey().equals(Constantes.EXPIRATION_ACCESS)).findFirst();
-        
-        if(!master && opt.isPresent()){
+        Optional<UserInfo> opt = userActiviti.getInfo().stream().filter(u -> u.getKey().equals(Constantes.EXPIRATION_ACCESS)).findFirst();
+
+        if (!master && opt.isPresent()) {
             throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
-        }        
-        
-        if(master){                        
-            if(opt.isPresent()){
+        }
+
+        if (master) {
+            if (opt.isPresent()) {
                 infoService.delete(opt.get().getId());
             }
         }
-        
+
         String password = Utils.generatePasswordRandom();
         userActiviti.setPassword(DigestUtils.md5Hex(password));
 
@@ -190,9 +196,9 @@ public class UserActivitiService {
         if (!opt.isPresent()) {
             throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
         }
-        
+
         String expiredAccess = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_ACCESS);
-        
+
         if (expiredAccess.equals("true")) {
             throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
