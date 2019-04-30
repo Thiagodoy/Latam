@@ -16,5 +16,6 @@ public class Constantes {
     public static final String FIRST_ACCESS = "primeiro_acesso";
     public static final String LAST_ACCESS = "ultimo_acesso";
     public static final String EXPIRATION_ACCESS = "acesso_expirado";
-    public static final String EXPIRATION_PASSWORD = "password_expirado";
+    public static final String EXPIRATION_PASSWORD = "password_expirado";    
+    public static final String CHANGE_PASSWORD = "trocar_senha";
 }

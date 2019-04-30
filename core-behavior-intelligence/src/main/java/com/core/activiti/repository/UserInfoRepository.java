@@ -16,5 +16,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserInfoRepository extends JpaRepository<UserInfo, String> {    
     Optional<UserInfo> findByKeyAndValue(String key,String value);
+    Optional<UserInfo> findByUserIdAndKey(String userId,String key);
     List<UserInfo> findByUserId(String userId);
 }
