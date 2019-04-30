@@ -27,7 +27,7 @@ public class UserInfoService {
         return infoRepository.findByUserId(id);
     }
     
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void save(UserInfo userInfo){
         infoRepository.save(userInfo);
     }
