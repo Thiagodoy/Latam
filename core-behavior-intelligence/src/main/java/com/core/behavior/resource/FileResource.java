@@ -118,6 +118,8 @@ public class FileResource {
             @RequestParam(name = "userId", required = false) String userId,
             @RequestParam(name = "dateCreated", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
+            @RequestParam(name = "timeStart", required = false) Long timeStart,
+            @RequestParam(name = "timeEnd", required = false) Long timeEnd,
             @RequestParam(name = "company", required = false) Long company,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -128,7 +130,7 @@ public class FileResource {
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 
-            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status);
+            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status, timeStart,timeEnd);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);

@@ -74,16 +74,11 @@ public class UserActiviti {
         this.info.forEach(e->{        
             e.setUserId(this.email);
         });
-    }
-    
-    public UserActiviti(){}
-    
-    
-    @PrePersist
-    public void create(){
+        
         this.createdAt = LocalDateTime.now();
     }
     
+    public UserActiviti(){}
     
     
 }

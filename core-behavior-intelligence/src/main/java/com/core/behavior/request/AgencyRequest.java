@@ -28,5 +28,7 @@ public class AgencyRequest {
     
     
     private String s3Path;
+    
+    private String cnpj;
 
 }

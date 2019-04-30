@@ -1,5 +1,7 @@
 package com.core.behavior.util;
 
+import com.core.activiti.model.UserActiviti;
+import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -176,6 +179,13 @@ public class Utils {
 
     public static String getMimeType(File file) throws IOException{
         return tika.detect(file);
+    }
+    
+    public static Optional<UserInfo> valueFromUserInfo(UserActiviti user,String key){
+        return  user.getInfo()
+                .stream()
+                .filter(t -> t.getKey().equals(key))
+                .findFirst();                
     }
     
 }

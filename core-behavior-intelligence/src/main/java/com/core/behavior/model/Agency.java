@@ -54,6 +54,9 @@ public class Agency {
     @Column(name = "s3_path")
     private String s3Path;
     
+    @Column(name = "cnpj")
+    private String cnpj;
+    
     
     public Agency(AgencyRequest request){
         this.name = request.getName();
@@ -66,6 +69,7 @@ public class Agency {
         this.flagApproved = request.getFlagApproved();
         this.s3Path = request.getS3Path();
         this.id = request.getId();
+        this.cnpj = request.getCnpj();
     }
 
 }

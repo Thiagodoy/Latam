@@ -7,6 +7,7 @@ import com.core.behavior.request.LoginRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.response.UserResponse;
 import com.core.behavior.services.UserActivitiService;
+import com.core.behavior.services.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -31,6 +33,9 @@ public class AuthenticationResource {
     
     @Autowired
     private UserActivitiService service;
+    
+    @Autowired
+    private UserInfoService infoService;
     
     @RequestMapping(value = "/change",method = RequestMethod.POST)
     @ApiOperation(value = "Change password")    
@@ -64,9 +69,9 @@ public class AuthenticationResource {
       
     @RequestMapping(value = "/forgot",method = RequestMethod.POST)
     @ApiOperation(value = "Send email with new password")   
-    public ResponseEntity login(@RequestBody ForgotAcessRequest request){
+    public ResponseEntity forgotAccess(@RequestBody ForgotAcessRequest request){
         try {            
-            service.fogotAcess(request.getEmail());            
+            service.forgotAccess(request.getEmail());            
             return ResponseEntity.ok().build();
         } catch (ActivitiException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,6 +84,22 @@ public class AuthenticationResource {
              return ResponseEntity.status(500).body(Response.build(ex.getMessage(), 500l));
         }
        
+    }    
+    
+    @RequestMapping(value = "/expired",method = RequestMethod.POST)
+    @ApiOperation(value = "")   
+    public ResponseEntity ExpiredPassword(@RequestParam("email")String email){
+        try {            
+            infoService.expiredPassword(email);            
+            return ResponseEntity.ok().build();
+        } catch (ActivitiException ex) {
+            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+            return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
+        }  catch (Exception ex) {
+            Logger.getLogger(AuthenticationResource.class.getName()).log(Level.SEVERE, null, ex);
+             return ResponseEntity.status(500).body(Response.build(ex.getMessage(), 500l));
+        }
+            
     }    
     
 }
