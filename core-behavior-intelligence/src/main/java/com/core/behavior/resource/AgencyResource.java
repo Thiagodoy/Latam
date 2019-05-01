@@ -42,7 +42,6 @@ public class AgencyResource {
             Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
-
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -77,5 +76,16 @@ public class AgencyResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
+    
+//    @RequestMapping(value = "/association/{id}", method = RequestMethod.post)
+//    public ResponseEntity delete(@PathVariable Long id) {
+//        try {
+//            agencyService.delete(id);
+//            return ResponseEntity.ok().build();
+//        } catch (Exception e) {
+//            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+//            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
+//        }
+//    }
 
 }
