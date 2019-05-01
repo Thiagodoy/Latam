@@ -113,7 +113,7 @@ public class UserActivitiService {
             }
         }
 
-          Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
+        Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate dateAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);
