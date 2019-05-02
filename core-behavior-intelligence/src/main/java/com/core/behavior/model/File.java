@@ -40,7 +40,7 @@ public class File {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "company")
+    @Column(name = "company", unique = true )
     private Long company;
 
     @Column(name = "qtd_total_lines")

@@ -100,7 +100,7 @@ public class FileService {
 //        if (uploadFtp) {
 //           clientAws.uploadFile(file, "FRONTUR");;
 //        };
-        Optional<File> opt = fileRepository.findByName(file.getName());
+        Optional<File> opt = fileRepository.findByNameAndCompany(file.getName(), agency.getId() );
 
 //        
 //        if (opt.isPresent() && (!(opt.get().getStatus().equals(StatusEnum.ERROR) && !(opt.get().getStatus().equals(StatusEnum.UPLOADED))))) {

@@ -22,5 +22,5 @@ import org.springframework.stereotype.Repository;
 public interface FileRepository extends JpaRepository<File, Long> , JpaSpecificationExecutor<File>{
     
     List<File> findByStatus(StatusEnum status);
-    Optional<File> findByName(String name);
+    Optional<File> findByNameAndCompany(String name, Long company);
 }
