@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import static oracle.jrockit.jfr.events.Bits.longValue;
+
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
