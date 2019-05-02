@@ -2,6 +2,7 @@ package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.util.TypeErrorEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -53,6 +54,7 @@ public class Log implements Serializable {
     public String messageError;
     
     @PositionParameter(value = 4)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at")
     public LocalDateTime createdAt;
     

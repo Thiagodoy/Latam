@@ -2,6 +2,7 @@ package com.core.activiti.model;
 
 import com.core.activiti.model.GroupMemberActiviti;
 import com.core.behavior.request.UserRequest;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ public class UserActiviti {
     @Column(name = "PICTURE_ID_")
     private String picture;
     
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
     

@@ -19,7 +19,7 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC          
+            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
             dataSourceUser: root
             dataSourcePassword: 12345678
             port: 3306            
@@ -38,7 +38,7 @@ activiti:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC          
+            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
             dataSourceUser: root
             dataSourcePassword: 12345678
             port: 3306            
