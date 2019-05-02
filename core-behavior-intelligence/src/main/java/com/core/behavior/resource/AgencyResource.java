@@ -36,7 +36,7 @@ public class AgencyResource {
             @RequestParam(name = "size") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("name").ascending());
             return ResponseEntity.ok(agencyService.list(name, code, pageRequest));
         } catch (Exception e) {
             Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);

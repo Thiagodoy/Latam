@@ -49,6 +49,9 @@ public class UserActiviti {
     @Column(name = "PICTURE_ID_")
     private String picture;
     
+    @Column(name = "USER_MASTER_ID_")
+    private String userMasterId;
+    
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
@@ -66,6 +69,7 @@ public class UserActiviti {
         this.email = request.getEmail();
         this.password = request.getPassword();
         this.picture = request.getPhoto();
+        this.userMasterId = request.getUserMaster();
         
         this.groups = new ArrayList<>();
         request.getGroups().forEach(g->{            

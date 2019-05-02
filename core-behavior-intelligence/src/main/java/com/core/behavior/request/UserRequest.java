@@ -19,5 +19,6 @@ public class UserRequest implements Serializable {
     private String photo;
     private List<String>groups; 
     private String company;
+    private String userMaster;
     private List<UserInfo>info;
 }

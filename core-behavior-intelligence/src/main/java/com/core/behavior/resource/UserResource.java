@@ -53,12 +53,13 @@ public class UserResource {
             @RequestParam(name = "firstName",required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName,
             @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "userMaster", required = false) String userMaster,
             @RequestParam(name = "page") int page,
             @RequestParam(name = "size") int size){
         try {            
             
             PageRequest pageRequest = PageRequest.of(page, size,Sort.by("id"));
-            return ResponseEntity.ok(service.listAllUser(firstName,lastName,email,pageRequest));
+            return ResponseEntity.ok(service.listAllUser(firstName,lastName,email,userMaster,pageRequest));
         } catch (Exception ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
