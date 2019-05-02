@@ -85,16 +85,18 @@ public class FileService {
         if (uploadAws) {
             String folder = agency.getS3Path().split("\\\\")[1];
             clientAws.uploadFile(file, folder);
-
+            
             com.core.behavior.model.File f = new com.core.behavior.model.File();
             f.setCompany(id);
             f.setName(file.getName());
             f.setUserId(userId);
             f.setStatus(StatusEnum.UPLOADED);
             f.setCreatedDate(LocalDateTime.now());
-
-            f = fileService.saveFile(f);
+            
             file.delete();
+            
+            f = fileService.saveFile(f);
+            
         }
 
 //        if (uploadFtp) {
