@@ -120,7 +120,7 @@ public class FileResource {
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
             @RequestParam(name = "timeStart", required = false) Long timeStart,
             @RequestParam(name = "timeEnd", required = false) Long timeEnd,
-            @RequestParam(name = "company", required = false) Long company,
+            @RequestParam(name = "company[]", required = false) Long[] company,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {

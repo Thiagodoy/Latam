@@ -8,6 +8,8 @@ import com.core.behavior.util.StatusEnum;
        
 
 import java.time.LocalDateTime;
+import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
@@ -29,8 +31,16 @@ public class FileSpecification {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(File_.createdDate), dateCreated);
     }
 
-    public static Specification<File> company(Long company) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(File_.company), company);
+    public static Specification<File> company(List<Long> company) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            In<Long> inClause = criteriaBuilder.in(root.get(File_.company));
+            
+            for (Long long1 : company) {
+                inClause.value(long1);
+            }
+            
+            return inClause;
+        };
     }  
     
     public static Specification<File> status(StatusEnum status) {
