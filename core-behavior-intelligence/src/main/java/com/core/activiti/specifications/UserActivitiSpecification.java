@@ -22,5 +22,9 @@ public class UserActivitiSpecification {
     public static Specification<UserActiviti> email(String email) {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(root.get(UserActiviti_.email), email + "%");
     }
+    
+    public static Specification<UserActiviti> userMaster(String id) {
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(UserActiviti_.userMasterId), id);
+    }
 
 }

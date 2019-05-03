@@ -8,6 +8,7 @@ package com.core.behavior.resource;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
+import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
@@ -20,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -56,8 +58,12 @@ public class FileResource {
 
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
-            return ResponseEntity.ok("File Uploaded success!");
-        } catch (Exception e) {
+            return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
+        } catch(DataIntegrityViolationException e){
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), MessageCode.FILE_NAME_REPETED));
+        }
+        catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
@@ -120,7 +126,7 @@ public class FileResource {
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dateCreated,
             @RequestParam(name = "timeStart", required = false) Long timeStart,
             @RequestParam(name = "timeEnd", required = false) Long timeEnd,
-            @RequestParam(name = "company", required = false) Long company,
+            @RequestParam(name = "company[]", required = false) Long[] company,
             @RequestParam(name = "status", required = false) String status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {

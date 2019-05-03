@@ -238,7 +238,7 @@ public class UserActivitiService {
         emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
     }
 
-    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, Pageable page) {
+    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String userMaster, Pageable page) {
 
         List<Specification<UserActiviti>> predicates = new ArrayList<>();
 
@@ -250,6 +250,9 @@ public class UserActivitiService {
         }
         if (Optional.ofNullable(email).isPresent()) {
             predicates.add(UserActivitiSpecification.email(email));
+        }        
+        if(Optional.ofNullable(userMaster).isPresent()){
+            predicates.add(UserActivitiSpecification.userMaster(userMaster));
         }
 
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);

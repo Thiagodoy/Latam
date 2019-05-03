@@ -14,11 +14,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
-import static oracle.jrockit.jfr.events.Bits.longValue;
+
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -84,22 +85,24 @@ public class FileService {
         if (uploadAws) {
             String folder = agency.getS3Path().split("\\\\")[1];
             clientAws.uploadFile(file, folder);
-
+            
             com.core.behavior.model.File f = new com.core.behavior.model.File();
             f.setCompany(id);
             f.setName(file.getName());
             f.setUserId(userId);
             f.setStatus(StatusEnum.UPLOADED);
             f.setCreatedDate(LocalDateTime.now());
-
-            f = fileService.saveFile(f);
+            
             file.delete();
+            
+            f = fileService.saveFile(f);
+            
         }
 
 //        if (uploadFtp) {
 //           clientAws.uploadFile(file, "FRONTUR");;
 //        };
-        Optional<File> opt = fileRepository.findByName(file.getName());
+        Optional<File> opt = fileRepository.findByNameAndCompany(file.getName(), agency.getId() );
 
 //        
 //        if (opt.isPresent() && (!(opt.get().getStatus().equals(StatusEnum.ERROR) && !(opt.get().getStatus().equals(StatusEnum.UPLOADED))))) {
@@ -193,7 +196,7 @@ public class FileService {
         fileRepository.save(file);
     }
 
-    public Page<File> list(String fileName, String userId, Long company, LocalDateTime createdAt, Pageable page, String status, Long start, Long end) {
+    public Page<File> list(String fileName, String userId, Long [] company, LocalDateTime createdAt, Pageable page, String status, Long start, Long end) {
 
         List<Specification<File>> predicates = new ArrayList<>();
 
@@ -206,7 +209,7 @@ public class FileService {
 //        }
 //        
             if (company != null) {
-                predicates.add(FileSpecification.company(company));
+                predicates.add(FileSpecification.company(Arrays.asList(company)));
             }
 //        
 //        if(createdAt != null){
