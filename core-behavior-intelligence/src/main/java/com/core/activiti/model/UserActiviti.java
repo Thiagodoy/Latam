@@ -1,11 +1,9 @@
 package com.core.activiti.model;
 
-import com.core.activiti.model.GroupMemberActiviti;
 import com.core.behavior.request.UserRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,10 +11,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import lombok.Data;
-
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  *
@@ -30,39 +27,39 @@ public class UserActiviti {
     @Id
     @Column(name = "ID_")
     private String id;
-    
+
     @Column(name = "REV_")
     private Long rev;
-    
+
     @Column(name = "FIRST_")
     private String firstName;
-    
+
     @Column(name = "LAST_")
     private String lastName;
-    
+
     @Column(name = "EMAIL_")
     private String email;
-    
+
     @Column(name = "PWD_")
     private String password;
-    
+
     @Column(name = "PICTURE_ID_")
     private String picture;
-    
+
     @Column(name = "USER_MASTER_ID_")
     private String userMasterId;
-    
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
-    
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,mappedBy = "userId")    
-    private List<GroupMemberActiviti>groups;
-    
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId")
+    private List<GroupMemberActiviti> groups;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
-    private List<UserInfo>info;
-    
-    public UserActiviti(UserRequest request){
+    private List<UserInfo> info;
+
+    public UserActiviti(UserRequest request) {
         this.id = request.getId();
         this.firstName = request.getFirstName();
         this.lastName = request.getLastName();
@@ -70,21 +67,52 @@ public class UserActiviti {
         this.password = request.getPassword();
         this.picture = request.getPhoto();
         this.userMasterId = request.getUserMaster();
-        
+
         this.groups = new ArrayList<>();
-        request.getGroups().forEach(g->{            
-            this.groups.add(new GroupMemberActiviti(this.id,g));        
+        request.getGroups().forEach(g -> {
+            this.groups.add(new GroupMemberActiviti(this.id, g));
         });
-        
+
         this.info = request.getInfo();
-        this.info.forEach(e->{        
+        this.info.forEach(e -> {
             e.setUserId(this.email);
         });
-        
+
         this.createdAt = LocalDateTime.now();
     }
-    
-    public UserActiviti(){}
-    
-    
+
+    public UserActiviti() {
+    }
+
+    public void merge(UserRequest user) {
+
+        if (user.getFirstName() != null && !user.getFirstName().equals(this.getFirstName())) {
+            this.firstName = user.getFirstName();
+        }
+
+        if (user.getLastName() != null && !user.getLastName().equals(this.getLastName())) {
+            this.lastName = user.getLastName();
+        }
+
+        if (user.getPassword() != null && !user.getPassword().equals(this.getPassword())) {
+            String p = DigestUtils.md5Hex(user.getPassword());
+            this.password = p;
+        }
+
+        if (user.getPhoto() != null && !user.getPhoto().equals(this.getPicture())) {
+            this.picture = user.getPhoto();
+        }
+
+        this.groups = new ArrayList<>();
+        user.getGroups().forEach(g -> {
+            this.groups.add(new GroupMemberActiviti(this.id, g));
+        });
+
+        this.info = user.getInfo();
+        this.info.forEach(e -> {
+            e.setUserId(this.email);
+        });
+
+    }
+
 }

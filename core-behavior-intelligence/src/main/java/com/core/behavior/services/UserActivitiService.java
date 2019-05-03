@@ -62,11 +62,10 @@ public class UserActivitiService {
 
     @Transactional
     public void updateUser(UserRequest user) {
-
-        userActivitiRepository.deleteById(user.getId());
-        UserActiviti userActiviti = new UserActiviti(user);
+        
+        UserActiviti userActiviti =  userActivitiRepository.findById(user.getId()).orElseThrow(()-> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));        
+        userActiviti.merge(user);
         userActivitiRepository.save(userActiviti);
-
     }
 
     public UserResponse getUser(String id) {
