@@ -103,14 +103,25 @@ public class UserActiviti {
             this.picture = user.getPhoto();
         }
 
-        this.groups = new ArrayList<>();
+        if (this.groups != null) {
+            this.groups.clear();
+        } else {
+            this.groups = new ArrayList<>();
+        }
+
         user.getGroups().forEach(g -> {
             this.groups.add(new GroupMemberActiviti(this.id, g));
         });
 
-        this.info = user.getInfo();
-        this.info.forEach(e -> {
-            e.setUserId(this.email);
+        if (this.info != null) {
+            this.info.clear();
+        } else {
+            this.info = new ArrayList<>();
+        }
+
+        user.getInfo().forEach(i -> {
+            i.setUserId(this.email);
+            this.info.add(i);
         });
 
     }
