@@ -47,19 +47,19 @@ public class AgencyService {
         
         Page<Agency> pageResult = agencyRepository.findAll(specification,page);
         
-        pageResult.get().parallel().forEach(a->{
-        
-            List<String> listIds = userInfoService
-                    .listInfoByKeyAndValue("agencia", String.valueOf(a.getId()))
-                    .stream()
-                    .map(aa->aa.getUserId())
-                    .collect(Collectors.toList());
-            
-            if(listIds.size() > 0){               
-                List<UserResponse> userResponses = userActivitiService.getUsers(listIds);
-                a.setUsers(userResponses);     
-            }
-        });
+//        pageResult.get().parallel().forEach(a->{
+//        
+//            List<String> listIds = userInfoService
+//                    .listInfoByKeyAndValue("agencia", String.valueOf(a.getId()))
+//                    .stream()
+//                    .map(aa->aa.getUserId())
+//                    .collect(Collectors.toList());
+//            
+//            if(listIds.size() > 0){               
+//                List<UserResponse> userResponses = userActivitiService.getUsers(listIds);
+//                a.setUsers(userResponses);     
+//            }
+//        });
         
         return pageResult;
     }

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -90,14 +91,14 @@ public class UserActivitiService {
     public List<UserResponse> getUsers(List<String> ids){
         
        List<UserResponse> list = new ArrayList();
-        
-        ids.forEach(i->{        
+        CopyOnWriteArrayList c = new CopyOnWriteArrayList(list);
+        ids.parallelStream().forEach(i->{        
            Optional<UserActiviti> opt = userActivitiRepository.findById(i);
            UserResponse user =  getResponseUsers(Arrays.asList(opt.get())).get(0);
-           list.add(user);        
+           c.add(user);        
         });
         
-        return list;
+        return c;
         
     }
 
@@ -291,7 +292,7 @@ public class UserActivitiService {
         list.forEach(u -> {
 
             List<GroupResponse> listGroupsResponse = new ArrayList();
-
+            u.getGroups();
             u.getGroups().forEach(g -> {
                 GroupActiviti group = listGroups.stream().filter(gg -> gg.getId().equals(g.getGroupId())).findFirst().get();
                 listGroupsResponse.add(new GroupResponse(group));
