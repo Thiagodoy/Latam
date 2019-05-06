@@ -86,6 +86,20 @@ public class UserActivitiService {
 
         return getResponseUsers(Arrays.asList(opt.get())).get(0);
     }
+    
+    public List<UserResponse> getUsers(List<String> ids){
+        
+       List<UserResponse> list = new ArrayList();
+        
+        ids.forEach(i->{        
+           Optional<UserActiviti> opt = userActivitiRepository.findById(i);
+           UserResponse user =  getResponseUsers(Arrays.asList(opt.get())).get(0);
+           list.add(user);        
+        });
+        
+        return list;
+        
+    }
 
     @Transactional
     public UserResponse login(LoginRequest request) {

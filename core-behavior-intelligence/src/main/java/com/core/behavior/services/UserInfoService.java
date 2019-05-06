@@ -5,7 +5,6 @@ import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.util.Constantes;
 import java.util.List;
-import java.util.Optional;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,8 +20,8 @@ public class UserInfoService {
     private UserInfoRepository infoRepository;
 
     public boolean checkCpfCnpj(String value) {
-        Optional<UserInfo> info = infoRepository.findByKeyAndValue("cpfCnpj", value);
-        return !info.isPresent();
+        List<UserInfo> info = infoRepository.findByKeyAndValue("cpf", value);
+        return !(info.size() > 0);
     }
 
     public List<UserInfo> findByUser(String id) {
@@ -47,6 +46,10 @@ public class UserInfoService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteByUserId(String id){
         infoRepository.deleteByUserId(id);
+    }
+    
+    public List<UserInfo> listInfoByKeyAndValue(String key,String value){
+        return infoRepository.findByKeyAndValue(key, value);
     }
     
     @Transactional
