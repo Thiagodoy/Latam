@@ -54,6 +54,9 @@ public class UserActivitiService {
 
     @Autowired
     private UserInfoService infoService;
+    
+    @Autowired
+    private GroupMemberSevice groupMemberSevice;
 
     @Transactional
     public void deleteUser(String idUser) {
@@ -62,11 +65,15 @@ public class UserActivitiService {
 
     @Transactional
     public void updateUser(UserRequest user) {
-
-        userActivitiRepository.deleteById(user.getId());
-        UserActiviti userActiviti = new UserActiviti(user);
+        
+        
+        groupMemberSevice.deleteByUserId(user.getId());
+        infoService.deleteByUserId(user.getId());
+        
+        UserActiviti userActiviti =  userActivitiRepository.findById(user.getId()).orElseThrow(()-> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR)); 
+        
+        userActiviti.merge(user);
         userActivitiRepository.save(userActiviti);
-
     }
 
     public UserResponse getUser(String id) {

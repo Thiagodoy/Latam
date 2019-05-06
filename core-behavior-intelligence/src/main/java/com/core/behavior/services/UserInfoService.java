@@ -4,7 +4,6 @@ import com.core.activiti.model.UserInfo;
 import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.util.Constantes;
-import com.core.behavior.util.MessageCode;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -40,6 +39,16 @@ public class UserInfoService {
         infoRepository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteAll(List<UserInfo>list){
+        infoRepository.deleteAll(list);
+    } 
+    
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void deleteByUserId(String id){
+        infoRepository.deleteByUserId(id);
+    }
+    
     @Transactional
     public void expiredPassword(String id) throws ActivitiException {
         UserInfo passwordExpiration = new UserInfo(id, Constantes.EXPIRATION_PASSWORD, "true");

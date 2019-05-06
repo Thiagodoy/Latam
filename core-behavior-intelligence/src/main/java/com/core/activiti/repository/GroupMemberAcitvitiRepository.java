@@ -16,5 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GroupMemberAcitvitiRepository extends CrudRepository<GroupMemberActiviti, GroupMemberActiviti.IdClass>{
     
+     void deleteByUserId(String userId);
     
 }
