@@ -4,6 +4,7 @@ import com.core.behavior.properties.ActivitiProperties;
 import com.core.behavior.properties.ActivitiProxyProperties;
 import com.core.behavior.properties.AmazonProperties;
 import com.core.behavior.properties.BehaviorProperties;
+import com.core.behavior.properties.ClientSftpProperties;
 import com.core.behavior.properties.EmailServiceProperties;
 import java.util.TimeZone;
 import javax.annotation.PostConstruct;
@@ -15,7 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class, AmazonProperties.class, EmailServiceProperties.class})
+@EnableConfigurationProperties({ClientSftpProperties.class, ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class, AmazonProperties.class, EmailServiceProperties.class})
 @EnableAutoConfiguration
 @ComponentScan()
 @EnableWebMvc

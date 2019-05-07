@@ -4,7 +4,9 @@ import com.core.behavior.request.UserRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,8 +55,8 @@ public class UserActiviti {
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId")
-    private List<GroupMemberActiviti> groups;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
+    private Set<GroupMemberActiviti> groups;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
     private List<UserInfo> info;
@@ -68,7 +70,7 @@ public class UserActiviti {
         this.picture = request.getPhoto();
         this.userMasterId = request.getUserMaster();
 
-        this.groups = new ArrayList<>();
+        this.groups = new HashSet<>();
         request.getGroups().forEach(g -> {
             this.groups.add(new GroupMemberActiviti(this.id, g));
         });
@@ -106,7 +108,7 @@ public class UserActiviti {
         if (this.groups != null) {
             this.groups.clear();
         } else {
-            this.groups = new ArrayList<>();
+            this.groups = new HashSet<>();
         }
 
         user.getGroups().forEach(g -> {

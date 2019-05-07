@@ -3,6 +3,8 @@ package com.core.behavior.resource;
 import com.core.behavior.request.AgencyRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.AgencyService;
+import com.core.behavior.services.UserInfoService;
+import com.core.behavior.util.MessageCode;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,11 @@ public class AgencyResource {
 
     @Autowired
     private AgencyService agencyService;
+    
+    @Autowired
+    private UserInfoService infoService;
 
-    @RequestMapping(value ="", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "code", required = false) String code,
@@ -41,6 +46,17 @@ public class AgencyResource {
         } catch (Exception e) {
             Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
+        }
+    }
+
+    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
+    public ResponseEntity getUsers(
+            @PathVariable(name = "id") long id) {
+        try {
+            return ResponseEntity.ok(agencyService.getUserByAgency(id));
+        } catch (Exception e) {
+            Logger.getLogger(AgencyResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), MessageCode.SERVER_ERROR));
         }
     }
 
@@ -76,7 +92,7 @@ public class AgencyResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
-    
+
 //    @RequestMapping(value = "/association/{id}", method = RequestMethod.post)
 //    public ResponseEntity delete(@PathVariable Long id) {
 //        try {
@@ -87,5 +103,4 @@ public class AgencyResource {
 //            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
 //        }
 //    }
-
 }

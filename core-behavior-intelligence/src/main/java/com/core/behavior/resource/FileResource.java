@@ -5,10 +5,13 @@
  */
 package com.core.behavior.resource;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
 import com.core.behavior.util.MessageCode;
+import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,11 +63,10 @@ public class FileResource {
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
-        } catch(DataIntegrityViolationException e){
-            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), MessageCode.FILE_NAME_REPETED));
-        }
-        catch (Exception e) {
+        }catch(ActivitiException ex){
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
+        }catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
@@ -90,7 +93,10 @@ public class FileResource {
             file.delete();
             return ResponseEntity.ok().build();
 
-        } catch (Exception ex) {
+        }catch(AmazonS3Exception ex){
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), SERVER_ERROR_AWS));
+        }catch (Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }
@@ -132,7 +138,7 @@ public class FileResource {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size);
+            PageRequest pageRequest = PageRequest.of(page, size,Sort.by("createdDate").descending());
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 
