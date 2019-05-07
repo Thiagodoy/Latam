@@ -25,28 +25,28 @@ public class AgencyService {
 
     @Autowired
     private AgencyRepository agencyRepository;
-    
+
     @Autowired
-    private UserInfoService  userInfoService;
-    
+    private UserInfoService userInfoService;
+
     @Autowired
-    private UserActivitiService  userActivitiService;
+    private UserActivitiService userActivitiService;
 
     public Page<Agency> list(String name, String code, Pageable page) {
-         List<Specification<Agency>> predicates = new ArrayList<>();
-         
-         if(Optional.ofNullable(name).isPresent()){             
-             predicates.add(AgenciaSpecification.name(name.toUpperCase()));
-         }
-         
-         if(Optional.ofNullable(code).isPresent()){
-               predicates.add(AgenciaSpecification.code(code.toUpperCase()));
-         }
-        
+        List<Specification<Agency>> predicates = new ArrayList<>();
+
+        if (Optional.ofNullable(name).isPresent()) {
+            predicates.add(AgenciaSpecification.name(name.toUpperCase()));
+        }
+
+        if (Optional.ofNullable(code).isPresent()) {
+            predicates.add(AgenciaSpecification.code(code.toUpperCase()));
+        }
+
         Specification<Agency> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
-        
-        Page<Agency> pageResult = agencyRepository.findAll(specification,page);
-        
+
+        Page<Agency> pageResult = agencyRepository.findAll(specification, page);
+
 //        pageResult.get().parallel().forEach(a->{
 //        
 //            List<String> listIds = userInfoService
@@ -60,16 +60,26 @@ public class AgencyService {
 //                a.setUsers(userResponses);     
 //            }
 //        });
-        
         return pageResult;
     }
-    
-    public Agency findById(Long id){
+
+    public List<UserResponse> getUserByAgency(Long id) {
+
+        List<String> listIds = userInfoService
+                .listInfoByKeyAndValue("agencia", String.valueOf(id))
+                .stream()
+                .map(aa -> aa.getUserId())
+                .collect(Collectors.toList());        
+        
+        return  userActivitiService.getUsers(listIds);
+    }
+
+    public Agency findById(Long id) {
         return agencyRepository.findById(id).get();
     }
 
     @Transactional
-    public void save(AgencyRequest request) {        
+    public void save(AgencyRequest request) {
         Agency entity = new Agency(request);
         agencyRepository.save(entity);
     }
@@ -78,7 +88,5 @@ public class AgencyService {
     public void delete(Long id) {
         agencyRepository.deleteById(id);
     }
-
-   
 
 }
