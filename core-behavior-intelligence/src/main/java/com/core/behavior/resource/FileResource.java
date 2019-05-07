@@ -6,6 +6,7 @@
 package com.core.behavior.resource;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
@@ -61,12 +62,9 @@ public class FileResource {
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
-        } catch(DataIntegrityViolationException e){
-            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), MessageCode.FILE_NAME_REPETED));
-        }catch(AmazonS3Exception ex){
+        }catch(ActivitiException ex){
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), MessageCode.SERVER_ERROR_AWS));
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
         }catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
