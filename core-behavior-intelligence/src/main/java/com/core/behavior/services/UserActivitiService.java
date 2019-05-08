@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -125,7 +127,7 @@ public class UserActivitiService {
 
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
 
-        if (firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
+        if (!Utils.isMaster(user) && firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
             LocalDateTime time = LocalDateTime.now().minus(24, ChronoUnit.HOURS);
 
             if (time.isAfter(user.getCreatedAt())) {
@@ -141,7 +143,7 @@ public class UserActivitiService {
         LocalDate dateAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);
         LocalDate ld = LocalDate.now().minus(45, ChronoUnit.DAYS);
 
-        if (ld.isAfter(dateAcess)) {
+        if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");
             infoService.save(passwordExpiration);
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
@@ -181,7 +183,19 @@ public class UserActivitiService {
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
 
-        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
 
     }
 
@@ -218,7 +232,21 @@ public class UserActivitiService {
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
 
-        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
+       
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
+        
     }
 
     @Transactional
@@ -256,8 +284,21 @@ public class UserActivitiService {
         parameter.put(":name", userActiviti.getFirstName());
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                 emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
 
-        emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+       
     }
 
     public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String userMaster, Pageable page) {

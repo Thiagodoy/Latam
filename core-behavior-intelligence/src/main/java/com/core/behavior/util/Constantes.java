@@ -19,5 +19,8 @@ public class Constantes {
     public static final String EXPIRATION_PASSWORD = "password_expirado";    
     public static final String CHANGE_PASSWORD = "trocar_senha";
     
+    public static final String PROFILE_MASTER = "master latam";
+    public static final String PROFILE_BEHAVIOR_MASTER = "suporte behavior";
+    
     
 }
