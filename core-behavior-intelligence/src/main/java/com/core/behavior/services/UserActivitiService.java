@@ -11,6 +11,7 @@ import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
 import com.core.activiti.specifications.UserActivitiSpecification;
+import com.core.behavior.dto.UserDTO;
 import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.EmailLayoutEnum;
@@ -301,7 +302,7 @@ public class UserActivitiService {
        
     }
 
-    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String userMaster, Pageable page) {
+    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String[] profile, String[]agencys, Pageable page) {
 
         List<Specification<UserActiviti>> predicates = new ArrayList<>();
 
@@ -314,15 +315,20 @@ public class UserActivitiService {
         if (Optional.ofNullable(email).isPresent()) {
             predicates.add(UserActivitiSpecification.email(email));
         }        
-        if(Optional.ofNullable(userMaster).isPresent()){
-            predicates.add(UserActivitiSpecification.userMaster(userMaster));
+        
+        if(profile != null && agencys != null){
+             List<UserDTO> list = userActivitiRepository.getUserByAgencyAndProfile(Arrays.asList(agencys), Arrays.asList(profile));
+             
+             if(!list.isEmpty()){
+                 predicates.add(UserActivitiSpecification.ids(list));
+             }
         }
 
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);
 
-    }
+    } 
 
     private List<UserResponse> getResponseUsers(List<UserActiviti> list) {
 

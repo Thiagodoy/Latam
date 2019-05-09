@@ -2,6 +2,11 @@ package com.core.activiti.specifications;
 
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserActiviti_;
+import com.core.behavior.dto.UserDTO;
+import com.core.behavior.model.File;
+import com.core.behavior.model.File_;
+import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -26,5 +31,17 @@ public class UserActivitiSpecification {
     public static Specification<UserActiviti> userMaster(String id) {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(UserActiviti_.userMasterId), id);
     }
+    
+    public static Specification<UserActiviti> ids(List<UserDTO> list) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            CriteriaBuilder.In<String> inClause = criteriaBuilder.in(root.get(UserActiviti_.id));
+            
+            for (UserDTO u : list) {
+                inClause.value(u.getId());
+            }
+            
+            return inClause;
+        };
+    }  
 
 }
