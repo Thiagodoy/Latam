@@ -292,7 +292,7 @@ public class UserActivitiService {
         
         Runnable runnable  = ()->{        
             try {
-                 emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+                 emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
             } catch (MessagingException ex) {
                 Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
             } catch (IOException ex) {
