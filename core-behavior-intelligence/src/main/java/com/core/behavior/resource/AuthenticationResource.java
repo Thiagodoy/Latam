@@ -39,7 +39,7 @@ public class AuthenticationResource {
     
     @RequestMapping(value = "/change",method = RequestMethod.POST)
     @ApiOperation(value = "Change password")    
-    public ResponseEntity saveUser(@RequestBody ChangePasswordRequest request){
+    public ResponseEntity changePassword(@RequestBody ChangePasswordRequest request){
         
         try {            
             service.changePassword(request);

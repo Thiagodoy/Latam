@@ -138,7 +138,7 @@ public class FileResource {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size,Sort.by("createdDate").descending());
+            PageRequest pageRequest = PageRequest.of(page, size,Sort.by("createdDate").ascending());
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 

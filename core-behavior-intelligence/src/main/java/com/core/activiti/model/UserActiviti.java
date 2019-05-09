@@ -1,5 +1,6 @@
 package com.core.activiti.model;
 
+import com.core.behavior.dto.UserDTO;
 import com.core.behavior.request.UserRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
@@ -9,10 +10,14 @@ import java.util.List;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -21,6 +26,21 @@ import org.apache.commons.codec.digest.DigestUtils;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
+
+@SqlResultSetMapping(name = "FileStatus",
+        classes = @ConstructorResult(
+                targetClass = UserDTO.class,
+                columns = {
+                    @ColumnResult(name = "user",  type = String.class)                                        
+                }))
+
+@NamedNativeQuery(name = "UserActiviti.getUserByAgencyAndProfile",resultSetMapping = "FileStatus",
+        query = "select distinct u.id_  as user from activiti.act_id_user u \n" +
+"	inner join activiti.act_id_membership b on b.user_id_ = u.id_ \n" +
+"    inner join activiti.act_id_info f on f.user_id_ = u.id_ and f.key_ = 'agencia'\n" +
+"    where f.value_ in :agencys and b.group_id_ in :profile")
+
+
 @Entity
 @Table(schema = "activiti", name = "act_id_user")
 @Data

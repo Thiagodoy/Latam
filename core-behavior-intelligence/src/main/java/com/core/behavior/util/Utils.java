@@ -43,6 +43,7 @@ public class Utils {
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
     private static Tika tika;
+
     public static enum TypeField {
         TICKET, LOG
     };
@@ -61,8 +62,8 @@ public class Utils {
                 .stream()
                 .filter(f -> f.isAnnotationPresent(PositionParameter.class))
                 .collect(Collectors.toList());
-        
-        tika =  new Tika();
+
+        tika = new Tika();
 
     }
 
@@ -155,37 +156,44 @@ public class Utils {
 
     }
 
-    public static  File loadLogo()
+    public static File loadLogo(String path)
             throws IOException {
         StreamFactory factory = StreamFactory.newInstance();
-        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream("static/logo.png");
+        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream(path);
 
         File targetFile = File.createTempFile("logo", ".png");
 
         FileUtils.copyInputStreamToFile(initialStream, targetFile);
         return targetFile;
     }
-    
-    public static String generatePasswordRandom(){
-    
+
+    public static String generatePasswordRandom() {
+
         Random rd = new Random();
-          
+
         int value = rd.nextInt(10);
         int value2 = rd.nextInt(10);
-        return  "%$" + value + "##!" + value2 + "+";     
-        
-       
+        return "%$" + value + "##!" + value2 + "+";
+
     }
 
-    public static String getMimeType(File file) throws IOException{
+    public static String getMimeType(File file) throws IOException {
         return tika.detect(file);
     }
-    
-    public static Optional<UserInfo> valueFromUserInfo(UserActiviti user,String key){
-        return  user.getInfo()
+
+    public static Optional<UserInfo> valueFromUserInfo(UserActiviti user, String key) {
+        return user.getInfo()
                 .stream()
                 .filter(t -> t.getKey().equals(key))
-                .findFirst();                
+                .findFirst();
     }
-    
+
+    public static boolean isMaster(UserActiviti user) {
+
+        return user.getGroups()
+                .stream()
+                .filter(g -> g.getGroupId().equals(Constantes.PROFILE_MASTER) || g.getGroupId().equals(Constantes.PROFILE_BEHAVIOR_MASTER))
+                .findFirst().isPresent();
+    }
+
 }

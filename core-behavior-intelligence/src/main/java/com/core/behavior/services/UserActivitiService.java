@@ -11,12 +11,14 @@ import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
 import com.core.activiti.specifications.UserActivitiSpecification;
+import com.core.behavior.dto.UserDTO;
 import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -125,7 +129,7 @@ public class UserActivitiService {
 
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
 
-        if (firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
+        if (!Utils.isMaster(user) && firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
             LocalDateTime time = LocalDateTime.now().minus(24, ChronoUnit.HOURS);
 
             if (time.isAfter(user.getCreatedAt())) {
@@ -141,7 +145,7 @@ public class UserActivitiService {
         LocalDate dateAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);
         LocalDate ld = LocalDate.now().minus(45, ChronoUnit.DAYS);
 
-        if (ld.isAfter(dateAcess)) {
+        if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");
             infoService.save(passwordExpiration);
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
@@ -181,7 +185,19 @@ public class UserActivitiService {
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
 
-        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
 
     }
 
@@ -218,7 +234,21 @@ public class UserActivitiService {
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
 
-        emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
+       
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
+        
     }
 
     @Transactional
@@ -251,16 +281,31 @@ public class UserActivitiService {
         }
 
         userActivitiRepository.save(userActiviti);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", userActiviti.getFirstName());
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
+        parameter.put(":data", formatter.format(LocalDateTime.now()));
+        
+        
+        Runnable runnable  = ()->{        
+            try {
+                 emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+        
+        new Thread(runnable).start();
 
-        emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+       
     }
 
-    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String userMaster, Pageable page) {
+    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String[] profile, String[]agencys, Pageable page) {
 
         List<Specification<UserActiviti>> predicates = new ArrayList<>();
 
@@ -273,15 +318,23 @@ public class UserActivitiService {
         if (Optional.ofNullable(email).isPresent()) {
             predicates.add(UserActivitiSpecification.email(email));
         }        
-        if(Optional.ofNullable(userMaster).isPresent()){
-            predicates.add(UserActivitiSpecification.userMaster(userMaster));
+        
+        if(profile != null && agencys != null){
+             List<UserDTO> list = userActivitiRepository.getUserByAgencyAndProfile(Arrays.asList(agencys), Arrays.asList(profile));
+             
+             if(!list.isEmpty()){
+                 predicates.add(UserActivitiSpecification.ids(list));
+             }else{
+                 //quando não houver nenhum usuário força retorno de uma lista vazia
+                 predicates.add(UserActivitiSpecification.ids(Arrays.asList(new UserDTO("-1"))));
+             }
         }
 
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);
 
-    }
+    } 
 
     private List<UserResponse> getResponseUsers(List<UserActiviti> list) {
 
