@@ -23,4 +23,12 @@ public class Constantes {
     public static final String PROFILE_BEHAVIOR_MASTER = "suporte behavior";
     
     
+    public static final String IMAGE_CHANFRO = "static/chanfro.png";
+    public static final String IMAGE_FUNDO = "static/fundo.png";
+    public static final String IMAGE_LOGO_LATAM = "static/logo-latam.png";
+    public static final String IMAGE_LOGO_ONE = "static/logo-one.png";
+    public static final String IMAGE_LOGO_001 = "static/logo001.png";
+    public static final String IMAGE_LOGO_002 = "static/logo002.png";
+    
+    
 }

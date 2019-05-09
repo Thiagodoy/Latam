@@ -156,10 +156,10 @@ public class Utils {
 
     }
 
-    public static File loadLogo()
+    public static File loadLogo(String path)
             throws IOException {
         StreamFactory factory = StreamFactory.newInstance();
-        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream("static/logo.png");
+        InputStream initialStream = factory.getClass().getClassLoader().getResourceAsStream(path);
 
         File targetFile = File.createTempFile("logo", ".png");
 

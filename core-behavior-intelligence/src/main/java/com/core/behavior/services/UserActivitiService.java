@@ -18,6 +18,7 @@ import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -280,11 +281,13 @@ public class UserActivitiService {
         }
 
         userActivitiRepository.save(userActiviti);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", userActiviti.getFirstName());
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
+        parameter.put(":data", formatter.format(LocalDateTime.now()));
         
         
         Runnable runnable  = ()->{        
@@ -321,6 +324,9 @@ public class UserActivitiService {
              
              if(!list.isEmpty()){
                  predicates.add(UserActivitiSpecification.ids(list));
+             }else{
+                 //quando não houver nenhum usuário força retorno de uma lista vazia
+                 predicates.add(UserActivitiSpecification.ids(Arrays.asList(new UserDTO("-1"))));
              }
         }
 
