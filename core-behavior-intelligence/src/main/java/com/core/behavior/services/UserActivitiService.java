@@ -187,7 +187,7 @@ public class UserActivitiService {
         userActivitiRepository.save(userActiviti);
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", user.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
 
@@ -246,7 +246,7 @@ public class UserActivitiService {
         userActivitiRepository.save(userActiviti);
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
 
@@ -296,7 +296,7 @@ public class UserActivitiService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", formatter.format(LocalDateTime.now()));
