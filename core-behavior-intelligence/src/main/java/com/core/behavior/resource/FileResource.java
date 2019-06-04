@@ -24,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -133,7 +132,7 @@ public class FileResource {
             @RequestParam(name = "timeStart", required = false) Long timeStart,
             @RequestParam(name = "timeEnd", required = false) Long timeEnd,
             @RequestParam(name = "company[]", required = false) Long[] company,
-            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "status[]", required = false) String[] status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 

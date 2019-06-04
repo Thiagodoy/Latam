@@ -60,6 +60,9 @@ public class Agency {
     @Column(name = "cnpj")
     private String cnpj;
     
+    @Column(name = "layout_file")
+    private Long layoutFile;
+    
     @Transient
     private List<UserResponse> users;
     

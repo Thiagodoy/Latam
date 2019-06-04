@@ -3,8 +3,6 @@ package com.core.activiti.specifications;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserActiviti_;
 import com.core.behavior.dto.UserDTO;
-import com.core.behavior.model.File;
-import com.core.behavior.model.File_;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 

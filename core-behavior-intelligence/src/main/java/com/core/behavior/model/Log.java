@@ -68,7 +68,7 @@ public class Log implements Serializable {
 
     @Override
     public String toString() {
-        MessageFormat formmater =  new MessageFormat("[CONTENT LINE] -> {0}\n[{1} {2}] -> {3} \n", new Locale("pt", "BR"));
+        MessageFormat formmater =  new MessageFormat("[CONTENT LINE] -> {0}\n[{1} {2}] -> {3} \n \n", new Locale("pt", "BR"));
         return formmater.format(new Object[]{this.recordContent, this.type, this.fieldName, this.messageError});
     }   
 

@@ -43,8 +43,16 @@ public class FileSpecification {
         };
     }  
     
-    public static Specification<File> status(StatusEnum status) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(File_.status), status);
+    public static Specification<File> status(List<String> status) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            In<StatusEnum> inClause = criteriaBuilder.in(root.get(File_.status));
+            
+            for (String st : status) {
+               StatusEnum stt =  StatusEnum.valueOf(st);
+                inClause.value(stt);
+            }            
+            return inClause;
+        };
     }  
     
     public static Specification<File> disLikestatus(StatusEnum status) {

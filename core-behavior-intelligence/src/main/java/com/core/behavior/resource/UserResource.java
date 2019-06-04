@@ -7,7 +7,6 @@ package com.core.behavior.resource;
 
 import com.core.behavior.activiti.response.PageResponse;
 import com.core.behavior.exception.ActivitiException;
-import com.core.behavior.request.LoginRequest;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.response.UserResponse;

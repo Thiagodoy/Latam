@@ -11,6 +11,7 @@ import com.core.behavior.repository.FileRepository;
 import com.core.behavior.sftp.ClientSftp;
 import com.core.behavior.specifications.FileSpecification;
 import com.core.behavior.util.MessageCode;
+
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -21,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import javax.mail.Message;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
@@ -34,7 +38,9 @@ import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
@@ -83,83 +89,103 @@ public class FileService {
         return clientAws.downloadFile(fileName, folder);
     }
 
-    
-    
-    @Transactional
     public void persistFile(MultipartFile fileInput, String userId, Long id, boolean uploadAws, boolean uploadFtp, boolean processFile) throws IOException, SchedulerException {
 
         java.io.File file = Utils.convertToFile(fileInput);
 
         Agency agency = agencyService.findById(id);
         String folder = agency.getS3Path().split("\\\\")[1];
+        Long layout = agency.getLayoutFile();
+
+        if (uploadAws || uploadFtp) {
+            this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,0);
+            this.uploadFile(uploadAws, uploadFtp, folder, file);
+        } else if (processFile) {
+
+            String[] s = new String[5];
+            s[0] = "VALIDATION_UPLOADED";
+            s[1] = "VALIDATION_PROCESSING";
+            s[2] = "VALIDATION_PARSE";
+            s[3] = "VALIDATION_ERROR";
+            s[4] = "VALIDATION_SUCCESS";
+
+            Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 10, Sort.by("createdDate").ascending()), s, null, null);
+
+            if (!result.getContent().isEmpty()) {
+                throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
+            }
+
+            com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,1);
+            this.processFile(userId, id, file, layout, f.getId());
+        }
+
+    }
+
+    private void uploadFile(boolean uploadAws, boolean uploadFtp, String folder, java.io.File file) throws IOException {
 
         if (uploadAws) {
             try {
                 clientAws.uploadFile(file, folder);
             } catch (AmazonS3Exception e) {
-                file.delete();
+                FileUtils.forceDelete(file); 
                 throw new ActivitiException(MessageCode.SERVER_ERROR_AWS);
-            }            
+            }
         }
 
         if (uploadFtp) {
             try {
                 clientSftp.uploadFile(file, folder);
-            } catch (Exception e) {
+            } catch (Exception e) {            
+                FileUtils.forceDelete(file);            
                 throw new ActivitiException(MessageCode.SERVER_ERROR_SFTP);
             }
-            
         }
 
+    }
+
+    private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {
+
+        JobDataMap data = new JobDataMap();
+        data.put(ProcessFileJob.DATA_USER_ID, userId);
+        data.put(ProcessFileJob.DATA_COMPANY, id);
+        data.put(ProcessFileJob.DATA_FILE, file);
+        data.put(ProcessFileJob.DATA_FILE_ID, fileId);
+        data.put(ProcessFileJob.DATA_LAYOUT_FILE, layout);
+
+        JobDetail detail = JobBuilder
+                .newJob(ProcessFileJob.class)
+                .withIdentity("WRITE-JOB-" + file.getName(), "process-file")
+                .withDescription("Processing files")
+                .usingJobData(data)
+                .build();
+
+        SimpleTrigger trigger = TriggerBuilder
+                .newTrigger()
+                .withIdentity("trigger-" + file.getName(), "process-file")
+                .startAt(new Date())
+                .withSchedule(simpleSchedule())
+                .build();
+
+        bean.getScheduler().scheduleJob(detail, trigger);
+    }
+
+    @Transactional
+    private com.core.behavior.model.File persist(String userId, Long id, java.io.File file, StatusEnum status,long stage) throws IOException {
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(id);
         f.setName(file.getName());
         f.setUserId(userId);
-        f.setStatus(StatusEnum.UPLOADED);
-        f.setCreatedDate(LocalDateTime.now());       
+        f.setStatus(status);
+        f.setStage(stage);        
+        f.setCreatedDate(LocalDateTime.now());
 
         try {
             f = fileService.saveFile(f);
-            file.delete();
+            return f;
         } catch (DataIntegrityViolationException e) {
-            file.delete();
+             FileUtils.forceDelete(file); 
             throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
         }
-        
-
-        // Optional<File> opt = fileRepository.findByNameAndCompany(file.getName(), agency.getId());
-//        
-//        if (opt.isPresent() && (!(opt.get().getStatus().equals(StatusEnum.ERROR) && !(opt.get().getStatus().equals(StatusEnum.UPLOADED))))) {
-//            file.delete();
-//            throw new Exception(MessageCode.FILE_NAME_REPETED.toString());
-//        }
-//        if(opt.isPresent() && opt.get().getStatus().equals(StatusEnum.ERROR)){
-//            fileRepository.delete(opt.get());
-//        }
-        if (processFile) {
-
-            JobDataMap data = new JobDataMap();
-            data.put(ProcessFileJob.DATA_USER_ID, userId);
-            data.put(ProcessFileJob.DATA_COMPANY, id);
-            data.put(ProcessFileJob.DATA_FILE, file);
-
-            JobDetail detail = JobBuilder
-                    .newJob(ProcessFileJob.class)
-                    .withIdentity("WRITE-JOB-" + file.getName(), "process-file")
-                    .withDescription("Processing files")
-                    .usingJobData(data)
-                    .build();
-
-            SimpleTrigger trigger = TriggerBuilder
-                    .newTrigger()
-                    .withIdentity("trigger-" + file.getName(), "process-file")
-                    .startAt(new Date())
-                    .withSchedule(simpleSchedule())
-                    .build();
-
-            bean.getScheduler().scheduleJob(detail, trigger);
-        }
-
     }
 
     @Transactional
@@ -168,7 +194,7 @@ public class FileService {
     }
 
     public List<com.core.behavior.model.File> listFilesOfPending() {
-        return fileRepository.findByStatus(StatusEnum.UPLOADED);
+        return fileRepository.findByStatus(StatusEnum.COLLECTOR_UPLOADED);
     }
 
     @Transactional
@@ -198,6 +224,13 @@ public class FileService {
         file.setStatus(status);
         fileRepository.save(file);
     }
+    
+    @Transactional
+    public void setStage(Long fileId, long s) {
+        File file = fileRepository.findById(fileId).get();
+        file.setStage(s);
+        fileRepository.save(file);
+    }
 
     @Transactional
     public void setExecutionTime(Long fileId, Long time) {
@@ -220,30 +253,20 @@ public class FileService {
         fileRepository.save(file);
     }
 
-    public Page<File> list(String fileName, String userId, Long[] company, LocalDateTime createdAt, Pageable page, String status, Long start, Long end) {
+    public Page<File> list(String fileName, String userId, Long[] company, LocalDateTime createdAt, Pageable page, String[] status, Long start, Long end) {
 
         List<Specification<File>> predicates = new ArrayList<>();
 
-//        if(fileName != null && fileName.length() > 0){
-//           predicates.add(FileSpecification.fileName(fileName));
-//        }
-//        
-//        if(userId != null && userId.length() > 0){
-//            predicates.add(FileSpecification.userId(userId));
-//        }
-//        
+        if (Optional.ofNullable(fileName).isPresent()) {
+            predicates.add(FileSpecification.fileName(fileName));
+        }
+
         if (company != null) {
             predicates.add(FileSpecification.company(Arrays.asList(company)));
         }
-//        
-//        if(createdAt != null){
-//            predicates.add( FileSpecification.dateCreated(createdAt));
-//        }
 
         if (status != null) {
-            predicates.add(FileSpecification.status(StatusEnum.UPLOADED));
-        } else {
-            predicates.add(FileSpecification.disLikestatus(StatusEnum.UPLOADED));
+            predicates.add(FileSpecification.status(Arrays.asList(status)));
         }
 
         if (start != null && end != null) {
@@ -255,7 +278,7 @@ public class FileService {
         Specification<File> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
         Page<File> fileResponse = fileRepository.findAll(specification, page);
 
-        fileResponse.getContent().stream().forEach(ff -> {
+        fileResponse.getContent().parallelStream().forEach(ff -> {
             ff.setStatusProcess(fileProcessStatusService.getStatusFile(ff.getId()));
         });
 

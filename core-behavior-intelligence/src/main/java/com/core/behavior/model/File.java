@@ -61,6 +61,9 @@ public class File {
     
     @Column(name = "persist_time")
     private Long persistTime;
+    
+    @Column(name = "stage")
+    private Long stage;
 
 
     @Transient

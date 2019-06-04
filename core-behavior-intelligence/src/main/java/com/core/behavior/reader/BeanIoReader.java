@@ -64,7 +64,7 @@ public class BeanIoReader {
             fileService.setParseTime(f.getId(), (end - start)/1000);
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
-            f.setStatus(StatusEnum.ERROR);
+            f.setStatus(StatusEnum.VALIDATION_ERROR);
             f = fileService.saveFile(f);
             logService.logGeneric(f.getId(), ex.getLocalizedMessage());
         }

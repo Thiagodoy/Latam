@@ -9,6 +9,8 @@ import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +22,9 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     List<TicketDuplicityDTO>listDuplicityByFileId(Long fileId);
+    
+    @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
+    List<Ticket>findByFileId(@Param("fileId")Long fileId);
     
     
 }
