@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
+import org.springframework.data.domain.Sort;
 
 /**
  *
@@ -72,6 +73,11 @@ public class TicketService {
         end = System.currentTimeMillis();        
         fileService.setPersistTime(fileId, (end - start)/1000);
     }
+    
+    public List<Ticket>listByFileId(Long id){
+        return ticketRepository.findByFileId(id);
+    } 
+
 
     @Transactional()
     public List<Ticket> saveAll(List<Ticket> list) {

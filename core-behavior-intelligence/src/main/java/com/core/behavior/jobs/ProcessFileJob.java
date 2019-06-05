@@ -1,6 +1,7 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
+import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
@@ -8,11 +9,16 @@ import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
+import com.core.behavior.util.Validator;
+import com.core.behavior.validator.ValidatorShortLayout;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -27,7 +33,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 public class ProcessFileJob extends QuartzJobBean {
 
     @Autowired
-    private BeanIoReader reader;
+    private BeanIoReader reader;   
+
 
     @Autowired
     private LogService logService;
@@ -42,9 +49,11 @@ public class ProcessFileJob extends QuartzJobBean {
     private TicketService ticketService;
 
     public static final String DATA_USER_ID = "userId";
-    public static final String DATA_FILE = "file";
+    public static final String DATA_FILE = "file";    
     public static final String DATA_COMPANY = "company";    
     public static final String DATA_FILE_ID = "fileId";
+    public static final String DATA_LAYOUT_FILE = "layoutFile";
+    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -55,38 +64,63 @@ public class ProcessFileJob extends QuartzJobBean {
         File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
         String user = jec.getJobDetail().getJobDataMap().getString(DATA_USER_ID);
         Long company = jec.getJobDetail().getJobDataMap().getLong(DATA_COMPANY);
+        Long layout = jec.getJobDetail().getJobDataMap().getLong(DATA_LAYOUT_FILE);
+        Long fileId = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
 
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(company);
+        f.setId(fileId);
         f.setName(file.getName());
         f.setUserId(user);
-        f.setStatus(StatusEnum.PROCESSING);
+        f.setStatus(StatusEnum.VALIDATION_PROCESSING);
+        f.setStage(2l);
         f.setCreatedDate(LocalDateTime.now());
 
         f = fileService.saveFile(f);
         final long idFile = f.getId();
         try {
-            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, Constantes.FILE_BEAN_TICKET, user);
+            
+            String beanTicket = layout == 1L ? Constantes.FILE_BEAN_TICKET_SHORT_LAYOUT : Constantes.FILE_BEAN_TICKET;            
+            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, beanTicket, user);
 
+            fileService.setStage(idFile,3);
+            
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();                
 
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(idFile);
                 });
-
-                ticketService.saveBatch(dto.getTicket());               
-                fileService.setStatus(idFile,StatusEnum.SUCCESS);
+                
+                fileService.setStage(idFile,4);
+                
+                 //Validação secundaria                
+//                dto.getTicket().parallelStream().forEach(t -> {
+//                    new ValidatorShortLayout(t).validate();
+//                });
+                
+                ticketService.saveBatch(dto.getTicket());    
+                List<Ticket> tickets = ticketService.listByFileId(idFile);
+                
+               
+                
+                fileService.setStatus(idFile,StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStage(idFile,5);
             } else {
-               fileService.setStatus(idFile,StatusEnum.ERROR);
+               fileService.setStatus(idFile,StatusEnum.VALIDATION_ERROR);
             }
         } catch (Exception e) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
             logService.logGeneric((f != null ? f.getId() : 0l), e.getLocalizedMessage());
-            fileService.setStatus(idFile,StatusEnum.ERROR);
+            fileService.setStatus(idFile,StatusEnum.VALIDATION_ERROR);
 
         } finally {
-            file.delete();
+            try {
+                FileUtils.forceDelete(file);
+            } catch (IOException ex) {
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
             if (f != null) {
                 fileProcessStatusService.generateProcessStatus(f.getId());
             }

@@ -7,7 +7,6 @@ package com.core.behavior.resource;
 
 import com.core.behavior.activiti.response.PageResponse;
 import com.core.behavior.exception.ActivitiException;
-import com.core.behavior.request.LoginRequest;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.response.UserResponse;
@@ -55,7 +54,7 @@ public class UserResource {
             @RequestParam(name = "size") int size) {
         try {
 
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("firstName"));
             return ResponseEntity.ok(service.listAllUser(firstName, lastName, email, profile,agency, pageRequest));
         } catch (Exception ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);

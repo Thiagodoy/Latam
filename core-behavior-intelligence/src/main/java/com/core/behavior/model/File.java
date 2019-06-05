@@ -1,16 +1,23 @@
 package com.core.behavior.model;
 
+import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.util.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
@@ -19,6 +26,32 @@ import lombok.Data;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
+
+
+@SqlResultSetMapping(name = "FileStatusProcess",
+        classes = @ConstructorResult(
+                targetClass = FileStatusProcessDTO.class,
+                columns = {
+                    @ColumnResult(name = "date",  type = Date.class),                    
+                    @ColumnResult(name = "qtd", type = BigInteger.class),
+                    @ColumnResult(name = "status", type = String.class)                    
+                    
+                }))
+
+@NamedNativeQuery(name = "File.statusProcesss", query = "SELECT *\n" +
+"FROM   (SELECT Date(created_at) AS date,\n" +
+"               Count(1) as qtd,\n" +
+"               status\n" +
+"        FROM   behavior.file f where company = :agencia \n" +
+"        GROUP  BY Date(created_at),\n" +
+"                  status) rr\n" +
+"ORDER  BY date ASC",resultSetMapping = "FileStatusProcess")
+
+
+
+
+
+
 @Entity
 @Table(schema = "behavior", name = "file")
 @Data
@@ -61,6 +94,9 @@ public class File {
     
     @Column(name = "persist_time")
     private Long persistTime;
+    
+    @Column(name = "stage")
+    private Long stage;
 
 
     @Transient

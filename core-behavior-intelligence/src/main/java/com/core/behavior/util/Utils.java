@@ -18,7 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
@@ -43,6 +45,7 @@ public class Utils {
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
     private static Tika tika;
+    private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
 
     public static enum TypeField {
         TICKET, LOG
@@ -64,6 +67,57 @@ public class Utils {
                 .collect(Collectors.toList());
 
         tika = new Tika();
+
+        entitiesHtml.put("à", "&#224;");
+        entitiesHtml.put("è", "&#232;");
+        entitiesHtml.put("ì", "&#236;");
+        entitiesHtml.put("ò", "&#242;");
+        entitiesHtml.put("ù", "&#249;");
+        entitiesHtml.put("À", "&#192;");
+        entitiesHtml.put("È", "&#200;");
+        entitiesHtml.put("Ì", "&#204;");
+        entitiesHtml.put("Ò", "&#210;");
+        entitiesHtml.put("Ù", "&#217;");
+        entitiesHtml.put("á", "&#225;");
+        entitiesHtml.put("é", "&#233;");
+        entitiesHtml.put("í", "&#237;");
+        entitiesHtml.put("ó", "&#243;");
+        entitiesHtml.put("ú", "&#250;");
+        entitiesHtml.put("ý", "&#253;");
+        entitiesHtml.put("Á", "&#193;");
+        entitiesHtml.put("É", "&#201;");
+        entitiesHtml.put("Í", "&#205;");
+        entitiesHtml.put("Ó", "&#211;");
+        entitiesHtml.put("Ú", "&#218;");
+        entitiesHtml.put("Ý", "&#221;");
+        entitiesHtml.put("â", "&#226;");
+        entitiesHtml.put("ê", "&#234;");
+        entitiesHtml.put("î", "&#238;");
+        entitiesHtml.put("ô", "&#244;");
+        entitiesHtml.put("û", "&#251;");
+        entitiesHtml.put("Â", "&#194;");
+        entitiesHtml.put("Ê", "&#202;");
+        entitiesHtml.put("Î", "&#206;");
+        entitiesHtml.put("Ô", "&#212;");
+        entitiesHtml.put("Û", "&#219;");
+        entitiesHtml.put("ã", "&#227;");
+        entitiesHtml.put("ñ", "&#241;");
+        entitiesHtml.put("õ", "&#245;");
+        entitiesHtml.put("Ã", "&#195;");
+        entitiesHtml.put("Ñ", "&#209;");
+        entitiesHtml.put("Õ", "&#213;");
+        entitiesHtml.put("ä", "&#228;");
+        entitiesHtml.put("ë", "&#235;");
+        entitiesHtml.put("ï", "&#239;");
+        entitiesHtml.put("ö", "&#246;");
+        entitiesHtml.put("ü", "&#252;");
+        entitiesHtml.put("ÿ", "&#255;");
+        entitiesHtml.put("Ä", "&#196;");
+        entitiesHtml.put("Ë", "&#203;");
+        entitiesHtml.put("Ï", "&#207;");
+        entitiesHtml.put("Ö", "&#214;");
+        entitiesHtml.put("Ü", "&#220;");        
+        entitiesHtml.put("ç", "&#231;");        
 
     }
 
@@ -194,6 +248,18 @@ public class Utils {
                 .stream()
                 .filter(g -> g.getGroupId().equals(Constantes.PROFILE_MASTER) || g.getGroupId().equals(Constantes.PROFILE_BEHAVIOR_MASTER))
                 .findFirst().isPresent();
+    }
+
+    public static String replaceAccentToEntityHtml(String value) {
+
+        for (int i = 0; i < value.length(); i++) {
+            String letter = Character.toString(value.charAt(i));
+            
+            if(entitiesHtml.containsKey(letter)){
+                value = value.replace(letter, entitiesHtml.get(letter));
+            }
+        } 
+        return value;
     }
 
 }

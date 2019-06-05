@@ -1,0 +1,64 @@
+<beanio xmlns="http://www.beanio.org/2012/03" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
+  
+    <stream name="ticket" format="csv"  >  
+        
+        <parser>
+           <property name="delimiter" value=";" />
+        </parser>
+        
+        <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />  
+        <typeHandler name="doubleHandler" class="com.core.behavior.reader.DoubleHandler" />    
+        <!-- record layout... -->  
+        
+              
+        <group name="file" class="com.core.behavior.dto.FileParsedDTO">            
+            <record  name="header" class="com.core.behavior.dto.HeaderDTO"  minOccurs="1" maxOccurs="1" order="1" >
+                <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
+                <field name="headerDataVoo" trim="true" type="string"  literal="DATA_VOO"/>
+                <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_VOO"/>
+                <field name="headerCiaBilhete" trim="true" type="string"  literal="CIA_BILHETE"/>
+                <field name="headerTrechoTkt" trim="true" type="string"  literal="TRECHO_TKT"/>
+                <field name="headerAtoOrigem" trim="true" type="string"  literal="ATO_ORIGEM"/>
+                <field name="headerAtoDestino" trim="true" type="string"  literal="ATO_DESTINO"/>
+                <field name="headerNumeroCupom" trim="true" type="string"  literal="NUMERO_CUPOM"/>
+                <field name="headerBilhete" trim="true" type="string"  literal="BILHETE"/>
+                <field name="headerTipoVenda" trim="true" type="string"  literal="TIPO_VENDA"/>
+                <field name="headerClasseCabine" trim="true" type="string"  literal="CLASSE_CABINE"/>
+                <field name="headerCiaVoo" trim="true" type="string"  literal="CIA_VOO"/>
+                <field name="headerValorBrl" trim="true" type="string"  literal="VALOR_BRL"/>
+                <field name="headerClienteEmpresa" trim="true" type="string"  literal="CLIENTE_EMPRESA"/>
+                <field name="headerCnpjClienteEmpresa" trim="true" type="string"  literal="CNPJ_CLIENTE_EMPRESA"/>
+                <field name="headerIataAgenciaEmissora" trim="true" type="string"  literal="IATA_AGENCIA_EMISSORA"/>
+                <field name="headerBaseVenda" trim="true" type="string"  literal="BASE_VENDA"/>
+                <field name="headerQtdePax" trim="true" type="string"  literal="QTDE_PAX"/>
+                <field name="headerNumVoo" trim="true" type="string"  literal="NUM_VOO"/>
+                <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="AGENCIA_CONSOLIDADA"/>
+            </record>
+            
+            <record name="ticket" class="com.core.behavior.model.Ticket" minOccurs="1" maxOccurs="unbounded" collection="list" order="2">
+                <field type="date" required="true" trim="true" typeHandler="dateHandler" name="dataEmissao"/>
+                <field type="date" required="true" trim="true" typeHandler="dateHandler" name="dataVoo"/>
+                <field type="string" required="true" trim="true" name="horaVoo" regex="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\s)?(AM|PM|am|pm)?"/>
+                <field type="string" required="true" trim="true" name="ciaBilhete"/>
+                <field type="string" required="true" trim="true" name="trechoTkt"/>
+                <field type="string" required="true" trim="true" name="atoOrigem"/>
+                <field type="string" required="true" trim="true" name="atoDestino"/>
+                <field type="long" required="true" trim="true" name="nroCupom"/>
+                <field type="long" required="true" trim="true" name="bilhete"/>
+                <field type="string" required="true" trim="true" name="tipoVenda"/>
+                <field type="string" required="true" trim="true" name="classeCabine"/>
+                <field type="string" required="true" trim="true" name="ciaVoo"/>
+                <field type="double" typeHandler="doubleHandler" trim="true" required="true" name="valorBrl"/>
+                <field type="string" required="false" name="clienteEmpresa" trim="true"/>
+                <field type="string" required="false" name="cnpjClienteEmpresa" trim="true"/>
+                <field type="long" required="true" name="iataAgenciaEmissora" trim="true" />
+                <field type="string" required="false" name="baseVenda" trim="true" />
+                <field type="long" required="false" name="qtdePax" trim="true"/>
+                <field type="long" required="false" name="numVoo" trim="true" />
+                <field type="string" required="true" name="agenciaConsolidada" trim="true" />
+            </record>
+        </group>
+    </stream>  
+</beanio>

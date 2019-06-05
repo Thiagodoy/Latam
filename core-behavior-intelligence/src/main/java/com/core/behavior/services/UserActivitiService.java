@@ -59,7 +59,7 @@ public class UserActivitiService {
 
     @Autowired
     private UserInfoService infoService;
-    
+
     @Autowired
     private GroupMemberSevice groupMemberSevice;
 
@@ -70,13 +70,12 @@ public class UserActivitiService {
 
     @Transactional
     public void updateUser(UserRequest user) {
-        
-        
+
         groupMemberSevice.deleteByUserId(user.getId());
         infoService.deleteByUserId(user.getId());
-        
-        UserActiviti userActiviti =  userActivitiRepository.findById(user.getId()).orElseThrow(()-> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR)); 
-        
+
+        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+
         userActiviti.merge(user);
         userActivitiRepository.save(userActiviti);
     }
@@ -91,19 +90,19 @@ public class UserActivitiService {
 
         return getResponseUsers(Arrays.asList(opt.get())).get(0);
     }
-    
-    public List<UserResponse> getUsers(List<String> ids){
-        
-       List<UserResponse> list = new ArrayList();
+
+    public List<UserResponse> getUsers(List<String> ids) {
+
+        List<UserResponse> list = new ArrayList();
         CopyOnWriteArrayList c = new CopyOnWriteArrayList(list);
-        ids.parallelStream().forEach(i->{        
-           Optional<UserActiviti> opt = userActivitiRepository.findById(i);
-           UserResponse user =  getResponseUsers(Arrays.asList(opt.get())).get(0);
-           c.add(user);        
+        ids.parallelStream().forEach(i -> {
+            Optional<UserActiviti> opt = userActivitiRepository.findById(i);
+            UserResponse user = getResponseUsers(Arrays.asList(opt.get())).get(0);
+            c.add(user);
         });
-        
+
         return c;
-        
+
     }
 
     @Transactional
@@ -111,17 +110,15 @@ public class UserActivitiService {
 
         UserActiviti user = userActivitiRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));       
+                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
 
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
-        }
+       
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
-        
+
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
@@ -130,9 +127,14 @@ public class UserActivitiService {
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
 
         if (!Utils.isMaster(user) && firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
-            LocalDateTime time = LocalDateTime.now().minus(24, ChronoUnit.HOURS);
+            LocalDate time = LocalDate.now().minus(1, ChronoUnit.DAYS);
 
-            if (time.isAfter(user.getCreatedAt())) {
+            Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate dateLastAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);           
+            
+            
+            if (time.isAfter(dateLastAcess)) {
                 UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_PASSWORD, "true");
                 infoService.save(passwordExpiration);
                 throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
@@ -151,6 +153,10 @@ public class UserActivitiService {
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
+        } 
+        
         List<GroupResponse> listGroupsResponse = new ArrayList();
         List<GroupActiviti> listGroups = groupActivitiRepository.findAll();
 
@@ -166,7 +172,7 @@ public class UserActivitiService {
 
         DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         userLastAccess.setValue(formatterDate.format(LocalDate.now()));
-        
+
         infoService.save(userLastAccess);
 
         return response;
@@ -181,13 +187,11 @@ public class UserActivitiService {
         userActivitiRepository.save(userActiviti);
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", user.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
 
-        
-        
-        Runnable runnable  = ()->{        
+        Runnable runnable = () -> {
             try {
                 emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
             } catch (MessagingException ex) {
@@ -196,7 +200,7 @@ public class UserActivitiService {
                 Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
             }
         };
-        
+
         new Thread(runnable).start();
 
     }
@@ -212,32 +216,41 @@ public class UserActivitiService {
         if (!master && opt.isPresent()) {
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
-        
+
         if (!master && optPass.isPresent()) {
             throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
 
         if (master) {
             if (opt.isPresent()) {
+                userActiviti.getInfo().remove(opt.get());
                 infoService.delete(opt.get().getId());
+            }
+
+            if (optPass.isPresent()) {
+                userActiviti.getInfo().remove(optPass.get());
                 infoService.delete(optPass.get().getId());
             }
         }
 
+        UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();                 
+        primeiroAcesso.setValue("true");        
+         
+        UserInfo lastAccess = Utils.valueFromUserInfo(userActiviti, Constantes.LAST_ACCESS).get();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");        
+        lastAccess.setValue(formatter.format(LocalDateTime.now()));
+        
         String password = Utils.generatePasswordRandom();
         userActiviti.setPassword(DigestUtils.md5Hex(password));
 
         userActivitiRepository.save(userActiviti);
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
 
-       
-        
-        
-        Runnable runnable  = ()->{        
+        Runnable runnable = () -> {
             try {
                 emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
             } catch (MessagingException ex) {
@@ -246,9 +259,9 @@ public class UserActivitiService {
                 Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
             }
         };
-        
+
         new Thread(runnable).start();
-        
+
     }
 
     @Transactional
@@ -264,12 +277,11 @@ public class UserActivitiService {
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
             throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
-        
+
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
             throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
-        
 
         UserActiviti userActiviti = opt.get();
         String password = Utils.generatePasswordRandom();
@@ -284,28 +296,26 @@ public class UserActivitiService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":name", userActiviti.getFirstName());
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", formatter.format(LocalDateTime.now()));
-        
-        
-        Runnable runnable  = ()->{        
+
+        Runnable runnable = () -> {
             try {
-                 emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
+                emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
             } catch (MessagingException ex) {
                 Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
             } catch (IOException ex) {
                 Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
             }
         };
-        
+
         new Thread(runnable).start();
 
-       
     }
 
-    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String[] profile, String[]agencys, Pageable page) {
+    public Page<UserActiviti> listAllUser(String firstName, String lastName, String email, String[] profile, String[] agencys, Pageable page) {
 
         List<Specification<UserActiviti>> predicates = new ArrayList<>();
 
@@ -317,24 +327,24 @@ public class UserActivitiService {
         }
         if (Optional.ofNullable(email).isPresent()) {
             predicates.add(UserActivitiSpecification.email(email));
-        }        
-        
-        if(profile != null && agencys != null){
-             List<UserDTO> list = userActivitiRepository.getUserByAgencyAndProfile(Arrays.asList(agencys), Arrays.asList(profile));
-             
-             if(!list.isEmpty()){
-                 predicates.add(UserActivitiSpecification.ids(list));
-             }else{
-                 //quando não houver nenhum usuário força retorno de uma lista vazia
-                 predicates.add(UserActivitiSpecification.ids(Arrays.asList(new UserDTO("-1"))));
-             }
+        }
+
+        if (profile != null && agencys != null) {
+            List<UserDTO> list = userActivitiRepository.getUserByAgencyAndProfile(Arrays.asList(agencys), Arrays.asList(profile));
+
+            if (!list.isEmpty()) {
+                predicates.add(UserActivitiSpecification.ids(list));
+            } else {
+                //quando não houver nenhum usuário força retorno de uma lista vazia
+                predicates.add(UserActivitiSpecification.ids(Arrays.asList(new UserDTO("-1"))));
+            }
         }
 
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);
 
-    } 
+    }
 
     private List<UserResponse> getResponseUsers(List<UserActiviti> list) {
 

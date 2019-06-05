@@ -63,15 +63,15 @@ public class Ticket {
     public String agenciaConsolidada;
     
     @PositionParameter(value = 2)
-    @Column(name = "ATO_DESTINO", nullable = false)
+    @Column(name = "ATO_DESTINO")
     public String atoDestino;
     
     @PositionParameter(value = 3)
-    @Column(name = "ATO_ORIGEM", nullable = false)
+    @Column(name = "ATO_ORIGEM")
     public String atoOrigem;
     
     @PositionParameter(value = 4)
-    @Column(name = "BASE_TARIFARIA", nullable = false)
+    @Column(name = "BASE_TARIFARIA")
     public String baseTarifaria;
     
     @PositionParameter(value = 5)
@@ -80,26 +80,26 @@ public class Ticket {
     
     @PositionParameter(value = 6)
     @Id
-    @Column(name = "BILHETE", nullable = false)
+    @Column(name = "BILHETE")
     public Long bilhete;
     
     @PositionParameter(value = 7)
-    @Column(name = "CIA_BILHETE", nullable = false)
+    @Column(name = "CIA_BILHETE")
     public String ciaBilhete;
     
     @PositionParameter(value = 8)
-    @Column(name = "CIA_VOO", nullable = false)
+    @Column(name = "CIA_VOO")
     public String ciaVoo;
     @PositionParameter(value = 9)
-    @Column(name = "CLASSE_CABINE", nullable = false)
+    @Column(name = "CLASSE_CABINE")
     public String classeCabine;
     
     @PositionParameter(value = 10)
-    @Column(name = "CLASSE_SERVICO", nullable = false)
+    @Column(name = "CLASSE_SERVICO")
     public String classeServico;
 
     @PositionParameter(value = 11)
-    @Column(name = "CLASSE_TARIFA", nullable = false)
+    @Column(name = "CLASSE_TARIFA")
     public String classeTarifa;
 
     @PositionParameter(value = 12)
@@ -115,11 +115,11 @@ public class Ticket {
     public Long cpfPax;
     
     @PositionParameter(value = 15)
-    @Column(name = "DATA_EMISSAO", nullable = false)
+    @Column(name = "DATA_EMISSAO")
     public Date dataEmissao;
 
     @PositionParameter(value = 16)
-    @Column(name = "DATA_EXTRACAO", nullable = false)
+    @Column(name = "DATA_EXTRACAO")
     public Date dataExtracao;
 
     @PositionParameter(value = 17)
@@ -128,7 +128,7 @@ public class Ticket {
     
     @PositionParameter(value = 18)
     @Id
-    @Column(name = "DATA_VOO", nullable = false)    
+    @Column(name = "DATA_VOO")    
     public Date dataVoo;
     
     @PositionParameter(value = 19)
@@ -148,11 +148,11 @@ public class Ticket {
     public String horaReserva;
     
     @PositionParameter(value = 23)
-    @Column(name = "HORA_VOO", nullable = false)
+    @Column(name = "HORA_VOO")
     public String horaVoo;    
 
     @PositionParameter(value = 24)
-    @Column(name = "IATA_AGENCIA_EMISSORA", nullable = false)
+    @Column(name = "IATA_AGENCIA_EMISSORA")
     public Long iataAgenciaEmissora;
 
     @PositionParameter(value = 25)
@@ -160,11 +160,11 @@ public class Ticket {
     public String nomeCliente;
 
     @PositionParameter(value = 26)
-    @Column(name = "NOME_PAX", nullable = false)
+    @Column(name = "NOME_PAX")
     public String nomePax;
 
     @PositionParameter(value = 27)
-    @Column(name = "NUMERO_CUPOM", nullable = false)
+    @Column(name = "NUMERO_CUPOM")
     public Long nroCupom;
 
     @PositionParameter(value = 28)
@@ -184,7 +184,7 @@ public class Ticket {
     public Long qtdePax;    
 
     @PositionParameter(value = 32)
-    @Column(name = "RT_OW", nullable = false)
+    @Column(name = "RT_OW")
     public String rtOn;
     
     @PositionParameter(value = 33)
@@ -196,7 +196,7 @@ public class Ticket {
     public Double tarifaPublicUs;
     
     @PositionParameter(value = 35)
-    @Column(name = "TARIFA_PUBLICA_R$", nullable = false)
+    @Column(name = "TARIFA_PUBLICA_R$")
     public Double tarifaPublica;
     
     @PositionParameter(value = 36)
@@ -204,44 +204,43 @@ public class Ticket {
     public String tierFidelidadePax;
 
     @PositionParameter(value = 37)
-    @Column(name = "TIPO_PAGAMENTO", nullable = false)
+    @Column(name = "TIPO_PAGAMENTO")
     public String tipoPagamento;
 
     @PositionParameter(value = 38)
-    @Column(name = "TIPO_PAX", nullable = false)
+    @Column(name = "TIPO_PAX")
     public String tipoPax;
 
     @PositionParameter(value = 39)
-    @Column(name = "TIPO_VENDA", nullable = false)
+    @Column(name = "TIPO_VENDA")
     public String tipoVenda;
 
     @PositionParameter(value = 40)
-    @Column(name = "TOUR_CODE", nullable = false)
+    @Column(name = "TOUR_CODE")
     public String tourCode;    
 
     @PositionParameter(value = 41)
-    @Column(name = "TRECHO_TKT", nullable = false)
+    @Column(name = "TRECHO_TKT")
     public String trechoTkt;
 
     @PositionParameter(value = 42)
-    @Column(name = "VALOR_BRL", nullable = false)
+    @Column(name = "VALOR_BRL")
     public Double valorBrl;
-
+    
     @PositionParameter(value = 43)
-    @Column(name = "VALOR_US$", nullable = false)
+    @Column(name = "VALOR_US$")
     public Double valorUs;
-
 
     @PositionParameter(value = 44)
     @Column(name = "CREATED_AT")
     public LocalDateTime createdAt;
 
     @PositionParameter(value = 45)
-    @Column(name = "FILE_ID", nullable = false)
+    @Column(name = "FILE_ID")
     public Long fileId;
     
     @PositionParameter(value = 46)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID")
     public Long id;
 
     

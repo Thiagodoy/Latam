@@ -24,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -133,7 +132,7 @@ public class FileResource {
             @RequestParam(name = "timeStart", required = false) Long timeStart,
             @RequestParam(name = "timeEnd", required = false) Long timeEnd,
             @RequestParam(name = "company[]", required = false) Long[] company,
-            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "status[]", required = false) String[] status,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
@@ -156,6 +155,16 @@ public class FileResource {
         try {
             fileService.deleteFile(id);
             return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
+        }
+    }
+    
+     @RequestMapping(value = "/status/files", method = RequestMethod.GET)
+    public ResponseEntity listar(@RequestParam(name = "company") Long agencia) {
+        try {
+            return ResponseEntity.ok(fileService.statusFilesProcess(agencia));
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
