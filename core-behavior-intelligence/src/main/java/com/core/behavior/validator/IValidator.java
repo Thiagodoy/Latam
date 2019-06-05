@@ -5,13 +5,10 @@
  */
 package com.core.behavior.validator;
 
-import com.core.behavior.exception.ValidationException;
-import com.core.behavior.model.Ticket;
-
 /**
  *
  * @author thiag
  */
 public interface IValidator {
-    void validate(Ticket ticket) throws ValidationException;
+    void validate();
 }

@@ -10,6 +10,7 @@ import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Validator;
+import com.core.behavior.validator.ValidatorShortLayout;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -93,15 +94,15 @@ public class ProcessFileJob extends QuartzJobBean {
                 
                 fileService.setStage(idFile,4);
                 
-                ticketService.saveBatch(dto.getTicket());    
+                 //Validação secundaria                
+//                dto.getTicket().parallelStream().forEach(t -> {
+//                    new ValidatorShortLayout(t).validate();
+//                });
                 
+                ticketService.saveBatch(dto.getTicket());    
                 List<Ticket> tickets = ticketService.listByFileId(idFile);
                 
-                //Validação secundaria                
-                tickets.parallelStream().forEach(t -> {             
-                    
-                
-                });
+               
                 
                 fileService.setStatus(idFile,StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile,5);

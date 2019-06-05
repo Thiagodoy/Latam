@@ -160,5 +160,15 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
+    
+     @RequestMapping(value = "/status/files", method = RequestMethod.GET)
+    public ResponseEntity listar(@RequestParam(name = "company") Long agencia) {
+        try {
+            return ResponseEntity.ok(fileService.statusFilesProcess(agencia));
+        } catch (Exception e) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
+        }
+    }
 
 }

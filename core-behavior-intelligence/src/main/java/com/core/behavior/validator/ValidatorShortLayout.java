@@ -11,6 +11,7 @@ import com.core.behavior.services.LogService;
 import com.core.behavior.util.RecordErrorEnum;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -25,7 +26,17 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     
     private Ticket ticket;
     private List<RecordErrorEnum> errors = new ArrayList<>();
+    private static List<Ticket> tickets = new CopyOnWriteArrayList<Ticket>();
 
+    
+    public static void clearList(){
+        tickets.clear();
+    }
+    
+    public static List<Ticket> getList(){
+        return tickets;
+    }
+    
     public ValidatorShortLayout(Ticket ticket) {
         this.ticket = ticket;
     }
@@ -131,7 +142,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     }
 
     @Override
-    public void validate(Ticket ticket)  throws ValidationException {
+    public void validate() {
         try {
 
             this.checkDataEmissao().
@@ -161,7 +172,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
             
 
         } catch (Exception e) {
-           throw new  ValidationException();        
+         
         }
     }
 

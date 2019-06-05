@@ -2,6 +2,7 @@ package com.core.behavior.services;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.core.behavior.aws.client.ClientAws;
+import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
@@ -283,6 +284,11 @@ public class FileService {
         });
 
         return fileResponse;
+    }
+    
+    
+    public List<FileStatusProcessDTO>statusFilesProcess(Long id){
+       return  this.fileRepository.statusProcesss(id);
     }
 
 }
