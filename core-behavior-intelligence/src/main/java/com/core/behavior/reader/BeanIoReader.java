@@ -44,9 +44,11 @@ public class BeanIoReader {
         try {
             StreamFactory factory = StreamFactory.newInstance();
             InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
+            //factory.loadResource("resources/layoutMinimoMessages.properties");
             factory.load(stream);
 
             reader = factory.createReader(str, file);
+            
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -77,14 +79,16 @@ public class BeanIoReader {
     private long countLineNumber(File file) {
 
         long count = 0;
+        FileReader reader = null;
+        LineNumberReader readerLine = null;
 
         try {
-            FileReader reader = new FileReader(file);
-            LineNumberReader readerLine = new LineNumberReader(reader);
+             reader = new FileReader(file);
+             readerLine = new LineNumberReader(reader);
 
             while (readerLine.readLine() != null) {
                 count++;
-            }
+            }           
 
             return --count;
 
@@ -92,7 +96,16 @@ public class BeanIoReader {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            try {
+                readerLine.close();
+                reader.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
         }
+        
 
         return 0l;
     }
