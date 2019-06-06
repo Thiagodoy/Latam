@@ -79,6 +79,7 @@ public class Agency {
         this.s3Path = request.getS3Path();
         this.id = request.getId();
         this.cnpj = request.getCnpj();
+        this.layoutFile = request.getLayoutFile();
     }
 
 }
