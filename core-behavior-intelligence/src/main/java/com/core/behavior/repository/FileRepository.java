@@ -8,6 +8,7 @@ package com.core.behavior.repository;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.model.File;
 import com.core.behavior.util.StatusEnum;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,6 @@ public interface FileRepository extends JpaRepository<File, Long> , JpaSpecifica
     List<File> findByStatus(StatusEnum status);
     
     @Query(nativeQuery = true)
-    List<FileStatusProcessDTO> statusProcesss(@Param("agencia")Long agencia);
+    List<FileStatusProcessDTO> statusProcesss(@Param("agencia")Long agencia, @Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
     Optional<File> findByNameAndCompany(String name, Long company);
 }

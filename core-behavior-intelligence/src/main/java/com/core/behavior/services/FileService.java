@@ -93,6 +93,13 @@ public class FileService {
     public void persistFile(MultipartFile fileInput, String userId, Long id, boolean uploadAws, boolean uploadFtp, boolean processFile) throws IOException, SchedulerException {
 
         java.io.File file = Utils.convertToFile(fileInput);
+        
+        
+        
+        if(Utils.isEmpty(file)){
+            FileUtils.forceDelete(file); 
+           throw new ActivitiException(MessageCode.FILE_EMPTY); 
+        }
 
         Agency agency = agencyService.findById(id);
         String folder = agency.getS3Path().split("\\\\")[1];
@@ -146,6 +153,10 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {
 
+        
+        
+        
+        
         JobDataMap data = new JobDataMap();
         data.put(ProcessFileJob.DATA_USER_ID, userId);
         data.put(ProcessFileJob.DATA_COMPANY, id);
@@ -287,8 +298,10 @@ public class FileService {
     }
     
     
-    public List<FileStatusProcessDTO>statusFilesProcess(Long id){
-       return  this.fileRepository.statusProcesss(id);
+    public List<FileStatusProcessDTO>statusFilesProcess(Long id, Long start, Long end){
+        LocalDateTime lstart = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault());
+        LocalDateTime lend = LocalDateTime.ofInstant(Instant.ofEpochMilli(end), ZoneId.systemDefault());
+       return  this.fileRepository.statusProcesss(id, lstart,  lend);
     }
 
 }

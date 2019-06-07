@@ -162,9 +162,11 @@ public class FileResource {
     }
     
      @RequestMapping(value = "/status/files", method = RequestMethod.GET)
-    public ResponseEntity listar(@RequestParam(name = "company") Long agencia) {
+    public ResponseEntity listar(@RequestParam(name = "company") Long agencia,
+            @RequestParam(name = "timeStart", required = false) Long timeStart,
+            @RequestParam(name = "timeEnd", required = false) Long timeEnd) {
         try {
-            return ResponseEntity.ok(fileService.statusFilesProcess(agencia));
+            return ResponseEntity.ok(fileService.statusFilesProcess(agencia,timeStart,timeEnd));
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
