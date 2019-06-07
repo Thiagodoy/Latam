@@ -50,7 +50,7 @@ public class AgencyResource {
     }
 
     @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
-    public ResponseEntity getUsers(
+    public ResponseEntity getAgencyByUser(
             @PathVariable(name = "id") long id) {
         try {
             return ResponseEntity.ok(agencyService.getUserByAgency(id));

@@ -55,6 +55,10 @@ public class LogService {
     public List<Log> listByFileId(Long fileId){
         return logRepository.findByFileId(fileId);
     }
+    
+    public boolean fileHasError(Long fileId){
+        return logRepository.countByFileId(fileId) > 0l;
+    }
 
     public void saveBatch(List<Log> logs) {
       
