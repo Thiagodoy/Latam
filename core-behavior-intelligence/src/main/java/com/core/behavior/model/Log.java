@@ -65,7 +65,7 @@ public class Log implements Serializable {
     @Column(name = "line_number")
     public Long lineNumber;
 
-    @PositionParameter(value = 6)
+    @PositionParameter(value = 8)
     @Column(name = "ticket_id")
     public Long ticketId;
 
