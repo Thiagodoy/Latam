@@ -83,7 +83,7 @@ public class ProcessFileJob extends QuartzJobBean {
             String beanTicket = layout == 1L ? Constantes.FILE_BEAN_TICKET_SHORT_LAYOUT : Constantes.FILE_BEAN_TICKET;            
             Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, beanTicket, user);
 
-            fileService.setStage(idFile,3);
+            fileService.setStage(idFile,2);
             
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();                
@@ -92,7 +92,7 @@ public class ProcessFileJob extends QuartzJobBean {
                     t.setFileId(idFile);
                 });
                 
-                fileService.setStage(idFile,4);
+                fileService.setStage(idFile,3);
                 
                  //Validação secundaria                
 //                dto.getTicket().parallelStream().forEach(t -> {
@@ -105,7 +105,7 @@ public class ProcessFileJob extends QuartzJobBean {
                
                 
                 fileService.setStatus(idFile,StatusEnum.VALIDATION_SUCCESS);
-                fileService.setStage(idFile,5);
+                fileService.setStage(idFile,4);
             }
         } catch (Throwable e) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
