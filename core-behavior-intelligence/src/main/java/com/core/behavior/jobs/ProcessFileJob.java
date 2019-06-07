@@ -33,8 +33,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 public class ProcessFileJob extends QuartzJobBean {
 
     @Autowired
-    private BeanIoReader reader;   
-
+    private BeanIoReader reader;
 
     @Autowired
     private LogService logService;
@@ -49,18 +48,16 @@ public class ProcessFileJob extends QuartzJobBean {
     private TicketService ticketService;
 
     public static final String DATA_USER_ID = "userId";
-    public static final String DATA_FILE = "file";    
-    public static final String DATA_COMPANY = "company";    
+    public static final String DATA_FILE = "file";
+    public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
-    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        
         long start = System.currentTimeMillis();
-        
+
         File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
         String user = jec.getJobDetail().getJobDataMap().getString(DATA_USER_ID);
         Long company = jec.getJobDetail().getJobDataMap().getLong(DATA_COMPANY);
@@ -79,38 +76,35 @@ public class ProcessFileJob extends QuartzJobBean {
         f = fileService.saveFile(f);
         final long idFile = f.getId();
         try {
-            
-            String beanTicket = layout == 1L ? Constantes.FILE_BEAN_TICKET_SHORT_LAYOUT : Constantes.FILE_BEAN_TICKET;            
+
+            String beanTicket = layout == 1L ? Constantes.FILE_BEAN_TICKET_SHORT_LAYOUT : Constantes.FILE_BEAN_TICKET;
             Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, beanTicket, user);
 
-            fileService.setStage(idFile,2);
-            
+            fileService.setStage(idFile, 2);
+
             if (fileParsed.isPresent()) {
-                FileParsedDTO dto = fileParsed.get();                
+                FileParsedDTO dto = fileParsed.get();
 
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(idFile);
                 });
-                
-                fileService.setStage(idFile,3);
-                
-                 //Validação secundaria                
-//                dto.getTicket().parallelStream().forEach(t -> {
-//                    new ValidatorShortLayout(t).validate();
-//                });
-                
-                ticketService.saveBatch(dto.getTicket());    
+
+                fileService.setStage(idFile, 3);
+
+                ticketService.saveBatch(dto.getTicket());
                 List<Ticket> tickets = ticketService.listByFileId(idFile);
-                
-               
-                
-                fileService.setStatus(idFile,StatusEnum.VALIDATION_SUCCESS);
-                fileService.setStage(idFile,4);
+
+                tickets.parallelStream().forEach(t -> {
+                    new ValidatorShortLayout(t).validate();
+                });
+
+                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStage(idFile, 4);
             }
         } catch (Throwable e) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
             logService.logGeneric((f != null ? f.getId() : 0l), e.getLocalizedMessage());
-            fileService.setStatus(idFile,StatusEnum.VALIDATION_ERROR);
+            fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
             try {
@@ -118,14 +112,14 @@ public class ProcessFileJob extends QuartzJobBean {
             } catch (IOException ex) {
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
             if (f != null) {
                 fileProcessStatusService.generateProcessStatus(f.getId());
             }
-            
-            long time = (System.currentTimeMillis() - start)/1000;
+
+            long time = (System.currentTimeMillis() - start) / 1000;
             fileService.setExecutionTime(idFile, time);
-             
+
         }
     }
 

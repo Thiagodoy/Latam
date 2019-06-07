@@ -5,13 +5,16 @@
  */
 package com.core.behavior.validator;
 
-import com.core.behavior.exception.ValidationException;
+import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.LogService;
+import com.core.behavior.services.TicketService;
 import com.core.behavior.util.RecordErrorEnum;
+import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TypeErrorEnum;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -20,23 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ValidatorShortLayout implements IValidatorShortLayout {
 
-    
     @Autowired
     private LogService logService;
-    
+
+    @Autowired
+    private TicketService ticketService;
+
     private Ticket ticket;
     private List<RecordErrorEnum> errors = new ArrayList<>();
-    private static List<Ticket> tickets = new CopyOnWriteArrayList<Ticket>();
 
-    
-    public static void clearList(){
-        tickets.clear();
-    }
-    
-    public static List<Ticket> getList(){
-        return tickets;
-    }
-    
     public ValidatorShortLayout(Ticket ticket) {
         this.ticket = ticket;
     }
@@ -47,77 +42,77 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     }
 
     @Override
-    public IValidatorShortLayout checkDataVoo(){
+    public IValidatorShortLayout checkDataVoo() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkHoraVoo(){
+    public IValidatorShortLayout checkHoraVoo() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkCiaBilhete(){
+    public IValidatorShortLayout checkCiaBilhete() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkTrechoTkt(){
+    public IValidatorShortLayout checkTrechoTkt() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkAtoOrigem(){
+    public IValidatorShortLayout checkAtoOrigem() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkAtoDestino(){
+    public IValidatorShortLayout checkAtoDestino() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkNumeroCupom(){
+    public IValidatorShortLayout checkNumeroCupom() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkBilhete(){
+    public IValidatorShortLayout checkBilhete() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkTipoVenda(){
+    public IValidatorShortLayout checkTipoVenda() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkClasseCabine(){
+    public IValidatorShortLayout checkClasseCabine() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkCiaVoo(){
+    public IValidatorShortLayout checkCiaVoo() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkValorBrl(){
+    public IValidatorShortLayout checkValorBrl() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkClienteEmpresa(){
+    public IValidatorShortLayout checkClienteEmpresa() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkCnpjClienteEmpresa(){
+    public IValidatorShortLayout checkCnpjClienteEmpresa() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkIataAgenciaEmissora(){
+    public IValidatorShortLayout checkIataAgenciaEmissora() {
         return this;
     }
 
@@ -127,17 +122,17 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     }
 
     @Override
-    public IValidatorShortLayout checkQtdPax(){
+    public IValidatorShortLayout checkQtdPax() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkNumVoo(){
+    public IValidatorShortLayout checkNumVoo() {
         return this;
     }
 
     @Override
-    public IValidatorShortLayout checkAgenciaConsolidada(){
+    public IValidatorShortLayout checkAgenciaConsolidada() {
         return this;
     }
 
@@ -165,15 +160,28 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
                     checkQtdPax().
                     checkNumVoo().
                     checkAgenciaConsolidada();
-            
-          if(!errors.isEmpty()){
-              
-          }  
-            
+
+            this.errors.forEach(e -> {
+                Log log = new Log();
+                log.setCreatedAt(LocalDateTime.now());
+                log.setFileId(this.ticket.getFileId());
+                log.setMessageError(e.message);
+                log.setType(TypeErrorEnum.RECORD);
+                logService.saveLog(log);
+            });
+
+            TicketStatusEnum status = !errors.isEmpty() ? TicketStatusEnum.UNAPPROVED : TicketStatusEnum.APPROVED;
+            this.ticket.setStatus(status);
+            this.ticketService.save(ticket);
 
         } catch (Exception e) {
-         
+            Log log = new Log();
+            log.setCreatedAt(LocalDateTime.now());
+            log.setFileId(this.ticket.getFileId());
+            log.setMessageError(e.getMessage());
+            log.setType(TypeErrorEnum.RECORD);
+            logService.saveLog(log);
         }
     }
-
+    
 }
