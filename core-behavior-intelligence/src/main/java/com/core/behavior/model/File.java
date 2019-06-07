@@ -42,7 +42,7 @@ import lombok.Data;
 "FROM   (SELECT Date(created_at) AS date,\n" +
 "               Count(1) as qtd,\n" +
 "               status\n" +
-"        FROM   behavior.file f where company = :agencia \n" +
+"        FROM   behavior.file f where company = :agencia and created_at between :start and :end \n" +
 "        GROUP  BY Date(created_at),\n" +
 "                  status) rr\n" +
 "ORDER  BY date ASC",resultSetMapping = "FileStatusProcess")

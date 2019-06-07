@@ -3,13 +3,17 @@ package com.core.behavior.util;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
+import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
+import com.core.behavior.reader.BeanIoReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -260,6 +264,41 @@ public class Utils {
             }
         } 
         return value;
+    }
+    
+    public static boolean isEmpty(File file){
+        
+        long count = 0;
+        FileReader reader = null;
+        LineNumberReader readerLine = null;
+        boolean isEmpty = true;
+        try {
+             reader = new FileReader(file);
+             readerLine = new LineNumberReader(reader);
+
+            while (readerLine.readLine() != null) {
+                count++;
+            }           
+
+            --count;
+            return count <= 0 ? isEmpty : !isEmpty;
+            
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+            return isEmpty;
+        } catch (IOException ex) {
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+            return isEmpty;
+        }finally{
+            try {
+                readerLine.close();
+                reader.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+           
+        }
     }
 
 }
