@@ -1,19 +1,26 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
+import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.util.TypeErrorEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Locale;
 import javax.persistence.Column;
+import javax.persistence.ColumnResult;
+import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedNativeQuery;
+import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,10 +29,20 @@ import lombok.Data;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
+@SqlResultSetMapping(name = "LogResult", classes = @ConstructorResult(columns = {
+    @ColumnResult(name = "msg", type = String.class),                    
+    @ColumnResult(name = "qtd", type = Long.class),},
+        targetClass = LogStatusSinteticoDTO.class))
+
+@NamedNativeQuery(name = "Log.listErroSintetico", 
+        query = "select  message_error as msg, count(1) as qtd "
+        + "from behavior.log "
+        + "where file_id = :fileId and field_name = :fieldName"
+        + " group by message_error", resultSetMapping = "LogResult")
+
 @Entity
 @Table(schema = "behavior", name = "log")
 @Data
-
 @AllArgsConstructor
 public class Log implements Serializable {
 
