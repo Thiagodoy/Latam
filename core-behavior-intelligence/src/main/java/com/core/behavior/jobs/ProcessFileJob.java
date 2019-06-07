@@ -109,7 +109,7 @@ public class ProcessFileJob extends QuartzJobBean {
             } else {
                fileService.setStatus(idFile,StatusEnum.VALIDATION_ERROR);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
             logService.logGeneric((f != null ? f.getId() : 0l), e.getLocalizedMessage());
             fileService.setStatus(idFile,StatusEnum.VALIDATION_ERROR);
