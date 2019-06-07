@@ -122,6 +122,24 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
+    
+     @RequestMapping(value = "/errors/sintetico/{id}/{field}", method = RequestMethod.GET)
+    public ResponseEntity downloadErrorSintetico(
+            @PathVariable Long id,
+            @PathVariable String field) {
+
+        try {
+            
+            return ResponseEntity.ok(fileService.generateLogStatusSintetico(id, field));
+
+        } catch (Exception e) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
+        }
+    }
+    
+    
+    
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(

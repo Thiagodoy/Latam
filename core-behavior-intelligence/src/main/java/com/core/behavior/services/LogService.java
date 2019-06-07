@@ -1,5 +1,6 @@
 package com.core.behavior.services;
 
+import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.LogRepository;
@@ -54,6 +55,14 @@ public class LogService {
     
     public List<Log> listByFileId(Long fileId){
         return logRepository.findByFileId(fileId);
+    }
+    
+    public List<LogStatusSinteticoDTO> listLogSintetico(Long fileId, String fieldName){
+        return logRepository.listErroSintetico(fileId, fieldName);
+    }
+    
+    public boolean fileHasError(Long fileId){
+        return logRepository.countByFileId(fileId) > 0l;
     }
 
     public void saveBatch(List<Log> logs) {

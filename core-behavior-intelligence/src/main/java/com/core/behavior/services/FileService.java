@@ -3,6 +3,7 @@ package com.core.behavior.services;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
+import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
@@ -214,6 +215,11 @@ public class FileService {
         this.fileRepository.save(file);
     }
 
+    
+    public List<LogStatusSinteticoDTO> generateLogStatusSintetico(Long file, String fieldName){
+        return this.logService.listLogSintetico(file, fieldName);
+    }
+    
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
 
         StringBuilder buffer = new StringBuilder();

@@ -2,6 +2,7 @@ package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.util.TicketStatusEnum;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -9,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedNativeQuery;
@@ -242,6 +245,10 @@ public class Ticket {
     @PositionParameter(value = 46)
     @Column(name = "ID")
     public Long id;
+    
+    @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
+    private TicketStatusEnum status;
 
     
     public Ticket() {
