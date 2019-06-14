@@ -300,5 +300,17 @@ public class Utils {
            
         }
     }
-
+    
+    public static boolean isLayoutMin(String atribute, long layout){
+        
+        
+        if(layout == 1){
+            List<String> attributes = Arrays.asList("dataEmissao","dataVoo","horaVoo","ciaBilhete","trechoTkt","atoOrigem","atoDestino","nroCupom","bilhete","tipoVenda","classeCabine","ciaVoo","valorBrl","clienteEmpresa","cnpjClienteEmpresa","iataAgenciaEmissora","baseVenda","qtdePax","numVoo","agenciaConsolidada");
+            
+            return attributes.contains(atribute);
+            
+        }
+         return true;
+        
+    }
 }

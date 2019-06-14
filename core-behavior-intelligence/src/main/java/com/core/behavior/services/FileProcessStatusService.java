@@ -6,6 +6,7 @@ import com.core.behavior.model.FileProcessStatus;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.FileProcessStatusRepository;
 import com.core.behavior.repository.FileRepository;
+import com.core.behavior.util.Utils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +40,8 @@ public class FileProcessStatusService {
 
         Map<String, FileProcessStatus> mapStatusMock = Arrays
                 .asList(Ticket.class.getDeclaredFields())
-                .stream()
-                .filter((f) -> !f.getName().equalsIgnoreCase("created_at") && f.isAnnotationPresent(Column.class))
+                .stream() //FIXME: alterar isLayout quando for adotar o layout completo
+                .filter((f) -> !f.getName().equalsIgnoreCase("created_at") && f.isAnnotationPresent(Column.class) && Utils.isLayoutMin(f.getName(), 1))
                 .map((ff) -> {
                     return new FileProcessStatus(fileId, ff.getName(), 0l, file.getQtdTotalLines(), 0d, 100d);
                 })

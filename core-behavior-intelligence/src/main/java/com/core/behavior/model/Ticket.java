@@ -249,7 +249,7 @@ public class Ticket {
     @Column(name = "STATUS")
     @PositionParameter(value = 47)
     @Enumerated(EnumType.STRING)
-    private TicketStatusEnum status;
+    public TicketStatusEnum status;
 
     
     public Ticket() {
