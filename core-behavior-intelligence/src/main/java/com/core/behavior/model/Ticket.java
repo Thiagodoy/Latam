@@ -247,6 +247,7 @@ public class Ticket {
     public Long id;
     
     @Column(name = "STATUS")
+    @PositionParameter(value = 47)
     @Enumerated(EnumType.STRING)
     private TicketStatusEnum status;
 
