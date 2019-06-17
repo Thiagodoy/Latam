@@ -48,8 +48,8 @@ public class FileProcessStatusService {
                 .collect(Collectors.toMap(FileProcessStatus::getFieldName, ss -> ss));
 
         //        custom
-        mapStatusMock.put("layout", new FileProcessStatus(fileId, "layout", 0l, file.getQtdTotalLines(), 0d, 100d));
-        mapStatusMock.put("generic", new FileProcessStatus(fileId, "generic", 0l, file.getQtdTotalLines(), 0d, 100d));
+       // mapStatusMock.put("layout", new FileProcessStatus(fileId, "layout", 0l, file.getQtdTotalLines(), 0d, 100d));
+        //mapStatusMock.put("generic", new FileProcessStatus(fileId, "generic", 0l, file.getQtdTotalLines(), 0d, 100d));
 
         List<FileStatusDTO> listStatus = this.fileProcessStatusRepository.getProcessStatus(fileId);
 
@@ -66,7 +66,7 @@ public class FileProcessStatusService {
             });
         }
 
-        if (mapStatusMock.get("layout").getQtdErrors() > 0) {
+        if (mapStatusMock.containsKey("layout") && mapStatusMock.get("layout").getQtdErrors() > 0) {
             fileProcessStatusRepository.save(mapStatusMock.get("layout"));
         } else {
 

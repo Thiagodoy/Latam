@@ -54,7 +54,7 @@ public class UserResource {
             @RequestParam(name = "size") int size) {
         try {
 
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("firstName"));
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("firstName").ascending());
             return ResponseEntity.ok(service.listAllUser(firstName, lastName, email, profile,agency, pageRequest));
         } catch (Exception ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
