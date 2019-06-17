@@ -8,7 +8,9 @@ package com.core.behavior.repository;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,6 +27,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket>findByFileId(@Param("fileId")Long fileId);
+    
+    @Modifying 
+    @Transactional
+    @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
+    void deleteByFileId(@Param("fileId")Long fileId);
     
     
 }
