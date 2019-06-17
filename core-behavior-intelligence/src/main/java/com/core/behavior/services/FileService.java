@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 
@@ -223,6 +224,8 @@ public class FileService {
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
 
         StringBuilder buffer = new StringBuilder();
+        String header = Utils.layoutMin.stream().collect(Collectors.joining(";"));
+        buffer.append("ERRO;" + header + "\n");
 
         logService.listByFileId(idFile).forEach(l -> {
             buffer.append(l);

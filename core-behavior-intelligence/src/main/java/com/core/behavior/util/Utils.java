@@ -50,6 +50,8 @@ public class Utils {
     private static SimpleDateFormat formmatDate;
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
+    
+    public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataVoo","horaVoo","ciaBilhete","trechoTkt","atoOrigem","atoDestino","nroCupom","bilhete","tipoVenda","classeCabine","ciaVoo","valorBrl","clienteEmpresa","cnpjClienteEmpresa","iataAgenciaEmissora","baseVenda","qtdePax","numVoo","agenciaConsolidada");
 
     public static enum TypeField {
         TICKET, LOG
@@ -305,10 +307,7 @@ public class Utils {
         
         
         if(layout == 1){
-            List<String> attributes = Arrays.asList("dataEmissao","dataVoo","horaVoo","ciaBilhete","trechoTkt","atoOrigem","atoDestino","nroCupom","bilhete","tipoVenda","classeCabine","ciaVoo","valorBrl","clienteEmpresa","cnpjClienteEmpresa","iataAgenciaEmissora","baseVenda","qtdePax","numVoo","agenciaConsolidada");
-            
-            return attributes.contains(atribute);
-            
+            return layoutMin.contains(atribute);            
         }
          return true;
         

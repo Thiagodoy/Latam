@@ -38,12 +38,12 @@ public class DateHandler implements TypeHandler {
         for (SimpleDateFormat f : fommaters ) {
             try {
                 result = f.parse(string);
-            } catch (ParseException ex) {}
+            } catch (ParseException ex) {            
+                throw new TypeConversionException("Data inválida!");
+            }
         }
         
-//        if(result == null){
-//            throw new TypeConversionException(""); 
-//        }
+
             
         return result;  
     }
