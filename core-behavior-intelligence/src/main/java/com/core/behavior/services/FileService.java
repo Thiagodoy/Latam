@@ -1,6 +1,9 @@
 package com.core.behavior.services;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.core.activiti.model.UserActiviti;
+import com.core.activiti.repository.UserActivitiRepository;
+import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
@@ -15,6 +18,7 @@ import com.core.behavior.repository.LogRepository;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.sftp.ClientSftp;
 import com.core.behavior.specifications.FileSpecification;
+import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 
 import com.core.behavior.util.StatusEnum;
@@ -64,6 +68,15 @@ public class FileService {
     
     @Autowired
     private TicketRepository ticketRepository;
+    
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+    
+    @Autowired
+    private EmailService emailService;    
+    
+    @Autowired
+    private UserActivitiRepository userActivitiRepository;
     
     @Autowired
     private FileProcessStatusRepository fileProcessStatusRepository;
@@ -122,8 +135,14 @@ public class FileService {
         if (uploadAws || uploadFtp) {
             this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,0);
             this.uploadFile(uploadAws, uploadFtp, folder, file);
+            //Notifica os usuários que estão na mesma agenica
+            userInfoRepository.findByKeyAndValue("agencia", String.valueOf(id)).forEach(info->{            
+                Optional<UserActiviti> u =  userActivitiRepository.findById(info.getUserId());                
+                if(u.isPresent()){
+                    emailService.sendEmailByUser(EmailLayoutEnum.FORGOT, "Notificação", u.get());
+                }
+            });
         } else if (processFile) {
-
             String[] s = new String[5];
             s[0] = "VALIDATION_UPLOADED";
             s[1] = "VALIDATION_PROCESSING";

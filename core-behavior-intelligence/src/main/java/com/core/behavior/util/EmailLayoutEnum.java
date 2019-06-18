@@ -6,5 +6,6 @@ package com.core.behavior.util;
  */
 public enum  EmailLayoutEnum {
     CONGRATS,
-    FORGOT
+    FORGOT,
+    NOTIFICACAO_UPLOAD
 }

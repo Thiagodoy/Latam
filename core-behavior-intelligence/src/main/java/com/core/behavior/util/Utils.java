@@ -208,6 +208,10 @@ public class Utils {
             case FORGOT:
                 stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
                 break;
+            case NOTIFICACAO_UPLOAD:
+                stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
+                break;
+                
         }
 
         String theString = IOUtils.toString(stream, "UTF-8");

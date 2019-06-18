@@ -127,11 +127,11 @@ public class UserActivitiService {
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
 
         if (!Utils.isMaster(user) && firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
-            LocalDate time = LocalDate.now().minus(1, ChronoUnit.DAYS);
+            LocalDateTime time = LocalDateTime.now().minus(4, ChronoUnit.HOURS);
 
             Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate dateLastAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);           
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime dateLastAcess = LocalDateTime.parse(lastAccess.get().getValue(), formatter);           
             
             
             if (time.isAfter(dateLastAcess)) {
@@ -143,9 +143,9 @@ public class UserActivitiService {
 
         Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate dateAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);
-        LocalDate ld = LocalDate.now().minus(45, ChronoUnit.DAYS);
+        LocalDate ld = LocalDate.now().minus(90, ChronoUnit.DAYS);
 
         if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");
@@ -170,8 +170,8 @@ public class UserActivitiService {
 
         UserInfo userLastAccess = user.getInfo().stream().filter(f -> f.getKey().equals(Constantes.LAST_ACCESS)).findFirst().get();
 
-        DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        userLastAccess.setValue(formatterDate.format(LocalDate.now()));
+        DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        userLastAccess.setValue(formatterDate.format(LocalDateTime.now()));
 
         infoService.save(userLastAccess);
 
