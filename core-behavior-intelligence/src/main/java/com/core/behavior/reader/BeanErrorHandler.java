@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.Data;
 import org.beanio.BeanReaderErrorHandler;
 import org.beanio.BeanReaderException;
@@ -71,10 +72,13 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
         }
 
         if (e.getRecordCount() == 0) {
+            
             Log log = new Log();
             log.setFileId(fileId);
             log.setFieldName("generic");
             log.setType(TypeErrorEnum.RECORD);
+            log.setRecordContent(e.getLocalizedMessage());
+            log.setLineNumber(0l);
             log.setMessageError(e.getMessage());
             logs.add(log);
         }
