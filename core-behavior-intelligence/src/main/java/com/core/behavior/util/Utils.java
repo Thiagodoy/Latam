@@ -50,6 +50,8 @@ public class Utils {
     private static SimpleDateFormat formmatDate;
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
+    
+    public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataVoo","horaVoo","ciaBilhete","trechoTkt","atoOrigem","atoDestino","nroCupom","bilhete","tipoVenda","classeCabine","ciaVoo","valorBrl","clienteEmpresa","cnpjClienteEmpresa","iataAgenciaEmissora","baseVenda","qtdePax","numVoo","agenciaConsolidada");
 
     public static enum TypeField {
         TICKET, LOG
@@ -206,6 +208,10 @@ public class Utils {
             case FORGOT:
                 stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
                 break;
+            case NOTIFICACAO_UPLOAD:
+                stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
+                break;
+                
         }
 
         String theString = IOUtils.toString(stream, "UTF-8");
@@ -300,5 +306,14 @@ public class Utils {
            
         }
     }
-
+    
+    public static boolean isLayoutMin(String atribute, long layout){
+        
+        
+        if(layout == 1){
+            return layoutMin.contains(atribute);            
+        }
+         return true;
+        
+    }
 }

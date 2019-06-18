@@ -8,7 +8,9 @@ package com.core.behavior.repository;
 import com.core.behavior.dto.FileStatusDTO;
 import com.core.behavior.model.FileProcessStatus;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -23,5 +25,10 @@ public interface FileProcessStatusRepository extends JpaRepository<FileProcessSt
     @Query(nativeQuery = true)
     List<FileStatusDTO>getProcessStatus(@Param("fileId")Long fileId);
     List<FileProcessStatus>findByFileId(Long fileId);
+    
+    @Modifying   
+    @Transactional
+    @Query(value = "delete from file_status  where file_id = :fileId", nativeQuery = true)  
+    void deleteByFileId(@Param("fileId") Long fileId);
     
 }

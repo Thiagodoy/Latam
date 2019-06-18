@@ -1,6 +1,9 @@
 package com.core.behavior.services;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.core.activiti.model.UserActiviti;
+import com.core.activiti.repository.UserActivitiRepository;
+import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
@@ -8,10 +11,14 @@ import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
+import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;
+import com.core.behavior.repository.LogRepository;
+import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.sftp.ClientSftp;
 import com.core.behavior.specifications.FileSpecification;
+import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 
 import com.core.behavior.util.StatusEnum;
@@ -27,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 
@@ -57,12 +65,30 @@ public class FileService {
 
     @Autowired
     private FileRepository fileRepository;
+    
+    @Autowired
+    private TicketRepository ticketRepository;
+    
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+    
+    @Autowired
+    private EmailService emailService;    
+    
+    @Autowired
+    private UserActivitiRepository userActivitiRepository;
+    
+    @Autowired
+    private FileProcessStatusRepository fileProcessStatusRepository;
 
     @Autowired
     private FileProcessStatusService fileProcessStatusService;
 
     @Autowired
-    private LogService logService;
+    private LogService logService;   
+    
+    @Autowired
+    private LogRepository logRepository;
 
     @Autowired
     private AgencyService agencyService;
@@ -109,8 +135,14 @@ public class FileService {
         if (uploadAws || uploadFtp) {
             this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,0);
             this.uploadFile(uploadAws, uploadFtp, folder, file);
+            //Notifica os usuários que estão na mesma agenica
+            userInfoRepository.findByKeyAndValue("agencia", String.valueOf(id)).forEach(info->{            
+                Optional<UserActiviti> u =  userActivitiRepository.findById(info.getUserId());                
+                if(u.isPresent()){
+                    emailService.sendEmailByUser(EmailLayoutEnum.FORGOT, "Notificação", u.get());
+                }
+            });
         } else if (processFile) {
-
             String[] s = new String[5];
             s[0] = "VALIDATION_UPLOADED";
             s[1] = "VALIDATION_PROCESSING";
@@ -121,7 +153,11 @@ public class FileService {
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 10, Sort.by("createdDate").ascending()), s, null, null);
 
             if (!result.getContent().isEmpty()) {
-                throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
+                
+                File fileTemp = result.getContent().get(0);
+                this.deleteFileCascade(fileTemp);
+                
+               /// throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
             }
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,1);
@@ -182,6 +218,16 @@ public class FileService {
         bean.getScheduler().scheduleJob(detail, trigger);
     }
 
+    
+    
+    
+    public void deleteFileCascade(File file){
+        ticketRepository.deleteByFileId(file.getId());
+        logRepository.deleteByFileId(file.getId());
+        fileProcessStatusRepository.deleteByFileId(file.getId());
+        fileRepository.delete(file);
+    }
+    
     @Transactional
     private com.core.behavior.model.File persist(String userId, Long id, java.io.File file, StatusEnum status,long stage) throws IOException {
         com.core.behavior.model.File f = new com.core.behavior.model.File();
@@ -223,6 +269,8 @@ public class FileService {
     public StringBuilder generateFileErrors(Long idFile, boolean isCsv) {
 
         StringBuilder buffer = new StringBuilder();
+        String header = Utils.layoutMin.stream().collect(Collectors.joining(";"));
+        buffer.append("ERRO;" + header + "\n");
 
         logService.listByFileId(idFile).forEach(l -> {
             buffer.append(l);

@@ -88,12 +88,12 @@ public class Log implements Serializable {
 
     @Override
     public String toString() {
-        MessageFormat formmater = new MessageFormat("[CONTENT LINE ({0})] -> {1}\n[{2} {3}] -> {4} \n \n", new Locale("pt", "BR"));
-        return formmater.format(new Object[]{this.lineNumber, this.recordContent, this.type, this.fieldName, this.messageError});
+        MessageFormat formmater = new MessageFormat("[Line :{0}] -> Campo {2} -> {3};{4}\n", new Locale("pt", "BR"));        
+        return formmater.format(new Object[]{this.lineNumber , this.type, this.fieldName, this.messageError, this.recordContent});
     }
 
     public String toStringCsv() {
-        MessageFormat formmater = new MessageFormat("[{0} {1}], {2} \n", new Locale("pt", "BR"));
+        MessageFormat formmater = new MessageFormat("{0} {1} {2} \n", new Locale("pt", "BR"));
         return formmater.format(new Object[]{this.type, this.fieldName, this.messageError});
     }
 

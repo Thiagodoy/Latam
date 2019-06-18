@@ -1,11 +1,17 @@
 package com.core.behavior.services;
 
+import com.core.activiti.model.UserActiviti;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.Utils;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,33 @@ public class EmailService {
     @Autowired
     private JavaMailSender sender;
 
+    
+    
+    public void sendEmailByUser(EmailLayoutEnum layout, String subject, UserActiviti userActiviti){
+    
+    
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
+        parameter.put(":email", userActiviti.getEmail());        
+        parameter.put(":data", formatter.format(LocalDateTime.now()));
+
+        Runnable runnable = () -> {
+            try {
+                this.send(layout, subject , parameter, userActiviti.getEmail());
+            } catch (MessagingException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            } catch (IOException ex) {
+                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
+            }
+        };
+
+        new Thread(runnable).start();
+    
+    
+    }
+    
+    
     public void send(EmailLayoutEnum layout,String subject,Map<String,String>parameters, String... emails) throws MessagingException, IOException {
 
         MimeMessage message = sender.createMimeMessage();        

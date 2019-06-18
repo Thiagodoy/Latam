@@ -92,11 +92,11 @@ public class ProcessFileJob extends QuartzJobBean {
                 fileService.setStage(idFile, 3);
 
                 ticketService.saveBatch(dto.getTicket());
-                List<Ticket> tickets = ticketService.listByFileId(idFile);
+                //List<Ticket> tickets = ticketService.listByFileId(idFile);
 
-                tickets.parallelStream().forEach(t -> {
-                    new ValidatorShortLayout(t).validate();
-                });
+//                tickets.parallelStream().forEach(t -> {
+//                    new ValidatorShortLayout(t).validate();
+//                });
 
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, 4);

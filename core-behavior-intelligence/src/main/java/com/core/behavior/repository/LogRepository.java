@@ -8,7 +8,9 @@ package com.core.behavior.repository;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.model.Log;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +26,10 @@ public interface LogRepository extends JpaRepository<Log, Long>{
     
     @Query(nativeQuery = true)
     List<LogStatusSinteticoDTO>listErroSintetico(@Param("fileId")Long fileId, @Param("fieldName")String fieldName);
+    
+    
+    @Modifying 
+    @Transactional
+    @Query(value = "delete from log  where file_id = :fileId", nativeQuery = true)    
+    void deleteByFileId(@Param("fileId")Long fileId);
 }

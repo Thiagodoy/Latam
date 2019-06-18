@@ -95,10 +95,7 @@ public class LogService {
 
         } catch (SQLException ex) {
             Logger.getLogger(TicketService.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-       
+        }      
 
     }
-
 }

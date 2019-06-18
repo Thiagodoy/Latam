@@ -18,7 +18,17 @@ public class DoubleHandler implements TypeHandler{
     @Override
     public Object parse(String string) throws TypeConversionException {
         
-        return Optional.of(string).isPresent() ? Double.valueOf(string.replace(",", "").replace(".", "")) / 100 : Double.valueOf("0.0");
+        
+        
+        try {
+             return Optional.of(string).isPresent() ? Double.valueOf(string.replace(",", "").replace(".", "")) / 100 : Double.valueOf("0.0");
+        } catch (Exception e) {
+            
+            throw  new TypeConversionException("Não foi possivel realizar a conversão para o valor primitivo!");
+        }
+        
+        
+       
     }
 
     @Override
