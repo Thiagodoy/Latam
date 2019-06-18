@@ -1,5 +1,6 @@
 package com.core.behavior.reader;
 
+import com.core.behavior.dto.HeaderDTO;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
@@ -7,12 +8,14 @@ import com.core.behavior.util.StatusEnum;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
 import org.beanio.StreamFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +34,13 @@ public class BeanIoReader {
     private FileService fileService;
 
     @Autowired
-    private LogService logService;    
+    private LogService logService;
 
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String user) {
 
         long start = System.currentTimeMillis();
         long end;
-        
+
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
         T record = null;
@@ -48,7 +51,6 @@ public class BeanIoReader {
             factory.load(stream);
 
             reader = factory.createReader(str, file);
-            
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -57,13 +59,13 @@ public class BeanIoReader {
             beanErrorHandler.setFileId(f.getId());
             reader.setErrorHandler(beanErrorHandler);
 
-            record = (T) reader.read();           
+            record = (T) reader.read();
 
             if (beanErrorHandler.getLogs().size() > 0) {
                 logService.saveBatch(beanErrorHandler.getLogs());
             }
             end = System.currentTimeMillis();
-            fileService.setParseTime(f.getId(), (end - start)/1000);
+            fileService.setParseTime(f.getId(), (end - start) / 1000);
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.VALIDATION_ERROR);
@@ -77,18 +79,17 @@ public class BeanIoReader {
     }
 
     private long countLineNumber(File file) {
-
         long count = 0;
         FileReader reader = null;
         LineNumberReader readerLine = null;
 
         try {
-             reader = new FileReader(file);
-             readerLine = new LineNumberReader(reader);
+            reader = new FileReader(file);
+            readerLine = new LineNumberReader(reader);
 
             while (readerLine.readLine() != null) {
                 count++;
-            }           
+            }
 
             return --count;
 
@@ -96,18 +97,61 @@ public class BeanIoReader {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        } finally {
             try {
                 readerLine.close();
                 reader.close();
             } catch (IOException ex) {
                 Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             }
-           
+
         }
-        
 
         return 0l;
+    }
+
+    public boolean headerIsValid(File file, String stream, String xmlParser) {
+
+        FileReader reader = null;
+        LineNumberReader readerLine = null;
+
+        try {
+            reader = new FileReader(file);
+            readerLine = new LineNumberReader(reader);
+
+            String header = readerLine.readLine();
+            File fileHeader = File.createTempFile("fileHeader", ".csv");
+            FileWriter writer = new FileWriter(fileHeader);
+            writer.write(header);
+            writer.flush();
+            writer.close();
+
+            StreamFactory factory = StreamFactory.newInstance();
+            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
+            //factory.loadResource("resources/layoutMinimoMessages.properties");
+            factory.load(str);
+
+            BeanReader beanReader = factory.createReader(stream, file);
+            HeaderDTO headerDto = (HeaderDTO) beanReader.read();
+            beanReader.close();
+            
+            FileUtils.forceDelete(fileHeader);
+
+            return Optional.ofNullable(headerDto).isPresent();
+
+        } catch (Exception ex) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+           return false;        
+        } finally {
+            try {
+                readerLine.close();
+                reader.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
     }
 
 }

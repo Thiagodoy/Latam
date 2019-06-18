@@ -15,6 +15,7 @@ public class MessageCode {
     public static final long SERVER_ERROR_AWS = 501l;
     public static final long SERVER_ERROR_SFTP = 502l;
     public static final Long FILE_NAME_REPETED = 1987L;
+    public static final Long FILE_HEADER_INVALID = 1333L;
     public static final Long FILE_EMPTY = 1986L;
     public static final Long FILE_UPLOADED_SUCCESS = 1988L;
 }

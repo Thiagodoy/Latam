@@ -11,6 +11,7 @@ import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
+import com.core.behavior.reader.BeanIoReader;
 import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;
@@ -18,6 +19,7 @@ import com.core.behavior.repository.LogRepository;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.sftp.ClientSftp;
 import com.core.behavior.specifications.FileSpecification;
+import com.core.behavior.util.Constantes;
 import com.core.behavior.util.EmailLayoutEnum;
 import com.core.behavior.util.MessageCode;
 
@@ -104,6 +106,9 @@ public class FileService {
 
     @Autowired
     private FileService fileService;
+    
+    @Autowired
+    private BeanIoReader beanIoReader;
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
@@ -158,6 +163,15 @@ public class FileService {
                 this.deleteFileCascade(fileTemp);
                 
                /// throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
+            }
+            
+             String urlFile = agency.getLayoutFile() == 1L ? Constantes.FILE_BEAN_HEADER_LAYOUT_SHORT : Constantes.FILE_BEAN_HEADER_LAYOUT;
+            
+            //Valida o header do arquivo
+            boolean headerIsValid = beanIoReader.headerIsValid(file,"streamHeader", urlFile);
+            
+            if(!headerIsValid){
+                throw new ActivitiException(MessageCode.FILE_HEADER_INVALID);
             }
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED,1);
