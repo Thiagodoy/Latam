@@ -12,13 +12,13 @@ import com.core.behavior.response.GroupResponse;
 import com.core.behavior.response.UserResponse;
 import com.core.activiti.specifications.UserActivitiSpecification;
 import com.core.behavior.dto.UserDTO;
+import com.core.behavior.model.Notificacao;
 import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.util.Constantes;
-import com.core.behavior.util.EmailLayoutEnum;
+import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -62,6 +60,9 @@ public class UserActivitiService {
 
     @Autowired
     private GroupMemberSevice groupMemberSevice;
+    
+    @Autowired
+    private NotificacaoService notificacaoService;
 
     @Transactional
     public void deleteUser(String idUser) {
@@ -190,19 +191,11 @@ public class UserActivitiService {
         parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
-
-        Runnable runnable = () -> {
-            try {
-                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, user.getEmail());
-            } catch (MessagingException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            } catch (IOException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            }
-        };
-
-        new Thread(runnable).start();
-
+        
+        Notificacao notificacao = new Notificacao();
+        notificacao.setLayout(LayoutEmailEnum.CONGRATS);
+        notificacao.setParameters(Utils.mapToString(parameter));
+        notificacaoService.save(notificacao);
     }
 
     @Transactional
@@ -249,18 +242,11 @@ public class UserActivitiService {
         parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
-
-        Runnable runnable = () -> {
-            try {
-                emailService.send(EmailLayoutEnum.CONGRATS, "Acesso", parameter, userActiviti.getEmail());
-            } catch (MessagingException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            } catch (IOException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            }
-        };
-
-        new Thread(runnable).start();
+        
+        Notificacao notificacao = new Notificacao();
+        notificacao.setLayout(LayoutEmailEnum.FORGOT);
+        notificacao.setParameters(Utils.mapToString(parameter));
+        notificacaoService.save(notificacao);       
 
     }
 
@@ -300,18 +286,11 @@ public class UserActivitiService {
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", formatter.format(LocalDateTime.now()));
-
-        Runnable runnable = () -> {
-            try {
-                emailService.send(EmailLayoutEnum.FORGOT, "Acesso", parameter, userActiviti.getEmail());
-            } catch (MessagingException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            } catch (IOException ex) {
-                Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "EMAIL", ex);
-            }
-        };
-
-        new Thread(runnable).start();
+        
+        Notificacao notificacao = new Notificacao();
+        notificacao.setLayout(LayoutEmailEnum.FORGOT);
+        notificacao.setParameters(Utils.mapToString(parameter));
+        notificacaoService.save(notificacao);
 
     }
 

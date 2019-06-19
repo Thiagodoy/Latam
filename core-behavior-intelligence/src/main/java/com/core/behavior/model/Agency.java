@@ -63,6 +63,15 @@ public class Agency {
     @Column(name = "layout_file")
     private Long layoutFile;
     
+    @Column(name = "send_email_daily_upload")
+    private Long sendDailyUpload;   
+    
+    @Column(name = "hours_advance")
+    private Long hoursAdvance;
+    
+    @Column(name = "time_limit")
+    private String timeLimit;
+    
     @Transient
     private List<UserResponse> users;
     

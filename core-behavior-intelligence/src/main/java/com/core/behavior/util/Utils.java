@@ -7,6 +7,9 @@ import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -194,31 +197,7 @@ public class Utils {
             parameters.put(index, "'" + value.toString() + "'");
         }
 
-    }
-
-    public static String getContenFromLayout(EmailLayoutEnum layout) throws IOException {
-
-        StreamFactory factory = StreamFactory.newInstance();
-        InputStream stream = null;
-
-        switch (layout) {
-            case CONGRATS:
-                stream = factory.getClass().getClassLoader().getResourceAsStream("static/CONGRAT-EMAIL.html");
-                break;
-            case FORGOT:
-                stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
-                break;
-            case NOTIFICACAO_UPLOAD:
-                stream = factory.getClass().getClassLoader().getResourceAsStream("static/FORGOT-ACESS.html");
-                break;
-                
-        }
-
-        String theString = IOUtils.toString(stream, "UTF-8");
-
-        return theString;
-
-    }
+    }   
 
     public static File loadLogo(String path)
             throws IOException {
@@ -307,13 +286,26 @@ public class Utils {
         }
     }
     
-    public static boolean isLayoutMin(String atribute, long layout){
-        
+    public static boolean isLayoutMin(String atribute, long layout){       
         
         if(layout == 1){
             return layoutMin.contains(atribute);            
         }
          return true;
         
+    }
+    
+    
+    public static String mapToString(Map ma){
+        try {
+            return  new ObjectMapper().writeValueAsString(ma);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
+    }
+    
+    public static Map<String,String>toMap(String value) throws IOException{
+        return  new ObjectMapper().readValue(value, HashMap.class);
     }
 }
