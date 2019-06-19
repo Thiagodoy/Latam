@@ -21,7 +21,7 @@ public class UserInfoService {
 
     public boolean checkCpfCnpj(String value) {
         List<UserInfo> info = infoRepository.findByKeyAndValue("cpf", value);
-        return !(info.size() > 0);
+        return !info.isEmpty();
     }
 
     public List<UserInfo> findByUser(String id) {
