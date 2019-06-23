@@ -1,102 +1,89 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.core.behavior.jobs;
 
+import com.core.activiti.model.GroupMemberActiviti;
+import com.core.activiti.model.UserActiviti;
 import com.core.behavior.model.Agency;
+import com.core.behavior.model.Notificacao;
 import com.core.behavior.services.AgencyService;
-import com.core.behavior.services.TicketService;
-import com.core.behavior.specifications.AgenciaSpecification;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.Date;
+import com.core.behavior.services.FileService;
+import com.core.behavior.services.NotificacaoService;
+import com.core.behavior.services.UserActivitiService;
+import com.core.behavior.util.LayoutEmailEnum;
+import com.core.behavior.util.Utils;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import org.joda.time.LocalDateTime;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
+import java.util.Map;
+import java.util.Optional;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.quartz.SchedulerException;
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import org.quartz.SimpleTrigger;
-import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 /**
  *
- * @author Thiago H. Godoy <thiagodoy@hotmail.com>
+ * @author thiag
  */
-@DisallowConcurrentExecution
 public class AgenciaEmailJob extends QuartzJobBean {
 
-    public static final String DATA_FILE_ID = "fileId";
+    @Autowired
+    private UserActivitiService userActivitiService;
 
+    @Autowired
+    private FileService fileService;
+    
     @Autowired
     private AgencyService agencyService;
 
     @Autowired
-    private SchedulerFactoryBean bean;
+    private NotificacaoService notificacaoService;
+
+    public static final String JOB_KEY_AGENCIA = "JOB_KEY_AGENCIA";
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        LocalDate now = LocalDate.now();
-        DayOfWeek day = now.getDayOfWeek();
+        String id = jec.getJobDetail().getJobDataMap().getString(JOB_KEY_AGENCIA);
+        String[] profile = new String[]{"agência", "executivo de planejamento", "master agência"};
 
-        if (day.equals(DayOfWeek.SATURDAY) || day.equals(DayOfWeek.SUNDAY)) {
+        boolean hasFile = fileService.hasFileToday(Long.parseLong(id));
+        
+        
+        Agency agency =  agencyService.findById(Long.parseLong(id));
+
+        if (hasFile) {
             return;
         }
 
-        List<Agency> agencias = agencyService
-                .listAll()
-                .stream()
-                .filter(a -> a.getSendDailyUpload().equals(1l))
-                .collect(Collectors.toList());
+        List<UserActiviti> users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id}, null).getContent();
 
-        agencias.forEach(a -> {
+        users.forEach(u -> {
 
-            String jobName = a.getName();
+            Optional<GroupMemberActiviti> opt = u.getGroups().stream().filter(g -> g.getGroupId().equals("executivo de planejamento")).findFirst();
 
-            JobDetail detail = JobBuilder
-                    .newJob(ProcessFileJob.class)
-                    .withIdentity("JOB-" + jobName + "-EMAIL", "send-email")
-                    .build();
-            
-            Date dateStart = generateDate(a);
-            SimpleTrigger trigger = TriggerBuilder
-                    .newTrigger()
-                    .withIdentity("trigger-" + jobName, "send-email")
-                    .startAt(new Date())
-                    .withSchedule(simpleSchedule())
-                    .build();
-            
-            
-            try {
-                bean.getScheduler().scheduleJob(detail, trigger);
-            } catch (SchedulerException ex) {
-                Logger.getLogger(AgenciaEmailJob.class.getName()).log(Level.SEVERE, null, ex);
+            Notificacao notificacao = new Notificacao();
+            Map<String, String> parameter = new HashMap<String, String>();
+
+            if (opt.isPresent()) {
+                parameter.put(":email", u.getEmail());
+                parameter.put(":nome", Utils.replaceAccentToEntityHtml(u.getFirstName()));
+                parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
+                notificacao.setParameters(Utils.mapToString(parameter));
+                notificacao.setLayout(LayoutEmailEnum.ATIVO_EXECUTIVO);
+            } else {
+                parameter.put(":email", u.getEmail());
+                parameter.put(":nome", Utils.replaceAccentToEntityHtml(u.getFirstName()));
+                notificacao.setLayout(LayoutEmailEnum.ATIVO);
             }
 
+            notificacaoService.save(notificacao);
+
         });
-    }
-    
-    private Date generateDate(Agency agency){
-        
-        String[]time = agency.getTimeLimit().split(":");
-        
-        int hour = Integer.parseInt(time[0]);
-        int minute = Integer.parseInt(time[1]);
-        
-        Long hourAdvace = agency.getHoursAdvance();
-        
-        LocalDateTime now = LocalDateTime.now().minusHours(hourAdvace.intValue());
-        now = now.withHourOfDay(hour).withMinuteOfHour(minute);
-        
-        return now.toDate();        
-        
+
     }
 
 }

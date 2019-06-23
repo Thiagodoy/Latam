@@ -28,7 +28,9 @@ import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -74,10 +76,7 @@ public class FileService {
     private TicketRepository ticketRepository;
 
     @Autowired
-    private UserInfoRepository userInfoRepository;
-
-    @Autowired
-    private EmailService emailService;
+    private UserInfoRepository userInfoRepository;    
 
     @Autowired
     private UserActivitiRepository userActivitiRepository;
@@ -104,10 +103,7 @@ public class FileService {
     private ClientAws clientAws;
 
     @Autowired
-    private ClientSftp clientSftp;
-
-    @Autowired
-    private FileService fileService;
+    private ClientSftp clientSftp;   
 
     @Autowired
     private BeanIoReader beanIoReader;
@@ -262,7 +258,7 @@ public class FileService {
         f.setCreatedDate(LocalDateTime.now());
 
         try {
-            f = fileService.saveFile(f);
+            f = this.saveFile(f);
             return f;
         } catch (DataIntegrityViolationException e) {
             FileUtils.forceDelete(file);
@@ -377,6 +373,13 @@ public class FileService {
         LocalDateTime lstart = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault());
         LocalDateTime lend = LocalDateTime.ofInstant(Instant.ofEpochMilli(end), ZoneId.systemDefault());
         return this.fileRepository.statusProcesss(id, lstart, lend);
+    }
+    
+    public boolean hasFileToday(Long idAgency){
+        
+        LocalDateTime init = LocalDate.now().atTime(LocalTime.MIN);
+        LocalDateTime end = LocalDate.now().atTime(LocalTime.MAX);        
+        return !fileRepository.findByCompanyAndCreatedDateBetween(idAgency,init,end).isEmpty();        
     }
 
 }

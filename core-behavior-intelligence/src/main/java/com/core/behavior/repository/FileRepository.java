@@ -30,4 +30,9 @@ public interface FileRepository extends JpaRepository<File, Long> , JpaSpecifica
     @Query(nativeQuery = true)
     List<FileStatusProcessDTO> statusProcesss(@Param("agencia")Long agencia, @Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
     Optional<File> findByNameAndCompany(String name, Long company);
+    
+    List<File>findByCompanyAndCreatedDateBetween(Long company,LocalDateTime start, LocalDateTime end);
+    
+    
+    
 }
