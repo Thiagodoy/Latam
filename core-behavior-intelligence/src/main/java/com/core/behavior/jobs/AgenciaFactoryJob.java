@@ -51,7 +51,7 @@ public class AgenciaFactoryJob extends QuartzJobBean {
         List<Agency> agencias = agencyService
                 .listAll()
                 .stream()
-                .filter(a -> a.getSendDailyUpload().equals(1l))
+                .filter(a -> a.getSendDailyUpload() != null && a.getSendDailyUpload().equals(1l))
                 .collect(Collectors.toList());
 
         agencias.parallelStream().forEach(a -> {
@@ -91,8 +91,8 @@ public class AgenciaFactoryJob extends QuartzJobBean {
         
         Long hourAdvace = agency.getHoursAdvance();
         
-        LocalDateTime now = LocalDateTime.now().minusHours(hourAdvace.intValue());
-        now = now.withHourOfDay(hour).withMinuteOfHour(minute);
+        LocalDateTime now = LocalDateTime.now();
+        now = now.withHourOfDay(hour).withMinuteOfHour(minute).minusHours(hourAdvace.intValue());
         
         return now.toDate();        
         

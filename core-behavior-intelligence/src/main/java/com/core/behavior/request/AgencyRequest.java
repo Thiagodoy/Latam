@@ -1,5 +1,6 @@
 package com.core.behavior.request;
 
+import javax.persistence.Column;
 import lombok.Data;
 
 /**
@@ -32,5 +33,13 @@ public class AgencyRequest {
     private String s3Path;
     
     private String cnpj;
+    
+    private Long sendDailyUpload;   
+    
+    
+    private Long hoursAdvance;
+    
+    
+    private String timeLimit;
 
 }

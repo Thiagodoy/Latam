@@ -89,6 +89,9 @@ public class Agency {
         this.id = request.getId();
         this.cnpj = request.getCnpj();
         this.layoutFile = request.getLayoutFile();
+        this.sendDailyUpload =  request.getSendDailyUpload();
+        this.hoursAdvance = request.getHoursAdvance();
+        this.timeLimit = request.getTimeLimit();
     }
 
 }
