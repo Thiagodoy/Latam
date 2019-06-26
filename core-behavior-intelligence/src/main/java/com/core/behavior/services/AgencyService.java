@@ -31,7 +31,11 @@ public class AgencyService {
 
     @Autowired
     private UserActivitiService userActivitiService;
-
+    
+    
+    public List<Agency>listAll(){
+        return agencyRepository.findAll();
+    }
     public Page<Agency> list(String name, String code, Pageable page) {
         List<Specification<Agency>> predicates = new ArrayList<>();
 

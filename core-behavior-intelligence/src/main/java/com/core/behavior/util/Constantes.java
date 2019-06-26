@@ -7,7 +7,9 @@ package com.core.behavior.util;
 public class Constantes {
 
     
-    public static final String FILE_BEAN_HEADER = "static/HEADER.xml";
+    public static final String FILE_BEAN_HEADER_LAYOUT = "static/HEADER_LAYOUT.xml";
+    public static final String FILE_BEAN_HEADER_LAYOUT_SHORT = "static/HEADER_LAYOUT_SHORT.xml";
+    
     public static final String FILE_BEAN_TICKET = "static/TICKET.xml";
     public static final String FILE_BEAN_TICKET_SHORT_LAYOUT = "static/TICKET_SHORT_LAYOUT.xml";
     
