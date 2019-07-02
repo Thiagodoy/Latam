@@ -3,6 +3,7 @@ package com.core.activiti.specifications;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserActiviti_;
 import com.core.behavior.dto.UserDTO;
+import com.core.behavior.util.UserStatusEnum;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 
@@ -28,6 +29,10 @@ public class UserActivitiSpecification {
     
     public static Specification<UserActiviti> userMaster(String id) {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(UserActiviti_.userMasterId), id);
+    }
+    
+    public static Specification<UserActiviti> status(UserStatusEnum status) {
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get(UserActiviti_.status), status);
     }
     
     public static Specification<UserActiviti> ids(List<UserDTO> list) {

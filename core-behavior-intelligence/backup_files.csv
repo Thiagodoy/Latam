@@ -1,0 +1,211 @@
+id,company,created_at,name,status,user_id,qtd_total_lines,repeated_lines,execution_time,parse_time,persist_time,stage
+1,9,"2019-06-04 17:49:53","teste1 - Copia (2).csv",VALIDATION_ERROR,thiagodoy@hotmail.com,12,NULL,47,0,NULL,1
+2,9,"2019-06-04 18:03:07","teste1 - Copia 3.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,12,NULL,7,0,NULL,2
+3,9,"2019-06-04 18:05:17",teste1.csv,VALIDATION_SUCCESS,thiagodoy@hotmail.com,12,NULL,3,0,0,5
+4,9,"2019-06-04 19:26:52",teste1.csv,COLLECTOR_UPLOADED,thiagodoy@hotmail.com,NULL,NULL,NULL,NULL,NULL,0
+5,9,"2019-06-04 19:42:30","teste1 - Copia 4.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,12,NULL,3,0,NULL,3
+6,9,"2019-06-04 19:49:26","teste1 - Copia 5.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,12,NULL,99,1,NULL,4
+7,9,"2019-06-04 19:55:46","teste1 - Copia 7.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,NULL,NULL,39,NULL,NULL,1
+8,9,"2019-06-04 19:57:15","teste1 - Copia 8.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,NULL,NULL,86,NULL,NULL,2
+9,9,"2019-06-04 20:01:44","teste1 - Copia 9.csv",VALIDATION_ERROR,thiagodoy@hotmail.com,12,NULL,209,0,NULL,3
+101,90,"2019-05-13 10:41:55","TRIPSERVICE SEM 19.csv",COLLECTOR_UPLOADED,leonardo.souza@latam.com,0,0,0,0,0,5
+102,53,"2019-05-13 11:05:30","Relatorio_Bilhetes_TAM -06-12.csv",COLLECTOR_UPLOADED,victor.bonadio@latam.com,0,0,0,0,0,5
+104,92,"2019-05-14 10:20:24","EMBARQUE 04.05 A 10.05 - PRONTA.xlsx",COLLECTOR_UPLOADED,bruce@embarqueturismo.com.br,0,0,0,0,0,5
+105,90,"2019-05-14 10:47:39","Informações tam 06-05 a 12-05-19.xls",COLLECTOR_UPLOADED,orimar.costa@tripservice.com.br,0,0,0,0,0,5
+106,2,"2019-05-14 13:29:43",AEROTUR.csv,COLLECTOR_UPLOADED,mauricio@aerotur.com.br,0,0,0,0,0,5
+107,93,"2019-05-14 16:40:26","Relatorio LATAM MAIO 14.05 CSV.csv",COLLECTOR_UPLOADED,marcos@viajeglobal.com.br,0,0,0,0,0,5
+108,43,"2019-05-14 18:14:41",13_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+109,78,"2019-05-15 17:30:13",14.05.latam.xlsx,COLLECTOR_UPLOADED,luiz.chaves@agmturismo.com.br,0,0,0,0,0,5
+110,43,"2019-05-15 17:35:27",14_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+112,43,"2019-05-15 18:19:54",14_05OD_Corrigido.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+113,78,"2019-05-16 08:23:21",15.05.latam.xlsx,COLLECTOR_UPLOADED,luiz.chaves@agmturismo.com.br,0,0,0,0,0,5
+114,40,"2019-05-16 09:46:07",TAMVOETUR16052019_0530460.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+115,43,"2019-05-16 16:47:50",15_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+116,40,"2019-05-17 09:10:32",TAMVOETUR17052019_0530360.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+117,78,"2019-05-17 09:47:13",latam_16_05.xlsx,COLLECTOR_UPLOADED,luiz.chaves@agmturismo.com.br,0,0,0,0,0,5
+118,52,"2019-05-17 10:49:23","Relatorio_TAM BD Diário - 15.05 a 16.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+119,43,"2019-05-17 18:33:14",16_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+120,78,"2019-05-20 08:46:54",latam_17_05.xlsx,COLLECTOR_UPLOADED,luiz.chaves@agmturismo.com.br,0,0,0,0,0,5
+122,90,"2019-05-20 09:26:29","Informações tam 13-05 a 19-05-19.xls",COLLECTOR_UPLOADED,orimar.costa@tripservice.com.br,0,0,0,0,0,5
+123,40,"2019-05-20 09:27:32",TAMVOETUR18052019_0530290.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+124,40,"2019-05-20 09:29:30",TAMVOETUR19052019_0530540.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+125,52,"2019-05-20 09:55:59","Relatorio_TAM BD - 06.05 a 19.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+126,52,"2019-05-20 09:58:29","Relatorio_TAM BD Diário - 16.05 a 19.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+127,4,"2019-05-20 10:10:50","tkt Base 13 a 1905019.csv",COLLECTOR_UPLOADED,lucianohermann@shoppingtour.com.br,0,0,0,0,0,5
+128,40,"2019-05-20 10:30:28",TAMVOETUR20052019_0530560.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+129,102,"2019-05-20 11:02:10","110519 A 170519 -DOMESTICO.xls",COLLECTOR_UPLOADED,edinei@emcatur.com.br,0,0,0,0,0,5
+130,42,"2019-05-20 11:17:29","RELATÓRIO DE VENDAS - 11.05.2019 A 17.05.2019.xls",COLLECTOR_UPLOADED,waldir.neto@dinastur.com.br,0,0,0,0,0,5
+132,62,"2019-05-20 11:52:47","TAM SEMANA 11MAY A 17MAY2019 - ENVIAR.xls",COLLECTOR_UPLOADED,gerente.adm@ideiasturismo.com.br,0,0,0,0,0,5
+133,40,"2019-05-20 13:35:47",TAMVOETUR20052019_1200570.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+134,80,"2019-05-20 15:48:29","RELATÓRIO SEMANAL - 11052019 a 17052019.xlsx",COLLECTOR_UPLOADED,bento.lopes@moneytur.com.br,0,0,0,0,0,5
+135,94,"2019-05-20 16:11:13","BASE DE DADOS LATAM - 01 A 19 MAI 19.csv",COLLECTOR_UPLOADED,ricardo@costabrava.com.br,0,0,0,0,0,5
+136,6,"2019-05-20 16:18:35","relatorio 11 a 17..xls",COLLECTOR_UPLOADED,petronio@classicturismo.com.br,0,0,0,0,0,5
+137,63,"2019-05-20 16:49:48","Relatório de Vendas Semanal LATAM 0.XLSX",COLLECTOR_UPLOADED,diego.conrado@latam.com,0,0,0,0,0,5
+138,92,"2019-05-20 16:50:44","EMBARQUE 11.05 A 17.05 - PRONTA.xlsx",COLLECTOR_UPLOADED,luciano@embarqueturismo.com.br,0,0,0,0,0,5
+139,102,"2019-05-20 16:52:31","110519 A 170519 -  INTER.xls",COLLECTOR_UPLOADED,edinei@emcatur.com.br,0,0,0,0,0,5
+140,50,"2019-05-20 17:12:07","Planilha LATAM - MIC TURISMO LTDA 11-05-19 a 17-05-19.xlsx",COLLECTOR_UPLOADED,faturamento@michelletour.com.br,0,0,0,0,0,5
+141,43,"2019-05-20 17:50:39",17_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+142,45,"2019-05-20 18:11:11","SEMANA 20.xlsx",COLLECTOR_UPLOADED,eduardo@oriturviagens.com.br,0,0,0,0,0,5
+143,30,"2019-05-20 19:13:39","13 a 19.05.2019.csv",COLLECTOR_UPLOADED,paulo.pinheiro@alaturjtb.com,0,0,0,0,0,5
+144,43,"2019-05-20 19:51:17",19_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+145,43,"2019-05-20 19:51:18",18_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+146,39,"2019-05-21 09:01:06","Base LATAM de 13 a 19-05.xlsx",COLLECTOR_UPLOADED,tatiane@saltur.com.br,0,0,0,0,0,5
+147,40,"2019-05-21 09:15:26",TAMVOETUR21052019_0530560.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+148,52,"2019-05-21 09:21:42","Relatorio_TAM BD Diário - 19.05 a 20.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+149,104,"2019-05-21 11:48:36","2019_Semana 20.csv",COLLECTOR_UPLOADED,daniele@cosmos.com.br,0,0,0,0,0,5
+151,2,"2019-05-21 14:06:49",AEROTUR_113.csv,COLLECTOR_UPLOADED,mauricio@aerotur.com.br,0,0,0,0,0,5
+152,17,"2019-05-21 16:34:56","Exportacao TAM 13-05-2019 a 19-05-2019.csv",COLLECTOR_UPLOADED,wellington@belvitur.com.br,0,0,0,0,0,5
+153,93,"2019-05-21 16:46:31","Relatorio LATAM Maio 2019 semana 4 CVS.csv",COLLECTOR_UPLOADED,marcos@viajeglobal.com.br,0,0,0,0,0,5
+154,43,"2019-05-21 17:11:39",20_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+155,43,"2019-05-21 17:27:21",20_05OD_corrigido.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+156,52,"2019-05-22 09:11:12","Relatorio_TAM BD Diário - 20.05 a 21.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+157,48,"2019-05-22 16:53:18",rel_0105_1705_new2.xls,COLLECTOR_UPLOADED,fernando.ramires@highlight.tur.br,0,0,0,0,0,5
+158,43,"2019-05-22 17:29:50",21_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+159,35,"2019-05-23 09:58:51","Gestão Ativa - 23MAY.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+160,35,"2019-05-23 10:04:13","TAM - MS - 2019 por emissão - atualizado_01 a 22 MAY19.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+162,40,"2019-05-23 10:24:23",TAMVOETUR22052019_0530510.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+163,40,"2019-05-23 10:24:42",TAMVOETUR23052019_0530290.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+164,52,"2019-05-23 11:20:58","Relatorio_TAM BD Diário - 21.05 a 22.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+165,35,"2019-05-23 11:30:44","Relatório Detalhado - Empresas BCD -  01 a 22 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+167,102,"2019-05-23 15:15:42","110519 A 170519 -DOMESTICO npvo.xls",COLLECTOR_UPLOADED,edinei@emcatur.com.br,0,0,0,0,0,5
+168,43,"2019-05-23 17:05:18",22_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+169,52,"2019-05-24 09:10:54","Relatorio_TAM BD Diário - 22.05 a 23.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+170,40,"2019-05-24 09:35:58",TAMVOETUR24052019_0531010.xlsx,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+171,35,"2019-05-24 10:24:59","Relatório Detalhado - Empresas BCD -  01 a 23 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+172,43,"2019-05-24 17:30:56",23_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+173,40,"2019-05-27 09:12:02",TAMVOETUR25052019_0530450.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+174,40,"2019-05-27 09:12:12",TAMVOETUR26052019_0530420.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+175,40,"2019-05-27 09:12:22",TAMVOETUR27052019_0530440.XLSX,COLLECTOR_UPLOADED,cadastrocomercial@voetur.com.br,0,0,0,0,0,5
+176,42,"2019-05-27 10:29:11","RELATÓRIO DE VENDAS - 18.05.2019 A 24.05.2019.xls",COLLECTOR_UPLOADED,waldir.neto@dinastur.com.br,0,0,0,0,0,5
+177,17,"2019-05-27 10:41:16","Exportacao TAM 20-05-2019 a 27-05-2019.csv",COLLECTOR_UPLOADED,wellington@belvitur.com.br,0,0,0,0,0,5
+178,31,"2019-05-27 10:44:16","20 Base 18_05 a 24_05_2019.xls",COLLECTOR_UPLOADED,gerencia.vendas@airesturismo.com.br,0,0,0,0,0,5
+179,52,"2019-05-27 11:33:09","Relatorio_TAM BD - 13.05 a 26.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+180,62,"2019-05-27 11:34:03","TAM SEMANA 18MAY A 24MAY2019 - ENVIAR.xls",COLLECTOR_UPLOADED,gerente.adm@ideiasturismo.com.br,0,0,0,0,0,5
+182,52,"2019-05-27 11:37:21","Relatorio_TAM BD Diário - 23.05 a 26.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+183,35,"2019-05-27 11:45:31","Relatório Detalhado - Empresas BCD -  01 a 26 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+184,40,"2019-05-27 12:20:53",TAMVOETUR27052019_1200560.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+185,4,"2019-05-27 13:15:11","tkt Base 20 a 2605019.csv",COLLECTOR_UPLOADED,lucianohermann@shoppingtour.com.br,0,0,0,0,0,5
+186,5,"2019-05-27 15:19:39","01 A 26 MAIO.csv",COLLECTOR_UPLOADED,mauricio.ti@patriaconsolidadora.com.br,0,0,0,0,0,5
+187,102,"2019-05-27 15:23:26","180519 A 240519 - INTER.xls",COLLECTOR_UPLOADED,edinei@emcatur.com.br,0,0,0,0,0,5
+188,102,"2019-05-27 15:23:27","180519 A 240519 -DOMESTICO.xls",COLLECTOR_UPLOADED,edinei@emcatur.com.br,0,0,0,0,0,5
+189,45,"2019-05-27 15:30:35","SEMANA 21.xlsx",COLLECTOR_UPLOADED,eduardo@oriturviagens.com.br,0,0,0,0,0,5
+191,32,"2019-05-27 15:48:18","RELATORIO - 01 A 24MAI 19.zip",COLLECTOR_UPLOADED,gssilva@maringaturismo.com.br,0,0,0,0,0,5
+192,63,"2019-05-27 16:17:47","Relatório de Vendas Semanal LATAM 0 (1).XLSX",COLLECTOR_UPLOADED,diego.conrado@latam.com,0,0,0,0,0,5
+193,21,"2019-05-27 16:28:03",bdlatam.csv,COLLECTOR_UPLOADED,junior@tyller.com.br,0,0,0,0,0,5
+194,39,"2019-05-27 16:32:02","Base LATAM de 20 a 26-05.xlsx",COLLECTOR_UPLOADED,tatiane@saltur.com.br,0,0,0,0,0,5
+196,64,"2019-05-27 16:42:36","05.Relatório Analítico JJ - 01 à 20 de Maio 2019.xlsx",COLLECTOR_UPLOADED,tiagoluiz@kontik.com.br,0,0,0,0,0,5
+197,14,"2019-05-27 17:08:55","INTER 20 a 26MAI.csv",COLLECTOR_UPLOADED,castanho@ancoradouro.com.br,0,0,0,0,0,5
+198,14,"2019-05-27 17:08:59","DOM 20 a 26MAI.csv",COLLECTOR_UPLOADED,castanho@ancoradouro.com.br,0,0,0,0,0,5
+199,80,"2019-05-27 17:33:18","RELATORIO SEMANAL 18052019 a 24052019.xlsx",COLLECTOR_UPLOADED,bento.lopes@moneytur.com.br,0,0,0,0,0,5
+200,97,"2019-05-27 17:51:02","RELATÓRIO PROPAG - 20.05.19 a 26.05.19.xlsx",COLLECTOR_UPLOADED,corporativo@propagtur.com.br,0,0,0,0,0,5
+201,94,"2019-05-27 18:01:59","BASE DA DADOS LATAM - 01 A 26 MAI 19.csv",COLLECTOR_UPLOADED,ricardo@costabrava.com.br,0,0,0,0,0,5
+202,50,"2019-05-27 18:13:30","Planilha LATAM - MIC TURISMO LTDA 18-05-19 a 24-05-19.xlsx",COLLECTOR_UPLOADED,faturamento@michelletour.com.br,0,0,0,0,0,5
+203,43,"2019-05-27 18:42:18",25_e_26_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+204,43,"2019-05-27 18:42:18",24_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+205,6,"2019-05-28 08:11:09","RELATORIO 18 A 25.05.xls",COLLECTOR_UPLOADED,petronio@classicturismo.com.br,0,0,0,0,0,5
+206,90,"2019-05-28 08:12:50","Informações tam 20-05 a 26-05-19.xls",COLLECTOR_UPLOADED,orimar.costa@tripservice.com.br,0,0,0,0,0,5
+207,104,"2019-05-28 08:27:33","2019_Semana 21.csv",COLLECTOR_UPLOADED,daniele@cosmos.com.br,0,0,0,0,0,5
+208,2,"2019-05-28 09:03:46",AEROTUR_114.csv,COLLECTOR_UPLOADED,mauricio@aerotur.com.br,0,0,0,0,0,5
+209,92,"2019-05-28 09:07:33","EMBARQUE 18.05 A 24.05 - PRONTA.xlsx",COLLECTOR_UPLOADED,luciano@embarqueturismo.com.br,0,0,0,0,0,5
+210,40,"2019-05-28 09:13:05",TAMVOETUR28052019_0531080.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+211,52,"2019-05-28 09:46:53","Relatorio_TAM BD Diário - 26.05 a 27.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+212,13,"2019-05-28 10:18:34","LATAM - Movimento Aéreo Detalhado 01 a 27.05.xlsx",COLLECTOR_UPLOADED,emoura@avipam.com.br,0,0,0,0,0,5
+213,65,"2019-05-28 10:29:31",GS_0036_Vendasportrecho(986)_636946360545711102.csv,COLLECTOR_UPLOADED,financeiro@gstravel.com.br,0,0,0,0,0,5
+214,64,"2019-05-28 10:46:34","05.Relatório Analítico JJ - 01 à 27 de Maio 2019.xlsx",COLLECTOR_UPLOADED,tiagoluiz@kontik.com.br,0,0,0,0,0,5
+215,35,"2019-05-28 11:00:29","Relatório Detalhado - Empresas BCD -  01 a 27 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+216,30,"2019-05-28 11:31:37","20 a 26.05.2019.csv",COLLECTOR_UPLOADED,paulo.pinheiro@alaturjtb.com,0,0,0,0,0,5
+217,19,"2019-05-28 11:45:09","Relatório semanal - S.21 - 18.05 a 24.05 - Nacional.xlsx",COLLECTOR_UPLOADED,luiz.pires@congonhastravel.com.br,0,0,0,0,0,5
+218,19,"2019-05-28 11:45:35","Relatório semanal - S.21 - 18.05 a 24.05 - Internacional.xlsx",COLLECTOR_UPLOADED,luiz.pires@congonhastravel.com.br,0,0,0,0,0,5
+219,16,"2019-05-28 12:29:30","Banco de Dados LATAM 20 A 26 MAIO DE 19.CSV",COLLECTOR_UPLOADED,gabriela.silva@masterturismo.com.br,0,0,0,0,0,5
+220,48,"2019-05-28 13:10:40",rel_0105_2605_tam.xls,COLLECTOR_UPLOADED,fernando.ramires@highlight.tur.br,0,0,0,0,0,5
+221,89,"2019-05-28 14:45:42","BASE DFTURISMO 18 a 24.05.2019.csv",COLLECTOR_UPLOADED,mateusf.leitao@gmail.com,0,0,0,0,0,5
+222,1,"2019-05-28 14:50:41","tam 2.csv",COLLECTOR_UPLOADED,jorge@frontur-consolidacao.com.br,0,0,0,0,0,5
+223,1,"2019-05-28 14:51:43","tam 3.csv",COLLECTOR_UPLOADED,jorge@frontur-consolidacao.com.br,0,0,0,0,0,5
+224,59,"2019-05-28 16:05:22",LATAM_relatório_semanal_21_a_27_maio.xlsx,COLLECTOR_UPLOADED,amanda.bigi@copastur.com.br,0,0,0,0,0,5
+225,11,"2019-05-28 16:23:54","BASE LATAM - 21 Á 27.05.xlsx",COLLECTOR_UPLOADED,cibelle.chaves@multicidades.com.br,0,0,0,0,0,5
+226,93,"2019-05-28 16:34:32","Relatorio LATAM 28maio CSV.csv",COLLECTOR_UPLOADED,marcos@viajeglobal.com.br,0,0,0,0,0,5
+227,7,"2019-05-28 17:30:12","BASE 27052019.xlsx",COLLECTOR_UPLOADED,joao.vianna@tradeturismo.com.br,0,0,0,0,0,5
+229,16,"2019-05-28 18:09:25","Banco de Dados LATAM 20 A 26 MAIO DE 19 - Atualizado.CSV",COLLECTOR_UPLOADED,gabriela.silva@masterturismo.com.br,0,0,0,0,0,5
+230,43,"2019-05-28 20:04:34",27_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+231,43,"2019-05-28 20:04:34",24_05OD_Corrigido.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+232,43,"2019-05-28 20:04:35",25_e_26_05OD_Corrigido.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+233,40,"2019-05-29 08:20:13",TAMVOETUR29052019_0530550.xlsx,COLLECTOR_UPLOADED,felipe.silva@voetur.com.br,0,0,0,0,0,5
+234,52,"2019-05-29 10:17:41","Relatorio_TAM BD Diário - 27.05 a 28.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+235,15,"2019-05-29 10:26:46","LATAM 19 A 26.xls",COLLECTOR_UPLOADED,denis@salvatur.com.br,0,0,0,0,0,5
+236,35,"2019-05-29 10:32:32","Relatório Detalhado - Empresas BCD -  01 a 28 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+237,13,"2019-05-29 10:42:57","LATAM - Movimento Aéreo Detalhado 01 a 28.05.xlsx",COLLECTOR_UPLOADED,emoura@avipam.com.br,0,0,0,0,0,5
+238,67,"2019-05-29 12:18:20",REPORTE_BILHETES_LATAM_20190529090454.csv,COLLECTOR_UPLOADED,acarvalho@make-travel.com.br,0,0,0,0,0,5
+240,81,"2019-05-29 13:55:50","Relatório LATAM_18_05_19 à 24_05_19_Ártico American.csv",COLLECTOR_UPLOADED,andrea.horta@articoamerican.com.br,0,0,0,0,0,5
+241,43,"2019-05-29 18:16:15",28_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+242,40,"2019-05-30 08:40:07",TAMVOETUR30052019_0530500.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+243,67,"2019-05-30 09:32:38",REPORTE_BILHETES_LATAM_20190530.csv,COLLECTOR_UPLOADED,acarvalho@make-travel.com.br,0,0,0,0,0,5
+244,52,"2019-05-30 09:52:06","Relatorio_TAM BD Diário - 28.05 a 29.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+245,35,"2019-05-30 12:01:58","Relatório Detalhado - Empresas BCD -  01 a 29 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+246,46,"2019-05-30 16:54:19","Cópia de Relatório LATAM 20 a 27.05.xls",COLLECTOR_UPLOADED,adm@alltour.com.br,0,0,0,0,0,5
+247,32,"2019-05-30 18:25:34","RELATORIO 01 A 24 MAIO19 -.zip",COLLECTOR_UPLOADED,aiwata@maringaturismo.com.br,0,0,0,0,0,5
+248,43,"2019-05-30 18:43:11",29_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+249,52,"2019-05-31 09:21:37","Relatorio_TAM BD Diário - 29.05 a 30.05.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+250,35,"2019-05-31 11:13:24","Relatório Detalhado - Empresas BCD -  01 a 30 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+251,67,"2019-05-31 12:50:41",REPORTE_BILHETES_LATAM_20190531.csv,COLLECTOR_UPLOADED,acarvalho@make-travel.com.br,0,0,0,0,0,5
+252,43,"2019-05-31 19:00:46",30_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+253,49,"2019-06-03 08:52:59","Rel Latam mai 2019.xls",COLLECTOR_UPLOADED,francimarfrasao@apolo.tur.br,0,0,0,0,0,5
+254,1,"2019-06-03 09:19:28","tam maio e junho.csv",COLLECTOR_UPLOADED,jorge@frontur-consolidacao.com.br,0,0,0,0,0,5
+255,1,"2019-06-03 09:20:50","tam 1 maio a 03 junho.csv",COLLECTOR_UPLOADED,jorge@frontur-consolidacao.com.br,0,0,0,0,0,5
+256,90,"2019-06-03 09:29:56","Informações tam 27-05 a 02-06-19.xls",COLLECTOR_UPLOADED,orimar.costa@tripservice.com.br,0,0,0,0,0,5
+257,40,"2019-06-03 09:39:10",TAMVOETUR03062019_0530520.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+259,40,"2019-06-03 09:39:36",TAMVOETUR02062019_0530400.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+260,40,"2019-06-03 09:39:48",TAMVOETUR01062019_0531000.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+261,40,"2019-06-03 09:40:04",TAMVOETUR01062019_0430480.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+262,39,"2019-06-03 09:45:15","Base LATAM de 27 a 02- 06.xlsx",COLLECTOR_UPLOADED,tatiane@saltur.com.br,0,0,0,0,0,5
+263,52,"2019-06-03 10:11:17","Relatorio_TAM BD - 20.05 a 02.06.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+264,52,"2019-06-03 10:13:03","Relatorio_TAM BD - Maio 2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+265,52,"2019-06-03 10:15:31","Relatorio_TAM BD Diário - 30.05 a 02.06.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+266,4,"2019-06-03 10:28:48","tkt Base 2705 a 02062019.csv",COLLECTOR_UPLOADED,lucianohermann@shoppingtour.com.br,0,0,0,0,0,5
+267,42,"2019-06-03 10:55:23","RELATÓRIO DE VENDAS - 25.05.2019 A 31.05.2019.xls",COLLECTOR_UPLOADED,waldir.neto@dinastur.com.br,0,0,0,0,0,5
+268,35,"2019-06-03 11:05:27","Relatório Detalhado - Empresas BCD -  01 a 31 05 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+269,62,"2019-06-03 12:00:24","TAM SEMANA 05MAY2019 - 25MAY A 31MAY - ENVIAR.xls",COLLECTOR_UPLOADED,gerente.adm@ideiasturismo.com.br,0,0,0,0,0,5
+270,67,"2019-06-03 12:42:09",REPORTE_BILHETES_LATAM_20190603.csv,COLLECTOR_UPLOADED,acarvalho@make-travel.com.br,0,0,0,0,0,5
+271,5,"2019-06-03 13:16:02","FECHAMENTO MAIO.csv",COLLECTOR_UPLOADED,mauricio.ti@patriaconsolidadora.com.br,0,0,0,0,0,5
+272,92,"2019-06-03 14:04:27","EMBARQUE 25.05 A 31.05 - PRONTA.xlsx",COLLECTOR_UPLOADED,luciano@embarqueturismo.com.br,0,0,0,0,0,5
+273,14,"2019-06-03 14:48:28","INTER 27MAI a 02JUN.csv",COLLECTOR_UPLOADED,castanho@ancoradouro.com.br,0,0,0,0,0,5
+274,14,"2019-06-03 14:48:29","DOM 27MAI a 02JUN.csv",COLLECTOR_UPLOADED,castanho@ancoradouro.com.br,0,0,0,0,0,5
+275,82,"2019-06-03 15:03:05",Base25MAY_31MAY.xls,COLLECTOR_UPLOADED,jeane@portobrasil.com.br,0,0,0,0,0,5
+276,80,"2019-06-03 16:01:03","RELATORIO SEMANAL - 25052019 a 31052019.xlsx",COLLECTOR_UPLOADED,bento.lopes@moneytur.com.br,0,0,0,0,0,5
+277,48,"2019-06-03 16:04:41",rel_0105_3105_tam.xls,COLLECTOR_UPLOADED,fernando.ramires@highlight.tur.br,0,0,0,0,0,5
+278,79,"2019-06-03 16:51:29","EFP_T986_Vendasportrecho_JJ Maio 19.csv",COLLECTOR_UPLOADED,eduardo.gomes@pvt.tur.br,0,0,0,0,0,5
+279,7,"2019-06-03 17:30:34","BASE 02062019.xlsx",COLLECTOR_UPLOADED,andreia.ferreira@tradeturismo.com.br,0,0,0,0,0,5
+280,15,"2019-06-03 17:47:28","latam semanal 27.05 a 02.06 .xlsx",COLLECTOR_UPLOADED,suporte@salvatur.com.br,0,0,0,0,0,5
+281,16,"2019-06-03 18:03:08","Banco de Dados LATAM 27 DE MAIO A 02 DE JUNHO DE 19.CSV",COLLECTOR_UPLOADED,gabriela.silva@masterturismo.com.br,0,0,0,0,0,5
+282,32,"2019-06-03 18:14:57","RELATORIO - 01 A 31MAI19.zip",COLLECTOR_UPLOADED,aiwata@maringaturismo.com.br,0,0,0,0,0,5
+283,97,"2019-06-03 18:16:05","RELATÓRIO PROPAG - 27.05.19 a 02.06.19.xlsx",COLLECTOR_UPLOADED,corporativo@propagtur.com.br,0,0,0,0,0,5
+284,63,"2019-06-03 18:52:30","Relatório de Vendas Semanal LATAM 0 (2).XLSX",COLLECTOR_UPLOADED,diego.conrado@latam.com,0,0,0,0,0,5
+285,30,"2019-06-03 18:52:38","27 a 31.05.2019.csv",COLLECTOR_UPLOADED,paulo.pinheiro@alaturjtb.com,0,0,0,0,0,5
+287,43,"2019-06-03 18:54:12",31_05OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+288,43,"2019-06-03 18:54:22",01_e_02_06OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+289,46,"2019-06-03 19:44:59","Relatório LATAM 28.05 a 02.06.xls",COLLECTOR_UPLOADED,adm@alltour.com.br,0,0,0,0,0,5
+291,40,"2019-06-04 09:09:43",TAMVOETUR04062019_0530440.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5
+292,45,"2019-06-04 09:15:32","SEMANA 22.xlsx",COLLECTOR_UPLOADED,eduardo@oriturviagens.com.br,0,0,0,0,0,5
+294,81,"2019-06-04 10:01:05","Relatório LATAM_25_05_19 à 31_05_19_Ártico American.csv",COLLECTOR_UPLOADED,andrea.horta@articoamerican.com.br,0,0,0,0,0,5
+295,50,"2019-06-04 10:11:48","Planilha LATAM - MIC TURISMO LTDA 25-05-19 a 31-05-19.xlsx",COLLECTOR_UPLOADED,faturamento@michelletour.com.br,0,0,0,0,0,5
+296,2,"2019-06-04 11:28:47",AEROTUR_115.csv,COLLECTOR_UPLOADED,mauricio@aerotur.com.br,0,0,0,0,0,5
+297,35,"2019-06-04 11:48:00","Relatório Detalhado - Empresas BCD -  01 a 03 06 2019_TAM por data de emissão.xlsx",COLLECTOR_UPLOADED,marco.constancio@bcdtravel.com.br,0,0,0,0,0,5
+298,89,"2019-06-04 11:57:10","BASE DFTURISMO 25 a 31.05.2019.csv",COLLECTOR_UPLOADED,mateusf.leitao@gmail.com,0,0,0,0,0,5
+299,104,"2019-06-04 12:01:07","2019_Semana 22.csv",COLLECTOR_UPLOADED,daniele@cosmos.com.br,0,0,0,0,0,5
+300,65,"2019-06-04 12:05:38",GS_0036_Vendasportrecho(986)_636952466828668425.csv,COLLECTOR_UPLOADED,financeiro@gstravel.com.br,0,0,0,0,0,5
+301,94,"2019-06-04 12:17:33","BASE DA DADOS LATAM - FINAL MAI 19.csv",COLLECTOR_UPLOADED,ricardo@costabrava.com.br,0,0,0,0,0,5
+302,67,"2019-06-04 12:38:20",REPORTE_BILHETES_LATAM_20190604.csv,COLLECTOR_UPLOADED,acarvalho@make-travel.com.br,0,0,0,0,0,5
+303,64,"2019-06-04 13:42:48","05.Relatório Analítico JJ - 01 à 31 de Maio 2019.xlsx",COLLECTOR_UPLOADED,tiagoluiz@kontik.com.br,0,0,0,0,0,5
+304,64,"2019-06-04 13:43:31","06.Relatório Analítico JJ - 01 à 03 de Junho 2019.xlsx",COLLECTOR_UPLOADED,tiagoluiz@kontik.com.br,0,0,0,0,0,5
+305,79,"2019-06-04 14:07:10","EFP_T986_Vendasportrecho_JJ 01-02Jun.csv",COLLECTOR_UPLOADED,eduardo.gomes@pvt.tur.br,0,0,0,0,0,5
+306,6,"2019-06-04 14:18:03","RELATORIO 25A31.05.19.xls",COLLECTOR_UPLOADED,petronio@classicturismo.com.br,0,0,0,0,0,5
+307,17,"2019-06-04 14:18:26","Exportacao TAM 27-05-2019 a 02-06-2019.csv",COLLECTOR_UPLOADED,wellington@belvitur.com.br,0,0,0,0,0,5
+308,19,"2019-06-04 14:39:40","Relatório semanal - S.22 - 25.05 a 31.05 - Nacional.xlsx",COLLECTOR_UPLOADED,luiz.pires@congonhastravel.com.br,0,0,0,0,0,5
+309,19,"2019-06-04 14:39:57","Relatório semanal - S.22 - 25.05 a 31.05 - Internacional.xlsx",COLLECTOR_UPLOADED,luiz.pires@congonhastravel.com.br,0,0,0,0,0,5
+310,52,"2019-06-04 16:23:28","Relatorio_TAM BD Diário - 02.06 a 03.06.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+311,59,"2019-06-04 16:47:57",LATAM_relatório_semanal_28_a_31_maio.xlsx,COLLECTOR_UPLOADED,amanda.bigi@copastur.com.br,0,0,0,0,0,5
+312,93,"2019-06-04 16:52:20","Relatorio LATAM 04junho CSV.csv",COLLECTOR_UPLOADED,marcos@viajeglobal.com.br,0,0,0,0,0,5
+313,11,"2019-06-04 17:00:50","BASE LATAM - 28.05 A 03.06.xls",COLLECTOR_UPLOADED,guilherme.gaister@multicidades.com.br,0,0,0,0,0,5
+314,104,"2019-06-04 17:31:59",2019_03Jun.csv,COLLECTOR_UPLOADED,daniele@cosmos.com.br,0,0,0,0,0,5
+315,43,"2019-06-04 19:08:58",03_06OD.xlsx,COLLECTOR_UPLOADED,albert@confiancaturismo.com.br,0,0,0,0,0,5
+316,52,"2019-06-05 09:01:07","Relatorio_TAM BD Diário - 03.06 a 04.06.2019.csv",COLLECTOR_UPLOADED,helpdesk@hostway.travel,0,0,0,0,0,5
+317,40,"2019-06-05 09:17:31",TAMVOETUR05062019_0530390.XLSX,COLLECTOR_UPLOADED,luvamberg.queiroz@voetur.com.br,0,0,0,0,0,5

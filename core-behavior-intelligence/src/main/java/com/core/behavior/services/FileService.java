@@ -137,6 +137,17 @@ public class FileService {
         Long layout = agency.getLayoutFile();
 
         if (uploadAws || uploadFtp) {
+             String[] s = new String[1];
+            s[0] = "COLLECTOR_UPLOADED";
+            Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 10, Sort.by("createdDate").ascending()), s, null, null);
+
+            if (!result.getContent().isEmpty()) {
+                File fileTemp = result.getContent().get(0);
+                this.deleteFileCascade(fileTemp);               
+            }
+            
+            
+            
             this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0);
             this.uploadFile(uploadAws, uploadFtp, folder, file);
            
