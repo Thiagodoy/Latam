@@ -107,7 +107,7 @@ public class Ticket {
 
     @PositionParameter(value = 13)
     @Column(name = "CNPJ")
-    public String cnpjClienteEmpresa;
+    public String cnpj;
     
     @PositionParameter(value = 14)
     @Column(name = "CPF_PAX")
