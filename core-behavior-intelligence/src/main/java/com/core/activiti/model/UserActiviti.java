@@ -2,6 +2,7 @@ package com.core.activiti.model;
 
 import com.core.behavior.dto.UserDTO;
 import com.core.behavior.request.UserRequest;
+import com.core.behavior.util.UserStatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
@@ -70,6 +73,10 @@ public class UserActiviti {
 
     @Column(name = "USER_MASTER_ID_")
     private String userMasterId;
+    
+    @Column(name = "USER_STATUS_")
+    @Enumerated(EnumType.STRING)
+    private UserStatusEnum status;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at_")
@@ -120,11 +127,9 @@ public class UserActiviti {
             String p = DigestUtils.md5Hex(user.getPassword());
             this.password = p;
         }
-
-        if (user.getPhoto() != null && !user.getPhoto().equals(this.getPicture())) {
-            this.picture = user.getPhoto();
-        }
-
+        
+        this.picture = user.getPhoto();
+        
         if (this.groups != null) {
             this.groups.clear();
         } else {

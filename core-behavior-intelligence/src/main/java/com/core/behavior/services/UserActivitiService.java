@@ -17,6 +17,7 @@ import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.MessageCode;
+import com.core.behavior.util.UserStatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -65,8 +66,11 @@ public class UserActivitiService {
     private NotificacaoService notificacaoService;
 
     @Transactional
-    public void deleteUser(String idUser) {
-        userActivitiRepository.deleteById(idUser);
+    public void deleteUser(String idUser) {       
+        
+        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();        
+        userActiviti.setStatus(UserStatusEnum.DISABLED);       
+        userActivitiRepository.save(userActiviti);
     }
 
     @Transactional
@@ -111,9 +115,13 @@ public class UserActivitiService {
 
         UserActiviti user = userActivitiRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
-
-       
+                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));       
+        
+        
+        if(user.getStatus().equals(UserStatusEnum.DISABLED)){
+              throw new ActivitiException(MessageCode.USER_DESATIVADO);
+        }
+        
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
@@ -185,6 +193,7 @@ public class UserActivitiService {
         String password = Utils.generatePasswordRandom();
         user.setPassword(DigestUtils.md5Hex(password));
         UserActiviti userActiviti = new UserActiviti(user);
+        userActiviti.setStatus(UserStatusEnum.ACTIVE);
         userActivitiRepository.save(userActiviti);
 
         Map<String, String> parameter = new HashMap<String, String>();
@@ -319,6 +328,9 @@ public class UserActivitiService {
             }
         }
 
+        predicates.add(UserActivitiSpecification.status(UserStatusEnum.ACTIVE));
+        
+        
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);

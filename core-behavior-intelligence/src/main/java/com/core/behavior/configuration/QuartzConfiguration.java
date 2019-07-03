@@ -1,5 +1,6 @@
 package com.core.behavior.configuration;
 
+import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import org.quartz.CronScheduleBuilder;
@@ -23,8 +24,9 @@ public class QuartzConfiguration {
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
         Scheduler scheduler = bean.getScheduler();
-
+        
         scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), GroupMatcher.jobGroupEquals("fg_jobgroup_01"));
+        
         scheduler.start();
 
         JobDetail detail = JobBuilder.newJob(ConsumerEmailJob.class).withIdentity("ConsumerEmailJob", "consumer-email")
@@ -35,7 +37,17 @@ public class QuartzConfiguration {
                 .withMisfireHandlingInstructionFireAndProceed())
                 .build();
         scheduler.scheduleJob(detail, crontrigger);
+        
+        
+        JobDetail detail1 = JobBuilder.newJob(AgenciaFactoryJob.class).withIdentity("AgenciaFactoryJob", "agencia-factory-email")
+                .withDescription("Agendador de notificação de email")
+                .build();
+        CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 00 12 1/1 * ? *")
+                .withMisfireHandlingInstructionFireAndProceed())
+                .build();
 
+        scheduler.scheduleJob(detail1, crontrigger1);
     }
 
 }

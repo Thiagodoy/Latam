@@ -15,6 +15,8 @@ import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.Utils;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,19 +49,29 @@ public class AgenciaEmailJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        String id = jec.getJobDetail().getJobDataMap().getString(JOB_KEY_AGENCIA);
+         System.out.println("hr ->" + LocalDateTime.now());
+        Long id = jec.getJobDetail().getJobDataMap().getLong(JOB_KEY_AGENCIA);
         String[] profile = new String[]{"agência", "executivo de planejamento", "master agência"};
 
-        boolean hasFile = fileService.hasFileToday(Long.parseLong(id));
+        boolean hasFile = fileService.hasFileToday(id);
         
+       
         
-        Agency agency =  agencyService.findById(Long.parseLong(id));
+        Agency agency =  agencyService.findById(id);
 
         if (hasFile) {
             return;
         }
+        
+        List<UserActiviti> users = null;
 
-        List<UserActiviti> users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id}, null).getContent();
+        try {
+            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, null).getContent();    
+        } catch (Exception e) {
+            e.printStackTrace();
+            users = new ArrayList<>();
+        }
+        
 
         users.forEach(u -> {
 
