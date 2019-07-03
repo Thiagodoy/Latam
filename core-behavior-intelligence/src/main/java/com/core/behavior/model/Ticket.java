@@ -80,7 +80,7 @@ public class Ticket {
     @PositionParameter(value = 6)
     @Id
     @Column(name = "BILHETE")
-    public Long bilhete;
+    public String bilhete;
     
     @PositionParameter(value = 7)
     @Column(name = "CIA_BILHETE")

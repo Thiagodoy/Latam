@@ -46,7 +46,7 @@
                 <field type="string" required="true" trim="true" name="origem"/>
                 <field type="string" required="true" trim="true" name="destino"/>
                 <field type="long" required="true" trim="true" name="cupom"/>
-                <field type="long" required="true" trim="true" name="bilhete"/>
+                <field type="string" required="true" trim="true" name="bilhete"/>
                 <field type="string" required="true" trim="true" name="tipo"/>
                 <field type="string" required="true" trim="true" name="cabine"/>
                 <field type="string" required="true" trim="true" name="ciaVoo"/>

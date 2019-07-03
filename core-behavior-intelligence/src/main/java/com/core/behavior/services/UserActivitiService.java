@@ -239,7 +239,7 @@ public class UserActivitiService {
         primeiroAcesso.setValue("true");        
          
         UserInfo lastAccess = Utils.valueFromUserInfo(userActiviti, Constantes.LAST_ACCESS).get();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");        
         lastAccess.setValue(formatter.format(LocalDateTime.now()));
         
         String password = Utils.generatePasswordRandom();
