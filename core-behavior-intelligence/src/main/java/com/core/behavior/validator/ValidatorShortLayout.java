@@ -340,6 +340,11 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
 
     @Override
     public IValidatorShortLayout checkCnpjClienteEmpresa() {
+        
+        String cnpj = ticket.getCnpj();
+     
+        
+        
         return this;
     }
 

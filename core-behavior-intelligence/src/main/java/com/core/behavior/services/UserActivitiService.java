@@ -246,11 +246,13 @@ public class UserActivitiService {
         userActiviti.setPassword(DigestUtils.md5Hex(password));
 
         userActivitiRepository.save(userActiviti);
+         DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
+        parameter.put(":data", data.format(LocalDateTime.now()));
         
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.FORGOT);
