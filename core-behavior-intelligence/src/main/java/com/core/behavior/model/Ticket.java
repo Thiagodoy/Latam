@@ -24,10 +24,6 @@ import lombok.Data;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 
-
-
-
-
 @SqlResultSetMapping(name = "TicketDuplicity",
         classes = @ConstructorResult(
                 targetClass = TicketDuplicityDTO.class,
@@ -62,16 +58,16 @@ public class Ticket {
     public String OndDirecional;
     
     @PositionParameter(value = 1)
-    @Column(name = "AGENCIA_CONSOLIDADA")
-    public String agenciaConsolidada;
+    @Column(name = "CONSOLIDADA")
+    public String consolidada;
     
     @PositionParameter(value = 2)
-    @Column(name = "ATO_DESTINO")
-    public String atoDestino;
+    @Column(name = "DESTINO")
+    public String destino;
     
     @PositionParameter(value = 3)
-    @Column(name = "ATO_ORIGEM")
-    public String atoOrigem;
+    @Column(name = "ORIGEM")
+    public String origem;
     
     @PositionParameter(value = 4)
     @Column(name = "BASE_TARIFARIA")
@@ -84,7 +80,7 @@ public class Ticket {
     @PositionParameter(value = 6)
     @Id
     @Column(name = "BILHETE")
-    public Long bilhete;
+    public String bilhete;
     
     @PositionParameter(value = 7)
     @Column(name = "CIA_BILHETE")
@@ -94,8 +90,8 @@ public class Ticket {
     @Column(name = "CIA_VOO")
     public String ciaVoo;
     @PositionParameter(value = 9)
-    @Column(name = "CLASSE_CABINE")
-    public String classeCabine;
+    @Column(name = "CABINE")
+    public String cabine;
     
     @PositionParameter(value = 10)
     @Column(name = "CLASSE_SERVICO")
@@ -106,12 +102,12 @@ public class Ticket {
     public String classeTarifa;
 
     @PositionParameter(value = 12)
-    @Column(name = "CLIENTE_EMPRESA")
-    public String clienteEmpresa;
+    @Column(name = "EMPRESA")
+    public String empresa;
 
     @PositionParameter(value = 13)
-    @Column(name = "CNPJ_CLIENTE_EMPRESA")
-    public String cnpjClienteEmpresa;
+    @Column(name = "CNPJ")
+    public String cnpj;
     
     @PositionParameter(value = 14)
     @Column(name = "CPF_PAX")
@@ -131,8 +127,8 @@ public class Ticket {
     
     @PositionParameter(value = 18)
     @Id
-    @Column(name = "DATA_VOO")    
-    public Date dataVoo;
+    @Column(name = "DATA_EMBARQUE")    
+    public Date dataEmbarque;
     
     @PositionParameter(value = 19)
     @Column(name = "DIGITO_VERIFICADOR_CC")
@@ -151,12 +147,12 @@ public class Ticket {
     public String horaReserva;
     
     @PositionParameter(value = 23)
-    @Column(name = "HORA_VOO")
-    public String horaVoo;    
+    @Column(name = "HORA_EMBARQUE")
+    public String horaEmbarque;    
 
     @PositionParameter(value = 24)
-    @Column(name = "IATA_AGENCIA_EMISSORA")
-    public Long iataAgenciaEmissora;
+    @Column(name = "IATA_AGENCIA")
+    public Long iataAgencia;
 
     @PositionParameter(value = 25)
     @Column(name = "NOME_CLIENTE")
@@ -167,8 +163,8 @@ public class Ticket {
     public String nomePax;
 
     @PositionParameter(value = 27)
-    @Column(name = "NUMERO_CUPOM")
-    public Long nroCupom;
+    @Column(name = "CUPOM")
+    public Long cupom;
 
     @PositionParameter(value = 28)
     @Column(name = "NUM_VOO")
@@ -183,8 +179,8 @@ public class Ticket {
     public String pnrCiaArea;
 
     @PositionParameter(value = 31)
-    @Column(name = "QTDE_PAX")
-    public Long qtdePax;    
+    @Column(name = "QTD_PAX")
+    public Long qtdPax;    
 
     @PositionParameter(value = 32)
     @Column(name = "RT_OW")
@@ -215,16 +211,16 @@ public class Ticket {
     public String tipoPax;
 
     @PositionParameter(value = 39)
-    @Column(name = "TIPO_VENDA")
-    public String tipoVenda;
+    @Column(name = "TIPO")
+    public String tipo;
 
     @PositionParameter(value = 40)
     @Column(name = "TOUR_CODE")
     public String tourCode;    
 
     @PositionParameter(value = 41)
-    @Column(name = "TRECHO_TKT")
-    public String trechoTkt;
+    @Column(name = "TRECHO")
+    public String trecho;
 
     @PositionParameter(value = 42)
     @Column(name = "VALOR_BRL")
@@ -259,7 +255,7 @@ public class Ticket {
      @Data
     public static class IdClass implements Serializable {
         public Long bilhete;
-        public Date dataVoo;
+        public Date dataEmbarque;
     }
 
 }

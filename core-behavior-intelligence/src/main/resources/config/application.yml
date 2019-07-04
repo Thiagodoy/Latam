@@ -5,7 +5,11 @@ server:
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
 
-
+spring:
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1
       
 behavior:           
     datasource:
@@ -19,9 +23,15 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
+<<<<<<< HEAD
             dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
             dataSourceUser: root
             dataSourcePassword: 12345678
+=======
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
+>>>>>>> 53fe7e41379bff28811e50730dd18ce2dd2eff8c
             port: 3306            
             connectionTestQuery: SELECT 1  
             
@@ -38,9 +48,15 @@ activiti:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
+<<<<<<< HEAD
             dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
             dataSourceUser: root
             dataSourcePassword: 12345678
+=======
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
+>>>>>>> 53fe7e41379bff28811e50730dd18ce2dd2eff8c
             port: 3306            
             connectionTestQuery: SELECT 1 
             
@@ -59,7 +75,7 @@ email:
            
            
 amazonproperties:
-        endpointUrl: https://s3.us-east-2.amazonaws.com
+        endpointUrl: https://s3.us-east-2.amazonaws.com.teste.teste
         accessKey: AKIAT4PQFE4EX2R5KXTK
         secretKey: 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
         bucketName: behint-files          
@@ -67,7 +83,7 @@ amazonproperties:
 sftp:
     user: ftp_upload_files
     password: iP9w5tux
-    host: 10.93.1.139
+    host: 10.93.1.146
     port: 22
     protocol: sftp
     basePath : /uploads

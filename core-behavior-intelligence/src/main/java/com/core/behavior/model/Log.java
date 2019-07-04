@@ -24,6 +24,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  *
@@ -44,6 +45,7 @@ import lombok.Data;
 @Table(schema = "behavior", name = "log")
 @Data
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"recordContent"})
 public class Log implements Serializable {
 
     @Id

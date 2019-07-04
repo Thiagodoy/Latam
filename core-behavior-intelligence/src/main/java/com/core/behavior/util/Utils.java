@@ -3,13 +3,11 @@ package com.core.behavior.util;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
-import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,6 +17,7 @@ import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.beanio.StreamFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,7 +52,7 @@ public class Utils {
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
     
-    public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataVoo","horaVoo","ciaBilhete","trechoTkt","atoOrigem","atoDestino","nroCupom","bilhete","tipoVenda","classeCabine","ciaVoo","valorBrl","clienteEmpresa","cnpjClienteEmpresa","iataAgenciaEmissora","baseVenda","qtdePax","numVoo","agenciaConsolidada");
+    public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
 
     public static enum TypeField {
         TICKET, LOG
@@ -308,4 +306,12 @@ public class Utils {
     public static Map<String,String>toMap(String value) throws IOException{
         return  new ObjectMapper().readValue(value, HashMap.class);
     }
+    
+   public static LocalDateTime dateToLocalDateTime(Date date){
+       return Instant.ofEpochMilli(date.getTime())
+      .atZone(ZoneId.systemDefault())
+      .toLocalDateTime();    
+   }
+    
+    
 }

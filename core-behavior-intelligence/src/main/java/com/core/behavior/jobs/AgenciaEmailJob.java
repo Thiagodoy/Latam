@@ -16,6 +16,7 @@ import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.Utils;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,8 +62,16 @@ public class AgenciaEmailJob extends QuartzJobBean {
         if (hasFile) {
             return;
         }
+        
+        List<UserActiviti> users = null;
 
-        List<UserActiviti> users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, null).getContent();
+        try {
+            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, null).getContent();    
+        } catch (Exception e) {
+            e.printStackTrace();
+            users = new ArrayList<>();
+        }
+        
 
         users.forEach(u -> {
 
