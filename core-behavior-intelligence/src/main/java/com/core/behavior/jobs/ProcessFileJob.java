@@ -1,7 +1,6 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
-import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
@@ -9,12 +8,10 @@ import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
-import com.core.behavior.util.Validator;
 import com.core.behavior.validator.ValidatorShortLayout;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,16 +88,16 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 fileService.setStage(idFile, 3);
 
-                ticketService.saveBatch(dto.getTicket());
-                //List<Ticket> tickets = ticketService.listByFileId(idFile);
+                //ticketService.saveBatch(dto.getTicket());
+               // List<Ticket> tickets = ticketService.listByFileId(idFile);
+                dto.getTicket().parallelStream().forEach(t -> {
+                    new ValidatorShortLayout(t,logService,ticketService).validate();
+                });
 
-//                tickets.parallelStream().forEach(t -> {
-//                    new ValidatorShortLayout(t).validate();
-//                });
-
-                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStatus(idFile, ValidatorShortLayout.countErrors > 0 ? StatusEnum.VALIDATION_ERROR : StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, 4);
-            }else if(logService.fileHasError(fileId)){                
+                ValidatorShortLayout.countErrors = 0;
+            } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
         } catch (Throwable e) {
