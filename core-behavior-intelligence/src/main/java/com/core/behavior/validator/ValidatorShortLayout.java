@@ -1,20 +1,24 @@
 package com.core.behavior.validator;
 
+import br.com.caelum.stella.validation.CNPJValidator;
+import br.com.caelum.stella.validation.Validator;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
-import com.core.behavior.util.RecordErrorEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -23,20 +27,29 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ValidatorShortLayout implements IValidatorShortLayout {
 
-    @Autowired
+    
     private LogService logService;
-
-    @Autowired
+    
     private TicketService ticketService;
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
 
     private Ticket ticket;
-    private List<RecordErrorEnum> errors = new ArrayList<>();
+    private List<Log> errors = new ArrayList<>();
 
-    public ValidatorShortLayout(Ticket ticket) {
+    public static long countErrors;
+    
+    public ValidatorShortLayout(Ticket ticket, LogService logService, TicketService ticketService ) {
         this.ticket = ticket;
+        this.ticketService = ticketService;
+        this.logService = logService;
     }
+    
+    
+    private static synchronized void countLog(){
+        ++ValidatorShortLayout.countErrors;
+    }
+    
 
     private void generateLog(Ticket t, String message, String field) {
         Log log = new Log();
@@ -45,7 +58,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         log.setFieldName(field);
         log.setMessageError(message);
         log.setType(TypeErrorEnum.RECORD);
-        logService.saveLog(log);
+        errors.add(log);
     }
 
     @Override
@@ -111,21 +124,31 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     public IValidatorShortLayout checkTrechoTkt() {
 
         StringBuilder message = new StringBuilder();
+        String trecho = ticket.getTrecho();
+        
+        
+        String [] tr = trecho.split("/");
+        
+        String origem = tr[0];
+        String destino = tr[tr.length - 1];
+        
 
-        if (ticket.getTrecho().length() < 7) {
+        if (trecho.length() < 7) {
             message.append("Incorreto o numero de carateres alfanumérico da compania aérea");
         }
 
-//        
-//        Inserir os códigos IATA dos aeroportos de origem (ATO_ORIGEM) e destino (ATO_DESTINO);
-//  Correto os códigos de aeroportos separados pelo caractere "/" barra;
-//  Correto campo estar preenchido;
-//  Correto mínimo de 07 caracteres, separados a cada três caracteres com apenas uma barra;
-//  Correto o código IATA quando na sequencia ser diferentes;
-//  Incorreto o código IATA quando na sequencia ser repetido;
-//  Incorreto o campo estar em branco;
-//  Incorreto o campo ter espaço, número ou caracter diferente de "/" barra;
-//  Incorreto o campo iniciar com número ou barra;
+        if (!ticket.getDestino().equals(destino)) {
+            message.append("Incorreto não contem o destino\n");
+        }
+
+        if (!ticket.getOrigem().equals(origem)) {
+            message.append("Incorreto não contem a origem");
+        }
+
+        if (message.length() > 0) {
+            this.generateLog(ticket, message.toString(), "trecho");
+        }
+
         return this;
     }
 
@@ -219,10 +242,10 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         }
 
         if (bilhete.length() > 11) {
-            message.append("Bilhete com o valor acima de1  caracteres.\n");
+            message.append("Bilhete com o valor acima de 11  caracteres.\n");
         }
 
-        String regex = MessageFormat.format("(0){0}", bilhete.length());
+        String regex = "(0){" + bilhete.length() + "}";
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(bilhete);
         m.find();
@@ -244,16 +267,18 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         String tipo = ticket.getTipo();
         StringBuilder message = new StringBuilder();
 
-        if (tipo.length() > 1) {
-            message.append("Maior que 1 caracter.\n");
-        }
+        if (Optional.ofNullable(tipo).isPresent()) {
+            if (tipo.length() > 1) {
+                message.append("Maior que 1 caracter.\n");
+            }
 
-        if (!tipo.equals("N") || !tipo.equals("I")) {
-            message.append("Caracater encontrado não é N ou I.\n");
-        }
+            if (!(tipo.equals("N") || tipo.equals("I"))) {
+                message.append("Caracater encontrado não é N ou I.\n");
+            }
 
-        if (message.length() > 0) {
-            this.generateLog(ticket, message.toString(), "tipo");
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "tipo");
+            }
         }
 
         return this;
@@ -265,20 +290,23 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         StringBuilder message = new StringBuilder();
         String cabine = ticket.getCabine();
 
-        if (cabine.length() > 1) {
-            message.append("Maior que 1 caracter.\n");
-        }
+        if (Optional.ofNullable(cabine).isPresent()) {
 
-        Pattern p = Pattern.compile("\\d+");
-        Matcher m = p.matcher(cabine);
-        m.find();
+            if (cabine.length() > 1) {
+                message.append("Maior que 1 caracter.\n");
+            }
 
-        if (m.group().length() > 0) {
-            message.append("Digito encontrado no campo.\n");
-        }
+            Pattern p = Pattern.compile("\\d+");
+            Matcher m = p.matcher(cabine);
+            m.find();
 
-        if (message.length() > 0) {
-            this.generateLog(ticket, message.toString(), "cabine");
+            if (m.matches()) {
+                message.append("Digito encontrado no campo.\n");
+            }
+
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "cabine");
+            }
         }
 
         return this;
@@ -290,24 +318,26 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         StringBuilder message = new StringBuilder();
         String voo = ticket.getCiaVoo();
 
-        if (voo.length() > 2) {
-            message.append("Maior que 2 caracteres.\n");
-        }
+        if (Optional.ofNullable(voo).isPresent()) {
+            if (voo.length() > 2) {
+                message.append("Maior que 2 caracteres.\n");
+            }
 
-        if (voo.length() < 2) {
-            message.append("Menor que 2 caracteres.\n");
-        }
+            if (voo.length() < 2) {
+                message.append("Menor que 2 caracteres.\n");
+            }
 
-        Pattern p = Pattern.compile("\\d*");
-        Matcher m = p.matcher(voo);
-        m.find();
+            Pattern p = Pattern.compile("\\d*");
+            Matcher m = p.matcher(voo);
+            m.find();
 
-        if (m.group().length() > 0) {
-            message.append("Digito encontrado no campo.\n");
-        }
+            if (m.group().length() > 0) {
+                message.append("Digito encontrado no campo.\n");
+            }
 
-        if (message.length() > 0) {
-            this.generateLog(ticket, message.toString(), "ciaVoo");
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "ciaVoo");
+            }
         }
 
         return this;
@@ -340,31 +370,122 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
 
     @Override
     public IValidatorShortLayout checkCnpjClienteEmpresa() {
-        
+
         String cnpj = ticket.getCnpj();
-     
-        
-        
+
+        Validator<String> validator = new CNPJValidator(true);
+        StringBuilder message = new StringBuilder();
+
+        if (Optional.ofNullable(cnpj).isPresent() && cnpj.length() > 0) {
+            if (cnpj.length() < 18) {
+                message.append("Cnpj inválido abaixo de 18 caracteres.\n");
+            }
+
+            if (cnpj.length() > 18) {
+                message.append("Cnpj inválido acima de 18 caracteres.\n");
+            }
+
+            if (!validator.isEligible(cnpj)) {
+                message.append("Cnpj ilegivel.\n");
+            }
+
+            if (validator.invalidMessagesFor(cnpj).size() > 0) {
+                String messages = validator.invalidMessagesFor(cnpj).stream().map(v -> v.getMessage()).collect(Collectors.joining("\n"));
+                message.append(messages);
+            }
+
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "cnpj");
+            }
+        }
         return this;
     }
 
     @Override
     public IValidatorShortLayout checkIataAgenciaEmissora() {
+
+        StringBuilder message = new StringBuilder();
+        if (Optional.ofNullable(ticket.getIataAgencia()).isPresent()) {
+            BigDecimal iata = BigDecimal.valueOf(ticket.getIataAgencia());
+            if (iata.compareTo(BigDecimal.valueOf(1000000)) < 0) {
+                message.append("Numero abaixo dos 7 digitos.\n");
+            }
+
+            if (iata.compareTo(BigDecimal.valueOf(99000000)) > 0) {
+                message.append("Numero acima dos 8 digitos.\n");
+            }
+
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "iataAgencia");
+            }
+        }
+
         return this;
     }
 
     @Override
     public IValidatorShortLayout checkBaseVenda() {
+
+        StringBuilder message = new StringBuilder();
+        String base = ticket.getBaseVenda();
+
+        if (Optional.ofNullable(base).isPresent()) {
+
+            if (base.length() > 3 || base.length() < 3) {
+                message.append("Diferente de 3 caracteres.\n");
+            }
+
+            if (base.length() > 3 || base.length() < 3) {
+                message.append("Diferente de 3 caracteres.\n");
+            }
+
+            Pattern p = Pattern.compile("\\d*");
+            Matcher m = p.matcher(base);
+            m.find();
+
+            if (m.group().length() > 0) {
+                message.append("Digito encontrado no campo.\n");
+            }
+
+            if (message.length() > 0) {
+                this.generateLog(ticket, message.toString(), "iataAgencia");
+            }
+        }
+
         return this;
     }
 
     @Override
     public IValidatorShortLayout checkQtdPax() {
+
+        StringBuilder message = new StringBuilder();
+
+        ticket.setQtdPax(Optional.ofNullable(ticket.getQtdPax()).isPresent() ? ticket.getQtdPax() : 1L);
+
+        if (ticket.getQtdPax() == 0l) {
+            message.append("QtdPax iqual a zero.\n");
+        }
+
+        if (message.length() > 0) {
+            this.generateLog(ticket, message.toString(), "qtdPax");
+        }
+
         return this;
     }
 
     @Override
     public IValidatorShortLayout checkNumVoo() {
+
+        StringBuilder message = new StringBuilder();
+
+        if (ticket.getNumVoo() == 0l) {
+            message.append("NumVoo iqual a zero.\n");
+        }
+
+        if (message.length() > 0) {
+            this.generateLog(ticket, message.toString(), "numVoo");
+        }
+
         return this;
     }
 
@@ -398,15 +519,12 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
                     checkNumVoo().
                     checkAgenciaConsolidada();
 
-            this.errors.forEach(e -> {
-                Log log = new Log();
-                log.setCreatedAt(LocalDateTime.now());
-                log.setFileId(this.ticket.getFileId());
-                log.setMessageError(e.message);
-                log.setType(TypeErrorEnum.RECORD);
-                logService.saveLog(log);
-            });
-
+            if (!errors.isEmpty()) {
+                logService.saveBatch(errors);
+                ValidatorShortLayout.countLog();
+            }        
+            
+            
             TicketStatusEnum status = !errors.isEmpty() ? TicketStatusEnum.UNAPPROVED : TicketStatusEnum.APPROVED;
             this.ticket.setStatus(status);
             this.ticketService.save(ticket);
@@ -420,5 +538,8 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
             logService.saveLog(log);
         }
     }
-
+    
+    
+  
 }
+

@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
@@ -66,7 +67,8 @@ public class AgenciaEmailJob extends QuartzJobBean {
         List<UserActiviti> users = null;
 
         try {
-            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, null).getContent();    
+            PageRequest page =  PageRequest.of(0, 1000);
+            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, page).getContent();    
         } catch (Exception e) {
             e.printStackTrace();
             users = new ArrayList<>();

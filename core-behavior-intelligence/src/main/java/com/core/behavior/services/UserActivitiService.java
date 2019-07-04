@@ -154,7 +154,7 @@ public class UserActivitiService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDate dateAcess = LocalDate.parse(lastAccess.get().getValue(), formatter);
-        LocalDate ld = LocalDate.now().minus(90, ChronoUnit.DAYS);
+        LocalDate ld = LocalDate.now().minus(180, ChronoUnit.DAYS);
 
         if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");

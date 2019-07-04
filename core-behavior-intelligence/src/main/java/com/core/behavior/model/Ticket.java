@@ -254,7 +254,7 @@ public class Ticket {
     
      @Data
     public static class IdClass implements Serializable {
-        public Long bilhete;
+        public String bilhete;
         public Date dataEmbarque;
     }
 
