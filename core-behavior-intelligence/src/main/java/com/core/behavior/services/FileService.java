@@ -144,8 +144,7 @@ public class FileService {
             if (!result.getContent().isEmpty()) {
                 File fileTemp = result.getContent().get(0);
                 this.deleteFileCascade(fileTemp);               
-            }
-            
+            }           
             
             
             this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0);
