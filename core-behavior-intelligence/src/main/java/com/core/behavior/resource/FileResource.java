@@ -10,6 +10,7 @@ import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
+import com.core.behavior.services.GeneratorFileReturnService;
 import com.core.behavior.util.MessageCode;
 import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
@@ -48,6 +49,9 @@ public class FileResource {
 
     @Autowired
     private FileService fileService;
+    
+    @Autowired
+    private GeneratorFileReturnService fileReturnService;
 
     @RequestMapping(value = "/{company}/{userId}/{uploadAws}/{uploadFtp}/{processFile}", method = RequestMethod.POST)
     @ApiOperation(value = "Upload of files")
@@ -86,6 +90,35 @@ public class FileResource {
             String mimeType = Utils.getMimeType(file);
             response.setContentType(mimeType);
             response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            InputStream in = new FileInputStream(file);
+            org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
+            response.flushBuffer();
+            file.delete();
+            return ResponseEntity.ok().build();
+
+        }catch(AmazonS3Exception ex){
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), SERVER_ERROR_AWS));
+        }catch (Exception ex) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
+        }
+
+    }
+    
+    @RequestMapping(value = "/downloadNew", method = RequestMethod.GET)
+    @ApiOperation(value = "Download of files")
+    public ResponseEntity downloadNewFile(
+            @RequestParam(name = "id") Long id,            
+            HttpServletResponse response) {
+
+        try {
+
+            java.io.File file = fileReturnService.generateFileReturnFriendly(id);
+            
+            //String mimeType = Utils.getMimeType(file);
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
             InputStream in = new FileInputStream(file);
             org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
             response.flushBuffer();

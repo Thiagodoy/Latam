@@ -3,7 +3,9 @@ package com.core.behavior.model;
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.Utils;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import javax.persistence.Column;
@@ -258,4 +260,29 @@ public class Ticket {
         public Date dataEmbarque;
     }
 
+     @Override
+     public String toString(){         
+         
+         return MessageFormat.format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19}", 
+                 Utils.formatDate(this.dataEmissao),
+                 Utils.formatDate(this.dataEmbarque),
+                 this.horaEmbarque,
+                 this.ciaBilhete,
+                 this.trecho,
+                 this.origem,
+                 this.destino,
+                 this.cupom,
+                 this.bilhete,
+                 this.tipo,
+                 this.cabine,
+                 this.ciaVoo,
+                 this.valorBrl,
+                 this.empresa,
+                 this.cnpj,
+                 this.iataAgencia,
+                 this.baseVenda,
+                 this.qtdPax,
+                 this.numVoo,
+                 this.consolidada);
+     }
 }
