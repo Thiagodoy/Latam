@@ -10,7 +10,6 @@ import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *

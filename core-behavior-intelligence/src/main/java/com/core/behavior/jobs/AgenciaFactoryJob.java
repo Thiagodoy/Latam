@@ -59,9 +59,9 @@ public class AgenciaFactoryJob extends QuartzJobBean {
             String jobName = a.getName();
 
             JobDetail detail = JobBuilder
-                    .newJob(AgenciaEmailJob.class)
+                    .newJob(AgencyEmailJob.class)
                     .withIdentity("JOB-" + jobName + "-EMAIL", "send-email")
-                    .usingJobData(AgenciaEmailJob.JOB_KEY_AGENCIA, a.getId())
+                    .usingJobData(AgencyEmailJob.JOB_KEY_AGENCIA, a.getId())
                     .build();
             
             Date dateStart = generateDate(a);

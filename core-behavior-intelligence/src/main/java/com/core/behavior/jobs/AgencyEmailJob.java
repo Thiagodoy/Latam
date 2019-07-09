@@ -31,7 +31,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  *
  * @author thiag
  */
-public class AgenciaEmailJob extends QuartzJobBean {
+public class AgencyEmailJob extends QuartzJobBean {
 
     @Autowired
     private UserActivitiService userActivitiService;

@@ -49,11 +49,13 @@ public class Utils {
     private static List<Field> fields;
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
+    private static SimpleDateFormat formmatDate2;
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
+    private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
     
     public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
-
+    public static String headerMinLayoutFile = "DATA_EMISSAO;DATA_VOO;HORA_VOO;CIA_BILHETE;TRECHO_TKT;ATO_ORIGEM;ATO_DESTINO;NUMERO_CUPOM;BILHETE;TIPO_VENDA;CLASSE_CABINE;CIA_VOO;VALOR_BRL;CLIENTE_EMPRESA;CNPJ_CLIENTE_EMPRESA;IATA_AGENCIA_EMISSORA;BASE_VENDA;QTDE_PAX;NUM_VOO;AGENCIA_CONSOLIDADA";
     public static enum TypeField {
         TICKET, LOG
     };
@@ -62,6 +64,7 @@ public class Utils {
 
         dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
         formmatDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        formmatDate2 = new SimpleDateFormat("dd/MM/yyyy");
 
         fieldsTicket = Arrays.asList(Ticket.class.getDeclaredFields())
                 .stream()
@@ -124,10 +127,35 @@ public class Utils {
         entitiesHtml.put("Ï", "&#207;");
         entitiesHtml.put("Ö", "&#214;");
         entitiesHtml.put("Ü", "&#220;");        
-        entitiesHtml.put("ç", "&#231;");        
+        entitiesHtml.put("ç", "&#231;");           
+        
+        
+        positionColumnByField.put("dataEmissao","A");
+        positionColumnByField.put("dataEmbarque","B");
+        positionColumnByField.put("horaEmbarque","C");
+        positionColumnByField.put("ciaBilhete","D");
+        positionColumnByField.put("trecho","E");
+        positionColumnByField.put("origem","F");
+        positionColumnByField.put("destino","G");
+        positionColumnByField.put("cupom","H");
+        positionColumnByField.put("bilhete","I");
+        positionColumnByField.put("tipo","J");
+        positionColumnByField.put("cabine","L");
+        positionColumnByField.put("ciaVoo","K");
+        positionColumnByField.put("valorBrl","M");
+        positionColumnByField.put("empresa","N");
+        positionColumnByField.put("cnpj","O");
+        positionColumnByField.put("iataAgencia","P");
+        positionColumnByField.put("baseVenda","Q");
+        positionColumnByField.put("qtdPax","R");
+        positionColumnByField.put("numVoo","S");
+        positionColumnByField.put("consolidada","T");
 
     }
 
+    public static  String getPositionExcelColumn(String field){
+        return positionColumnByField.get(field);
+    }
     public static File convertToFile(MultipartFile file) throws FileNotFoundException, IOException {
 
         File convFile = new File(file.getOriginalFilename());
@@ -311,6 +339,10 @@ public class Utils {
        return Instant.ofEpochMilli(date.getTime())
       .atZone(ZoneId.systemDefault())
       .toLocalDateTime();    
+   }
+   
+   public static String formatDate(Date date){
+       return formmatDate2.format(date);
    }
     
     

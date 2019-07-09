@@ -388,6 +388,17 @@ public class UserActivitiService {
                 op.get().setValue("false");
             }
         }
+        
+        
+        // Altera o contador  da mudanca de senha
+        Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();        
+        if(op.isPresent()){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");                
+            op.get().setValue(formatter.format(LocalDateTime.now()));
+        }
+        
+        
+        
         userActivitiRepository.save(user);
 
     }
