@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import static com.core.behavior.util.Utils.TypeField;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  *
@@ -64,6 +65,11 @@ public class LogService {
     public boolean fileHasError(Long fileId){
         return logRepository.countByFileId(fileId) > 0l;
     }
+    
+    public Optional<Log> findByFileIdAndField(String field, Long id){
+        return logRepository.findByFileIdAndFieldName(id,field);
+    }
+
 
     public void saveBatch(List<Log> logs) {
       

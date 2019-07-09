@@ -14,6 +14,8 @@ import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.NamedNativeQuery;
@@ -50,7 +52,7 @@ import lombok.Data;
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
-@IdClass(Ticket.IdClass.class)
+//@IdClass(Ticket.IdClass.class)
 @Data
 public class Ticket {
 
@@ -79,8 +81,7 @@ public class Ticket {
     @Column(name = "BASE_VENDA")
     public String baseVenda;
     
-    @PositionParameter(value = 6)
-    @Id
+    @PositionParameter(value = 6)  
     @Column(name = "BILHETE")
     public String bilhete;
     
@@ -127,8 +128,7 @@ public class Ticket {
     @Column(name = "DATA_RESERVA")
     public Date dataReserva;
     
-    @PositionParameter(value = 18)
-    @Id
+    @PositionParameter(value = 18)   
     @Column(name = "DATA_EMBARQUE")    
     public Date dataEmbarque;
     
@@ -241,6 +241,8 @@ public class Ticket {
     public Long fileId;
     
     @PositionParameter(value = 46)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     public Long id;
     

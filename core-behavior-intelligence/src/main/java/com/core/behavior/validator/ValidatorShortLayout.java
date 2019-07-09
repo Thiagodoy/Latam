@@ -55,8 +55,21 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         log.setFileId(this.ticket.getFileId());
         log.setFieldName(field);
         log.setMessageError(message);
+        log.setRecordContent(ticket.toString());
         log.setType(TypeErrorEnum.RECORD);
-        errors.add(log);
+        
+        Optional<Log>op = logService.findByFileIdAndField(field, ticket.getFileId());
+        
+        if(op.isPresent()){
+            Log l = op.get();
+            l.setMessageError(l.getMessageError() + "\n" + message);
+            logService.saveLog(l);
+        }else{
+            errors.add(log);
+        }
+        
+        
+        
     }
 
     @Override
@@ -126,6 +139,13 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         
         
         String [] tr = trecho.split("/");
+        
+        if(tr.length <= 1){
+            message.append("Incorreto a composição do trecho faltando '/'");
+            this.generateLog(ticket, message.toString(), "trecho");
+            return this;
+        }
+        
         
         String origem = tr[0];
         String destino = tr[tr.length - 1];

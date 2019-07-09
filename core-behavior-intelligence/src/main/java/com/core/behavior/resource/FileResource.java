@@ -7,6 +7,7 @@ package com.core.behavior.resource;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
@@ -16,6 +17,7 @@ import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -121,8 +124,8 @@ public class FileResource {
             response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
             InputStream in = new FileInputStream(file);
             org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
-            response.flushBuffer();
-            file.delete();
+            response.flushBuffer();            
+            FileUtils.forceDelete(file);
             return ResponseEntity.ok().build();
 
         }catch(AmazonS3Exception ex){
