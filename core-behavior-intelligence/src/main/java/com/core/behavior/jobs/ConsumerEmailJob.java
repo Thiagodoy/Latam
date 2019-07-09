@@ -58,7 +58,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
                 Map<String, String> parameters = Utils.toMap(n.getParameters());
                 String content = this.getContentEmail(n.getLayout().getPath());
-
+               
                 helper.setSubject(n.getLayout().getSubject());
 
                 if (parameters != null && parameters.size() > 0) {
@@ -69,6 +69,8 @@ public class ConsumerEmailJob extends QuartzJobBean {
                         }
                     }
                 }
+                
+                content = Utils.replaceAccentToEntityHtml(content);
                 
                 helper.setText(content, true); 
                 
