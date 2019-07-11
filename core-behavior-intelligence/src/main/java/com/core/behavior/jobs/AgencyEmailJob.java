@@ -50,7 +50,7 @@ public class AgencyEmailJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-         System.out.println("hr ->" + LocalDateTime.now());
+         //System.out.println("hr ->" + LocalDateTime.now());
         Long id = jec.getJobDetail().getJobDataMap().getLong(JOB_KEY_AGENCIA);
         String[] profile = new String[]{"agência", "executivo de planejamento", "master agência"};
 

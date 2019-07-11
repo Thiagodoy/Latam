@@ -250,6 +250,9 @@ public class Ticket {
     @PositionParameter(value = 47)
     @Enumerated(EnumType.STRING)
     public TicketStatusEnum status;
+    
+    @Column(name = "LINE_FILE")
+    public Long lineFile;
 
     
     public Ticket() {
@@ -265,7 +268,8 @@ public class Ticket {
      @Override
      public String toString(){         
          
-         return MessageFormat.format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19}", 
+         return MessageFormat.format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20}",
+                 this.lineFile,
                  Utils.formatDate(this.dataEmissao),
                  Utils.formatDate(this.dataEmbarque),
                  this.horaEmbarque,

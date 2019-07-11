@@ -1,6 +1,7 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
+import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
@@ -42,7 +43,7 @@ public class ProcessFileJob extends QuartzJobBean {
     private FileProcessStatusService fileProcessStatusService;
 
     @Autowired
-    private TicketService ticketService;
+    private ValidatorShortLayout validator;
 
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
@@ -86,13 +87,23 @@ public class ProcessFileJob extends QuartzJobBean {
                     t.setFileId(idFile);
                 });
 
+                long count = 2;
+                for (Ticket t : dto.getTicket()) {
+                    t.setLineFile(count++);
+                }
+
                 fileService.setStage(idFile, 3);
 
                 //ticketService.saveBatch(dto.getTicket());
-               // List<Ticket> tickets = ticketService.listByFileId(idFile);
+                // List<Ticket> tickets = ticketService.listByFileId(idFile);
+                long startValidation = System.currentTimeMillis();
+                
                 dto.getTicket().forEach(t -> {
-                    new ValidatorShortLayout(t,logService,ticketService).validate();
+                    validator.validate(t);
                 });
+                
+                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
+                fileService.setValidationTime(idFile, timeValidation);
 
                 fileService.setStatus(idFile, ValidatorShortLayout.countErrors > 0 ? StatusEnum.VALIDATION_ERROR : StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, 4);

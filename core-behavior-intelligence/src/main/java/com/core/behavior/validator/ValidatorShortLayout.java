@@ -15,19 +15,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author thiag
  */
+@Component
 public class ValidatorShortLayout implements IValidatorShortLayout {
 
-    
+    @Autowired
     private LogService logService;
     
+    @Autowired    
     private TicketService ticketService;
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
@@ -37,11 +43,11 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
 
     public static long countErrors;
     
-    public ValidatorShortLayout(Ticket ticket, LogService logService, TicketService ticketService ) {
-        this.ticket = ticket;
-        this.ticketService = ticketService;
-        this.logService = logService;
-    }
+//    public ValidatorShortLayout(Ticket ticket, LogService logService, TicketService ticketService ) {
+//        this.ticket = ticket;
+//        this.ticketService = ticketService;
+//        this.logService = logService;
+//    }
     
     
     private static synchronized void countLog(){
@@ -55,6 +61,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         log.setFileId(this.ticket.getFileId());
         log.setFieldName(field);
         log.setMessageError(message);
+        log.setLineNumber(t.getLineFile());
         log.setRecordContent(ticket.toString());
         log.setType(TypeErrorEnum.RECORD);
         
@@ -152,15 +159,15 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         
 
         if (trecho.length() < 7) {
-            message.append("Incorreto o numero de carateres alfanumérico da compania aérea");
+            message.append("Incorreto o numero de carateres alfanumérico da compania aérea.\n");
         }
 
         if (!ticket.getDestino().equals(destino)) {
-            message.append("Incorreto não contem o destino\n");
+            message.append("Incorreto não contem o destino no final do trecho.\n");
         }
 
         if (!ticket.getOrigem().equals(origem)) {
-            message.append("Incorreto não contem a origem");
+            message.append("Incorreto não contem a origem no inicio do trecho.\n");
         }
 
         if (message.length() > 0) {
@@ -513,7 +520,8 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
     }
 
     @Override
-    public void validate() {
+    public void validate(Ticket ticket) {
+        this.ticket = ticket;
         try {
 
             this.checkDataEmissao().
@@ -548,12 +556,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
             this.ticketService.save(ticket);
 
         } catch (Exception e) {
-            Log log = new Log();
-            log.setCreatedAt(LocalDateTime.now());
-            log.setFileId(this.ticket.getFileId());
-            log.setMessageError(e.getMessage());
-            log.setType(TypeErrorEnum.RECORD);
-            logService.saveLog(log);
+            Logger.getLogger(ValidatorShortLayout.class.getName()).log(Level.SEVERE, null, e);
         }
     }
     

@@ -62,7 +62,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
                         Log log = new Log();
                         log.setFieldName(key);
                         log.setFileId(fileId);
-                        log.setRecordContent(recordContext.getRecordText());
+                        log.setRecordContent( recordContext.getLineNumber() + ";" + recordContext.getRecordText());
                         log.setLineNumber((long) recordContext.getLineNumber());
                         log.setType(TypeErrorEnum.COLUMN);
                         log.setMessageError(erro);

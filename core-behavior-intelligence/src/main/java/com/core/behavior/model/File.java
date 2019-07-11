@@ -95,6 +95,9 @@ public class File {
     @Column(name = "persist_time")
     private Long persistTime;
     
+    @Column(name = "validation_time")
+    private Long validationTime;
+    
     @Column(name = "stage")
     private Long stage;
 

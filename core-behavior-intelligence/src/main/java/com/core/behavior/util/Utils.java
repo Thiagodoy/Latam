@@ -55,7 +55,7 @@ public class Utils {
     private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
     
     public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
-    public static String headerMinLayoutFile = "DATA_EMISSAO;DATA_VOO;HORA_VOO;CIA_BILHETE;TRECHO_TKT;ATO_ORIGEM;ATO_DESTINO;NUMERO_CUPOM;BILHETE;TIPO_VENDA;CLASSE_CABINE;CIA_VOO;VALOR_BRL;CLIENTE_EMPRESA;CNPJ_CLIENTE_EMPRESA;IATA_AGENCIA_EMISSORA;BASE_VENDA;QTDE_PAX;NUM_VOO;AGENCIA_CONSOLIDADA";
+    public static String headerMinLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
     public static enum TypeField {
         TICKET, LOG
     };
@@ -130,26 +130,26 @@ public class Utils {
         entitiesHtml.put("ç", "&#231;");           
         
         
-        positionColumnByField.put("dataEmissao","A");
-        positionColumnByField.put("dataEmbarque","B");
-        positionColumnByField.put("horaEmbarque","C");
-        positionColumnByField.put("ciaBilhete","D");
-        positionColumnByField.put("trecho","E");
-        positionColumnByField.put("origem","F");
-        positionColumnByField.put("destino","G");
-        positionColumnByField.put("cupom","H");
-        positionColumnByField.put("bilhete","I");
-        positionColumnByField.put("tipo","J");
-        positionColumnByField.put("cabine","L");
-        positionColumnByField.put("ciaVoo","K");
-        positionColumnByField.put("valorBrl","M");
-        positionColumnByField.put("empresa","N");
-        positionColumnByField.put("cnpj","O");
-        positionColumnByField.put("iataAgencia","P");
-        positionColumnByField.put("baseVenda","Q");
-        positionColumnByField.put("qtdPax","R");
-        positionColumnByField.put("numVoo","S");
-        positionColumnByField.put("consolidada","T");
+        positionColumnByField.put("dataEmissao","B");
+        positionColumnByField.put("dataEmbarque","C");
+        positionColumnByField.put("horaEmbarque","D");
+        positionColumnByField.put("ciaBilhete","E");
+        positionColumnByField.put("trecho","F");
+        positionColumnByField.put("origem","G");
+        positionColumnByField.put("destino","H");
+        positionColumnByField.put("cupom","I");
+        positionColumnByField.put("bilhete","J");
+        positionColumnByField.put("tipo","L");
+        positionColumnByField.put("cabine","K");
+        positionColumnByField.put("ciaVoo","M");
+        positionColumnByField.put("valorBrl","N");
+        positionColumnByField.put("empresa","O");
+        positionColumnByField.put("cnpj","P");
+        positionColumnByField.put("iataAgencia","Q");
+        positionColumnByField.put("baseVenda","R");
+        positionColumnByField.put("qtdPax","S");
+        positionColumnByField.put("numVoo","T");
+        positionColumnByField.put("consolidada","U");
 
     }
 

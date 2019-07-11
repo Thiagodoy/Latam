@@ -59,8 +59,9 @@ public class BeanIoReader {
             beanErrorHandler.setFileId(f.getId());
             reader.setErrorHandler(beanErrorHandler);
 
-            record = (T) reader.read();
-
+            record = (T) reader.read();       
+            
+            
             if (beanErrorHandler.getLogs().size() > 0) {
                 logService.saveBatch(beanErrorHandler.getLogs());
             }

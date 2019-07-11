@@ -346,6 +346,14 @@ public class FileService {
         file.setPersistTime(time);
         fileRepository.save(file);
     }
+    
+    @Transactional
+    public void setValidationTime(Long fileId, Long time) {
+        File file = fileRepository.findById(fileId).get();
+        file.setValidationTime(time);
+        fileRepository.save(file);
+    }
+    
 
     public Page<File> list(String fileName, String userId, Long[] company, LocalDateTime createdAt, Pageable page, String[] status, Long start, Long end) {
 

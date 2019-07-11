@@ -14,10 +14,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -57,12 +58,9 @@ public class GeneratorFileReturnService {
         List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
         LineErrorDTO.reset();
 
-        
-        
         logDistinct.stream().forEach(l -> {
 
             LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
-            
 
             logs.stream().filter(ll -> ll.getRecordContent().equals(l.getRecordContent())).forEach(lll -> {
 
@@ -79,15 +77,14 @@ public class GeneratorFileReturnService {
 
     private File generateFile(List<LineErrorDTO> errors, String fileName) throws FileNotFoundException, IOException {
 
-        String sheetName = "Sheet1";//name of sheet
+        String sheetName = "Erros";//name of sheet
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet(sheetName);
 
         CellStyle backgroundStyle = wb.createCellStyle();
-        
+
         CellStyle cellBold = wb.createCellStyle();
-        
 
         backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
         backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -99,7 +96,7 @@ public class GeneratorFileReturnService {
         font.setFontName("Arial");
         font.setColor(IndexedColors.BLACK.getIndex());
         font.setBold(true);
-        font.setItalic(false);
+        font.setItalic(true);
 
 //        borderStyle.setBorderBottom(BorderStyle.MEDIUM_DASH_DOT_DOT);
 //        borderStyle.setBottomBorderColor(IndexedColors.BLUE1.getIndex());
@@ -113,10 +110,10 @@ public class GeneratorFileReturnService {
         String[] header = Utils.headerMinLayoutFile.split(";");
         XSSFRow rr = sheet.createRow(0);
         cellBold.setFont(font);
-        
+
         for (int i = 0; i < header.length; i++) {
             XSSFCell cell = rr.createCell(i);
-            cell.setCellValue(header[i]);            
+            cell.setCellValue(header[i]);
         }
 
         for (int r = 0; r < errors.size(); r++) {
@@ -126,25 +123,31 @@ public class GeneratorFileReturnService {
             String[] values = errors.get(r).getLineContent().split(";");
             for (int c = 0; c < values.length; c++) {
                 XSSFCell cell = row.createCell(c);
-
-                System.out.println("Celula ->" + cell.getAddress().toString());
-                System.out.println("Has comment ->" + errors.get(r).getComments().containsKey(cell.getAddress().toString()));
-                if (errors.get(r).getComments().containsKey(cell.getAddress().toString())) {
-                    String comment = errors.get(r).getComments().get(cell.getAddress().toString());
-                    Comment com = createCellComment(sheet, "Behavior", comment, cell);
-                    cell.setCellComment(com);
-                    com.setAddress(cell.getAddress());
-                    cell.setCellStyle(borderStyle);
-                    cell.setCellStyle(backgroundStyle);
-                }
-
                 cell.setCellValue(values[c]);
 
             }
+        }
+
+        //Create a comments
+        for (LineErrorDTO e : errors) {
+
+            e.getComments().forEach((key, value) -> {
+                CellReference cellReference = new CellReference(key);
+                XSSFRow row = sheet.getRow(cellReference.getRow());
+                
+                XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
+
+                Comment com = createCellComment(sheet, "Behavior", value, cell);
+                cell.setCellComment(com);
+                com.setAddress(cell.getAddress());
+                cell.setCellStyle(borderStyle);
+                cell.setCellStyle(backgroundStyle);
+
+            });
 
         }
 
-        File temp = new File(fileName + "error.xlsx");
+        File temp = File.createTempFile("temp", ".xlsx");
         FileOutputStream fileOut = new FileOutputStream(temp);
 
         //write this workbook to an Outputstream.

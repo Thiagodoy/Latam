@@ -114,18 +114,18 @@ public class FileResource {
     public ResponseEntity downloadNewFile(
             @RequestParam(name = "id") Long id,            
             HttpServletResponse response) {
-
+         java.io.File file = null;
         try {
 
-            java.io.File file = fileReturnService.generateFileReturnFriendly(id);
+            file = fileReturnService.generateFileReturnFriendly(id);
+            String nameFile = fileService.findById(id).getName();
             
             //String mimeType = Utils.getMimeType(file);
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-disposition", "attachment; filename=" + file.getName());
+            response.setHeader("Content-disposition", "attachment; filename=" + nameFile + "error.xlsx");
             InputStream in = new FileInputStream(file);
             org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
-            response.flushBuffer();            
-            FileUtils.forceDelete(file);
+            response.flushBuffer(); 
             return ResponseEntity.ok().build();
 
         }catch(AmazonS3Exception ex){
@@ -134,6 +134,12 @@ public class FileResource {
         }catch (Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
+        }finally{
+//             try {
+//                 FileUtils.forceDelete(file);
+//             } catch (IOException ex) {
+//                 Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, null, ex);
+//             }
         }
 
     }

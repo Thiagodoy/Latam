@@ -5,10 +5,12 @@
  */
 package com.core.behavior.validator;
 
+import com.core.behavior.model.Ticket;
+
 /**
  *
  * @author thiag
  */
 public interface IValidator {
-    void validate();
+    void validate(Ticket ticket);
 }
