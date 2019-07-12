@@ -70,8 +70,7 @@ public class BeanIoReader {
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.VALIDATION_ERROR);
-            f = fileService.saveFile(f);
-            logService.logGeneric(f.getId(), ex.getLocalizedMessage());
+            f = fileService.saveFile(f);           
         }
 
         reader.close();

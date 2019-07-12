@@ -24,6 +24,11 @@ public class DateHandler implements TypeHandler {
 
         Object result = null;
 
+        
+        if(string.length()!= 10){
+             throw new TypeConversionException("Data inválida!");
+        }
+        
         try {
             result = formatter4.parse(string);
         } catch (ParseException e3) {
