@@ -5,23 +5,27 @@ server:
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
 
-
+spring:
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1
       
 behavior:           
     datasource:
         socketTimeout: 30000
         loginTimeout: 30000
-        minimumIdle: 10
-        maximumPoolSize: 150
+        minimumIdle: 0
+        maximumPoolSize: 50
         validationTimeout: 10000
         idleTimeout: 30000
         connectionTimeout: 30000
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
             port: 3306            
             connectionTestQuery: SELECT 1  
             
@@ -30,17 +34,17 @@ activiti:
     datasource:
         socketTimeout: 30000
         loginTimeout: 30000
-        minimumIdle: 10
-        maximumPoolSize: 150
+        minimumIdle: 50
+        maximumPoolSize: 1000
         validationTimeout: 10000
         idleTimeout: 30000
         connectionTimeout: 30000
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
             port: 3306            
             connectionTestQuery: SELECT 1 
             
@@ -59,7 +63,7 @@ email:
            
            
 amazonproperties:
-        endpointUrl: https://s3.us-east-2.amazonaws.com
+        endpointUrl: https://s3.us-east-2.amazonaws.com.teste.teste
         accessKey: AKIAT4PQFE4EX2R5KXTK
         secretKey: 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
         bucketName: behint-files          
@@ -67,7 +71,7 @@ amazonproperties:
 sftp:
     user: ftp_upload_files
     password: iP9w5tux
-    host: 10.93.1.139
+    host: 10.93.1.146
     port: 22
     protocol: sftp
     basePath : /uploads

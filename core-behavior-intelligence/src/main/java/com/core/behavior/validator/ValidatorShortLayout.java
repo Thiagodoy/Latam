@@ -561,7 +561,7 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
                     e.setTicketId(idTicket);
                 });
                 
-                logService.saveBatch(errors);
+                logService.saveAll(errors);
                 ValidatorShortLayout.countLog();
             }        
             

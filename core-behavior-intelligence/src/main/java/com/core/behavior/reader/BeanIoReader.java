@@ -140,7 +140,7 @@ public class BeanIoReader {
             return Optional.ofNullable(headerDto).isPresent();
 
         } catch (Exception ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
            return false;        
         } finally {
             try {
