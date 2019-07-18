@@ -5,21 +5,29 @@
  */
 package com.core.behavior.jobs;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
+import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
+import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.writer.BeanIoWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FileUtils;
+import static org.apache.poi.hssf.usermodel.HeaderFooter.file;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -36,6 +44,9 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private TicketService ticketService;
+    
+    @Autowired
+    private ClientAws clientAws;
 
     private static final String DIR_UPLOAD = System.getProperty("user.dir") + "\\upload\\";
 
@@ -78,6 +89,15 @@ public class IntegrationJob extends QuartzJobBean {
         //Salvar os arquivos listados
         Arrays.asList(uploadFolder.listFiles()).forEach(f -> {
 
+             try {
+                clientAws.uploadFile(f, "behint-sources\\latam\\air-moviment");
+            } catch (AmazonS3Exception e) {
+               
+                throw new ActivitiException(MessageCode.SERVER_ERROR_AWS);
+            } catch (IOException ex) {
+                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
         });
 
     }

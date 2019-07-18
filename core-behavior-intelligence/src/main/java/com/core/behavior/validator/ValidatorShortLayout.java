@@ -159,22 +159,22 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
             return this;
         }
         
-        
-        String origem = tr[0];
-        String destino = tr[tr.length - 1];
+//        
+//        String origem = tr[0];
+//        String destino = tr[tr.length - 1];
         
 
         if (trecho.length() < 7) {
             message.append("Incorreto o numero de carateres alfanumérico da compania aérea.\n");
         }
 
-        if (!ticket.getDestino().equals(destino)) {
-            message.append("Incorreto não contem o destino no final do trecho.\n");
-        }
+//        if (!ticket.getDestino().equals(destino)) {
+//            message.append("Incorreto não contem o destino no final do trecho.\n");
+//        }
 
-        if (!ticket.getOrigem().equals(origem)) {
-            message.append("Incorreto não contem a origem no inicio do trecho.\n");
-        }
+//        if (!ticket.getOrigem().equals(origem)) {
+//            message.append("Incorreto não contem a origem no inicio do trecho.\n");
+//        }
 
         if (message.length() > 0) {
             this.generateLog(ticket, message.toString(), "trecho");
@@ -420,10 +420,10 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
                 message.append("Cnpj ilegivel.\n");
             }
 
-            if (validator.invalidMessagesFor(cnpj).size() > 0) {
-                String messages = validator.invalidMessagesFor(cnpj).stream().map(v -> v.getMessage()).collect(Collectors.joining("\n"));
-                message.append(messages);
-            }
+//            if (validator.invalidMessagesFor(cnpj).size() > 0) {
+//                String messages = validator.invalidMessagesFor(cnpj).stream().map(v -> v.getMessage()).collect(Collectors.joining("\n"));
+//                message.append(messages);
+//            }
 
             if (message.length() > 0) {
                 this.generateLog(ticket, message.toString(), "cnpj");

@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
@@ -275,8 +276,11 @@ public class Ticket {
      @Override
      public String toString(){         
          
+         String iata = Optional.ofNullable(this.iataAgencia).isPresent() ? "" : "0";
+         String line = Optional.ofNullable(this.lineFile).isPresent() ? "" : "0";
+         
          return MessageFormat.format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20}",
-                 this.lineFile,
+                 line.replaceAll(".", ""),
                  Utils.formatDate(this.dataEmissao),
                  Utils.formatDate(this.dataEmbarque),
                  this.horaEmbarque,
@@ -292,7 +296,7 @@ public class Ticket {
                  this.valorBrl,
                  this.empresa,
                  this.cnpj,
-                 this.iataAgencia,
+                 iata.replaceAll(".", ""),
                  this.baseVenda,
                  this.qtdPax,
                  this.numVoo,
