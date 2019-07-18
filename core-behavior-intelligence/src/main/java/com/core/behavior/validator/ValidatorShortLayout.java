@@ -20,20 +20,16 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author thiag
  */
-@Component
+
 public class ValidatorShortLayout implements IValidatorShortLayout {
 
-    @Autowired
-    private LogService logService;
     
-    @Autowired    
+    private LogService logService;
     private TicketService ticketService;
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
@@ -49,10 +45,19 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
 //        this.logService = logService;
 //    }
     
+    public ValidatorShortLayout(){
+        
+    }
+    
+    public ValidatorShortLayout(LogService logService,TicketService ticketService){
+        this.logService = logService;
+        this.ticketService = ticketService;
+    }
     
     private static synchronized void countLog(){
         ++ValidatorShortLayout.countErrors;
     }
+    
     
 
     private void generateLog(Ticket t, String message, String field) {
@@ -65,15 +70,16 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
         log.setRecordContent(ticket.toString());
         log.setType(TypeErrorEnum.RECORD);
         
-        Optional<Log>op = logService.findByFileIdAndField(field, ticket.getFileId());
         
-        if(op.isPresent()){
-            Log l = op.get();
-            l.setMessageError(l.getMessageError() + "\n" + message);
-            logService.saveLog(l);
-        }else{
+        //Optional<Log>op = logService.findByFileIdAndField(field, ticket.getFileId());
+        
+//        if(op.isPresent()){
+//            Log l = op.get();
+//            l.setMessageError(l.getMessageError() + "\n" + message);
+//            logService.saveLog(l);
+//        }else{
             errors.add(log);
-        }
+        //}
         
         
         

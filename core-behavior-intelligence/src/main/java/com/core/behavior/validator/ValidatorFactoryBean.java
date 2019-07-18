@@ -28,7 +28,7 @@ public class ValidatorFactoryBean implements ValidatorFactory{
         
         
         if(type.equals(ValidatorEnum.SHORT)){
-            return new ValidatorShortLayout();
+            return new ValidatorShortLayout(logService,ticketService);
         }
         
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

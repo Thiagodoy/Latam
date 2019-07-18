@@ -10,6 +10,8 @@ import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.TicketLayoutEnum;
+import com.core.behavior.validator.ValidatorEnum;
+import com.core.behavior.validator.ValidatorFactoryBean;
 import com.core.behavior.validator.ValidatorShortLayout;
 import java.io.File;
 import java.io.IOException;
@@ -42,9 +44,12 @@ public class ProcessFileJob extends QuartzJobBean {
 
     @Autowired
     private FileProcessStatusService fileProcessStatusService;
-
+    
     @Autowired
-    private ValidatorShortLayout validator;
+    private ValidatorFactoryBean factoryBean;
+
+    //@Autowired
+    //private ValidatorShortLayout validator;
 
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
@@ -100,8 +105,9 @@ public class ProcessFileJob extends QuartzJobBean {
                 // List<Ticket> tickets = ticketService.listByFileId(idFile);
                 long startValidation = System.currentTimeMillis();
                 
-                dto.getTicket().forEach(t -> {
-                    validator.validate(t);
+                dto.getTicket().parallelStream().forEach(t -> {
+                    factoryBean.getBean(ValidatorEnum.SHORT).validate(t);
+                    //validator.validate(t);
                 });
                 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
