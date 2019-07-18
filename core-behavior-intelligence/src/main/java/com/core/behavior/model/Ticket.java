@@ -2,6 +2,7 @@ package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import java.io.Serializable;
@@ -251,8 +252,14 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     public TicketStatusEnum status;
     
+    @PositionParameter(value = 48)
     @Column(name = "LINE_FILE")
     public Long lineFile;
+    
+    @PositionParameter(value = 49)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "LAYOUT")
+    public TicketLayoutEnum layout;
 
     
     public Ticket() {

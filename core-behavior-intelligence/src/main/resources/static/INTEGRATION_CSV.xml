@@ -1,0 +1,64 @@
+<beanio xmlns="http://www.beanio.org/2012/03" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.beanio.org/2012/03 http://www.beanio.org/2012/03/mapping.xsd">
+  
+    <stream name="ticket" format="csv" resourceBundle="beanio/layoutMinimoMessages"  >  
+        
+        <parser>
+           <property name="delimiter" value=";" />
+        </parser>
+        
+        <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />  
+        <typeHandler name="doubleHandler" class="com.core.behavior.reader.DoubleHandler" />    
+        <!-- record layout... -->  
+        
+              
+        <group name="file" class="com.core.behavior.dto.FileIntegrationDTO">            
+            <record  name="header" class="com.core.behavior.dto.HeaderShortIntegrationDTO"  minOccurs="1" maxOccurs="1" order="1" >
+                <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
+                <field name="headerDataVoo" trim="true" type="string"  literal="DATA_EMBARQUE"/>
+                <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_EMBARQUE"/>
+                <field name="headerCiaBilhete" trim="true" type="string"  literal="CIA_BILHETE"/>
+                <field name="headerTrechoTkt" trim="true" type="string"  literal="TRECHO"/>
+                <field name="headerAtoOrigem" trim="true" type="string"  literal="ORIGEM"/>
+                <field name="headerAtoDestino" trim="true" type="string"  literal="DESTINO"/>
+                <field name="headerNumeroCupom" trim="true" type="string"  literal="CUPOM"/>
+                <field name="headerBilhete" trim="true" type="string"  literal="BILHETE"/>
+                <field name="headerTipoVenda" trim="true" type="string"  literal="TIPO"/>
+                <field name="headerClasseCabine" trim="true" type="string"  literal="CABINE"/>
+                <field name="headerCiaVoo" trim="true" type="string"  literal="CIA_VOO"/>
+                <field name="headerValorBrl" trim="true" type="string"  literal="VALOR_BRL"/>
+                <field name="headerClienteEmpresa" trim="true" type="string"  literal="EMPRESA"/>
+                <field name="headerCnpjClienteEmpresa" trim="true" type="string"  literal="CNPJ"/>
+                <field name="headerIataAgenciaEmissora" trim="true" type="string"  literal="IATA_AGENCIA"/>
+                <field name="headerBaseVenda" trim="true" type="string"  literal="BASE_VENDA"/>
+                <field name="headerQtdePax" trim="true" type="string"  literal="QTD_PAX"/>
+                <field name="headerNumVoo" trim="true" type="string"  literal="NUM_VOO"/>
+                <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="CONSOLIDADA"/>
+            </record>    
+            
+            <record name="integrationDTOs" class="com.core.behavior.dto.TicketIntegrationDTO" minOccurs="1" maxOccurs="unbounded" collection="list" order="2" >
+                <field type="string" name="dataEmissao"/>
+                <field type="string"  name="dataEmbarque"/>
+                <field type="string" name="horaEmbarque" />
+                <field type="string" name="ciaBilhete"/>
+                <field type="string" name="trecho"/>
+                <field type="string" name="origem"/>
+                <field type="string" name="destino"/>
+                <field type="string" name="cupom"/>
+                <field type="string" name="bilhete"/>
+                <field type="string" name="tipo"/>
+                <field type="string" name="cabine"/>
+                <field type="string" name="ciaVoo"/>
+                <field type="string" name="valorBrl"/>
+                <field type="string" name="empresa" />
+                <field type="string" name="cnpj" trim="true"/>
+                <field type="string" name="iataAgencia" trim="true" />
+                <field type="string" name="baseVenda" trim="true" />
+                <field type="string" name="qtdPax" trim="true"/>
+                <field type="string" name="numVoo" trim="true" />
+                <field type="string" name="consolidada" trim="true" />
+            </record>
+        </group>
+    </stream>  
+</beanio>

@@ -9,8 +9,16 @@ package com.core.behavior.util;
  *
  * @author thiag
  */
-public enum TicketStatusEnum {
-    APPROVED,
-    UNAPPROVED,
-    WRITED
+public enum TicketLayoutEnum {
+    SHORT,
+    FULL;
+    
+    /**
+     *
+     * @param value
+     * @return
+     */
+    public static TicketLayoutEnum getLayout(Long value){
+        return value == 1 ? SHORT : FULL;
+    }
 }

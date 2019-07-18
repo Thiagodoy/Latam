@@ -14,9 +14,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -128,24 +129,33 @@ public class GeneratorFileReturnService {
             }
         }
 
-        //Create a comments
-        for (LineErrorDTO e : errors) {
-
-            e.getComments().forEach((key, value) -> {
-                CellReference cellReference = new CellReference(key);
-                XSSFRow row = sheet.getRow(cellReference.getRow());
-                
-                XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
-
-                Comment com = createCellComment(sheet, "Behavior", value, cell);
-                cell.setCellComment(com);
-                com.setAddress(cell.getAddress());
-                cell.setCellStyle(borderStyle);
-                cell.setCellStyle(backgroundStyle);
-
+        //Realiza append para comentarios da mesma Celula
+        Map<String, String> comments = new HashMap<String, String>();
+        errors.forEach(dto -> {
+            dto.getComments().forEach((key, message) -> {
+                if (comments.containsKey(key)) {
+                    String value = comments.get(key) + "\n" + message;
+                    comments.put(key, value);
+                } else {
+                    comments.put(key, message);
+                }
             });
+        });
 
-        }
+        //Create a comments
+        comments.forEach((key, value) -> {
+            CellReference cellReference = new CellReference(key);
+            XSSFRow row = sheet.getRow(cellReference.getRow());
+
+            XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
+
+            Comment com = createCellComment(sheet, "Behavior", value, cell);
+            cell.setCellComment(com);
+            com.setAddress(cell.getAddress());
+            cell.setCellStyle(borderStyle);
+            cell.setCellStyle(backgroundStyle);
+
+        });
 
         File temp = File.createTempFile("temp", ".xlsx");
         FileOutputStream fileOut = new FileOutputStream(temp);

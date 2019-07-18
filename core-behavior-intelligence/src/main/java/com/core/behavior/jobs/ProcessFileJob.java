@@ -9,6 +9,7 @@ import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.StatusEnum;
+import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.validator.ValidatorShortLayout;
 import java.io.File;
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(idFile);
+                    t.setLayout(TicketLayoutEnum.getLayout(layout));
                 });
 
                 long count = 2;

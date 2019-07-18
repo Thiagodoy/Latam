@@ -7,8 +7,11 @@ package com.core.behavior.repository;
 
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
+import com.core.behavior.util.TicketStatusEnum;
 import java.util.List;
 import javax.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,6 +35,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Transactional
     @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
     void deleteByFileId(@Param("fileId")Long fileId);
+    
+    //@Query(nativeQuery = true,countQuery = "select count(*) from ticket where status= :status" ,value = "select * from ticket where status= :status")
+    List<Ticket>findByStatus(TicketStatusEnum status, Pageable page);
     
     
 }

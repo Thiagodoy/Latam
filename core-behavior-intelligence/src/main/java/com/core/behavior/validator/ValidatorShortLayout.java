@@ -544,16 +544,23 @@ public class ValidatorShortLayout implements IValidatorShortLayout {
                     checkQtdPax().
                     checkNumVoo().
                     checkAgenciaConsolidada();
-
-            if (!errors.isEmpty()) {
+            
+            TicketStatusEnum status = !errors.isEmpty() ? TicketStatusEnum.UNAPPROVED : TicketStatusEnum.APPROVED;
+            this.ticket.setStatus(status);
+            ticket = this.ticketService.save(ticket);
+            final long idTicket = ticket.getId();
+            
+            if (!errors.isEmpty()) {                
+                errors.parallelStream().forEach(e->{                
+                    e.setTicketId(idTicket);
+                });
+                
                 logService.saveBatch(errors);
                 ValidatorShortLayout.countLog();
             }        
             
             
-            TicketStatusEnum status = !errors.isEmpty() ? TicketStatusEnum.UNAPPROVED : TicketStatusEnum.APPROVED;
-            this.ticket.setStatus(status);
-            this.ticketService.save(ticket);
+            
 
         } catch (Exception e) {
             Logger.getLogger(ValidatorShortLayout.class.getName()).log(Level.SEVERE, null, e);
