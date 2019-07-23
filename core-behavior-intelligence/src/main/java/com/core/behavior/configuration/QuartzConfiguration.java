@@ -39,15 +39,15 @@ public class QuartzConfiguration {
                 .build();
         scheduler.scheduleJob(detail, crontrigger);
 
-        JobDetail detail1 = JobBuilder.newJob(AgenciaFactoryJob.class).withIdentity("AgenciaFactoryJob", "agencia-factory-email")
-                .withDescription("Agendador de notificação de email")
-                .build();
-        CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 00 02 1/1 * ? *")
-                        .withMisfireHandlingInstructionFireAndProceed())
-                .build();
-
-        scheduler.scheduleJob(detail1, crontrigger1);
+//        JobDetail detail1 = JobBuilder.newJob(AgenciaFactoryJob.class).withIdentity("AgenciaFactoryJob", "agencia-factory-email")
+//                .withDescription("Agendador de notificação de email")
+//                .build();
+//        CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
+//                .withSchedule(CronScheduleBuilder.cronSchedule("0 00 02 1/1 * ? *")
+//                        .withMisfireHandlingInstructionFireAndProceed())
+//                .build();
+//
+//        scheduler.scheduleJob(detail1, crontrigger1);
         
         //:FIXME
 

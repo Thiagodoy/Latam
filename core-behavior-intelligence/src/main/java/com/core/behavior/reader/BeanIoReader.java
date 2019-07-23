@@ -15,6 +15,7 @@ import java.io.LineNumberReader;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
 import org.beanio.StreamFactory;
@@ -36,21 +37,21 @@ public class BeanIoReader {
     @Autowired
     private LogService logService;
 
-    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String user) {
+    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
-        long end;
-
+        long end;       
+        
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
         T record = null;
         try {
             StreamFactory factory = StreamFactory.newInstance();
-            InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
-            //factory.loadResource("resources/layoutMinimoMessages.properties");
-            factory.load(stream);
+            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
+           
+            factory.load(str);
 
-            reader = factory.createReader(str, file);
+            reader = factory.createReader(stream.getStreamId(), file);
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -128,7 +129,7 @@ public class BeanIoReader {
 
             StreamFactory factory = StreamFactory.newInstance();
             InputStream str = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
-            //factory.loadResource("resources/layoutMinimoMessages.properties");
+           
             factory.load(str);
 
             BeanReader beanReader = factory.createReader(stream, file);

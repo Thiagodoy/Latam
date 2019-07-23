@@ -15,23 +15,16 @@ import org.springframework.stereotype.Component;
  * @author thiag
  */
 @Component
-public class ValidatorFactoryBean implements ValidatorFactory{
+public class ValidatorFactoryBean implements ValidatorFactory {
 
     @Autowired
     private LogService logService;
+
     
-    @Autowired    
-    private TicketService ticketService;
-    
+
     @Override
-    public IValidator getBean(ValidatorEnum type) {
-        
-        
-        if(type.equals(ValidatorEnum.SHORT)){
-            return new ValidatorShortLayout(logService,ticketService);
-        }
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public IValidator getBean() {
+        return  new Validator(logService);              
     }
-    
+
 }

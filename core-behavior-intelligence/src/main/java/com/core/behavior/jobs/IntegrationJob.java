@@ -6,28 +6,25 @@
 package com.core.behavior.jobs;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.core.behavior.aws.client.ClientAws;
+import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
-import com.core.behavior.exception.ActivitiException;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
-import com.core.behavior.util.MessageCode;
+import com.core.behavior.util.Constantes;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.writer.BeanIoWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
-import static org.apache.poi.hssf.usermodel.HeaderFooter.file;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -44,16 +41,16 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private TicketService ticketService;
-    
-    @Autowired
-    private ClientAws clientAws;
 
-    private static final String DIR_UPLOAD = System.getProperty("user.dir") + "\\upload\\";
+    @Autowired
+    private ClientIntegrationAws clientAws;
+
+    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        File uploadFolder = new File(DIR_UPLOAD);
+        File uploadFolder = new File(Constantes.DIR_UPLOAD);
 
         if (!uploadFolder.isDirectory()) {
             uploadFolder.mkdir();
@@ -65,39 +62,43 @@ public class IntegrationJob extends QuartzJobBean {
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
 
-        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
-
-        List<File> files = new ArrayList<>();
+        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());        
 
         if (!shortLayout.isEmpty()) {
 
             FileIntegrationDTO dTO = mountDTO(shortLayout);
-            File file = BeanIoWriter.writer(uploadFolder, TicketLayoutEnum.SHORT, dTO, Stream.SHORT_LAYOUT);
+            File file = BeanIoWriter.writer(uploadFolder, TicketLayoutEnum.SHORT, dTO, Stream.SHORT_LAYOUT_INTEGRATION);
 
             if (file != null) {
-                //:FIXME
-                //changeStatus(shortLayout);
-                files.add(file);
+                changeStatus(shortLayout);              
             }
 
         }
 
         if (!fullLayout.isEmpty()) {
-            //:TODO Implementar
+            FileIntegrationDTO dTO = mountDTO(fullLayout);
+            File file = BeanIoWriter.writer(uploadFolder, TicketLayoutEnum.FULL, dTO, Stream.FULL_LAYOUT_INTEGRATION);
+
+            if (file != null) {
+                changeStatus(fullLayout);              
+            }
         }
 
-        //Salvar os arquivos listados
+       
         Arrays.asList(uploadFolder.listFiles()).forEach(f -> {
 
-             try {
-                clientAws.uploadFile(f, "behint-sources\\latam\\air-moviment");
+            try {
+                String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);
+
+                if (Optional.ofNullable(hash).isPresent()) {
+                    f.delete();
+                }
             } catch (AmazonS3Exception e) {
-               
-                throw new ActivitiException(MessageCode.SERVER_ERROR_AWS);
-            } catch (IOException ex) {
+                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, e);
+            } catch (Exception ex) {
                 Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         });
 
     }
@@ -110,7 +111,7 @@ public class IntegrationJob extends QuartzJobBean {
         });
 
         dTO.setIntegrationDTOs(l);
-        
+
         return dTO;
     }
 

@@ -56,6 +56,7 @@ public class Utils {
     
     public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
     public static String headerMinLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
+    public static String headerFullLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
     public static enum TypeField {
         TICKET, LOG
     };

@@ -16,5 +16,6 @@ import lombok.Data;
 public class FileIntegrationDTO {
     
     private HeaderShortIntegrationDTO header = new HeaderShortIntegrationDTO();
+    private HeaderFullIntegrationDTO headerFull = new HeaderFullIntegrationDTO();
     private List<TicketIntegrationDTO> integrationDTOs;
 }

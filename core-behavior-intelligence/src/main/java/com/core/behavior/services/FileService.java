@@ -251,7 +251,7 @@ public class FileService {
     }
 
     public void deleteFileCascade(File file) {
-        ticketRepository.deleteByFileId(file.getId());
+        //ticketRepository.deleteByFileId(file.getId());
         logRepository.deleteByFileId(file.getId());
         fileProcessStatusRepository.deleteByFileId(file.getId());
         fileRepository.delete(file);

@@ -57,4 +57,10 @@ public class HeaderDTO {
     private String headerTipoPagamento;
     private String headerDigitoVerificadorCC;
     private String headerNomeCliente;
+    private String headerHoraPouso;
+    private String headerTktDesignator;
+    private String headerEmailPax;
+    private String headerCellPax;
+    private String headerGrupoEmpresa;
+    private String headerGrupoConsolidada;
 }

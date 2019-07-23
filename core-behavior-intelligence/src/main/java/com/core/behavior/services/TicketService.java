@@ -40,6 +40,11 @@ public class TicketService {
 
     public void saveBatch(List<Ticket> ticket) throws SQLException {
         
+        
+        if(ticket.isEmpty()){
+            return;
+        }
+        
         long start = System.currentTimeMillis();
         long end;
         long fileId = ticket.get(0).getFileId();

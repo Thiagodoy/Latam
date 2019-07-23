@@ -62,7 +62,13 @@ amazonproperties:
         endpointUrl: https://s3.us-east-2.amazonaws.com
         accessKey: AKIAT4PQFE4EX2R5KXTK
         secretKey: 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
-        bucketName: behint-files          
+        bucketName: behint-files   
+        
+amazonairmovement:
+        endpointUrl: https://s3.us-east-2.amazonaws.com.teste.teste
+        accessKey: AKIAT4PQFE4EX2R5KXTK
+        secretKey: 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
+        bucketName: behint-sources 
         
 sftp:
     user: ftp_upload_files

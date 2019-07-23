@@ -11,6 +11,6 @@ package com.core.behavior.validator;
  */
 public interface ValidatorFactory{
 
-    IValidator getBean(ValidatorEnum type);
+    IValidator getBean();
     
 }

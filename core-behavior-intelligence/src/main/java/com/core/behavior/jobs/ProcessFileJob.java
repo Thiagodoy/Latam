@@ -8,14 +8,19 @@ import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
+import com.core.behavior.util.StageEnum;
 import com.core.behavior.util.StatusEnum;
+import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
-import com.core.behavior.validator.ValidatorEnum;
+import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.validator.ValidatorFactoryBean;
-import com.core.behavior.validator.ValidatorShortLayout;
+import com.core.behavior.validator.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,9 +52,12 @@ public class ProcessFileJob extends QuartzJobBean {
     
     @Autowired
     private ValidatorFactoryBean factoryBean;
+    
+    @Autowired
+    private TicketService ticketService;
 
     //@Autowired
-    //private ValidatorShortLayout validator;
+    //private Validator validator;
 
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
@@ -74,17 +82,17 @@ public class ProcessFileJob extends QuartzJobBean {
         f.setName(file.getName());
         f.setUserId(user);
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
-        f.setStage(2l);
+        f.setStage(StageEnum.UPLOAD.getCode());
         f.setCreatedDate(LocalDateTime.now());
 
         f = fileService.saveFile(f);
         final long idFile = f.getId();
         try {
 
-            String beanTicket = layout == 1L ? Constantes.FILE_BEAN_TICKET_SHORT_LAYOUT : Constantes.FILE_BEAN_TICKET;
-            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, Constantes.STREAM_TICKET, beanTicket, user);
+            Stream stream = layout == 1L ? Stream.SHORT_LAYOUT_PARSER : Stream.FULL_LAYOUT_PARSER;
+            Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, stream);
 
-            fileService.setStage(idFile, 2);
+            fileService.setStage(idFile, StageEnum.VALIDATION_LAYOUT.getCode());
 
             if (fileParsed.isPresent()) {
                 FileParsedDTO dto = fileParsed.get();
@@ -99,29 +107,34 @@ public class ProcessFileJob extends QuartzJobBean {
                     t.setLineFile(count++);
                 }
 
-                fileService.setStage(idFile, 3);
+                fileService.setStage(idFile, StageEnum.VALIDATION_CONTENT.getCode());
 
-                //ticketService.saveBatch(dto.getTicket());
-                // List<Ticket> tickets = ticketService.listByFileId(idFile);
                 long startValidation = System.currentTimeMillis();
                 
-                dto.getTicket().parallelStream().forEach(t -> {
-                    factoryBean.getBean(ValidatorEnum.SHORT).validate(t);
-                    //validator.validate(t);
+                List<Ticket> out = Collections.synchronizedList(new ArrayList<Ticket>());
+                
+                dto.getTicket().forEach(t -> {
+                    factoryBean.getBean().validate(t,out);                    
+                });                
+                
+                out.parallelStream().forEach(t->{
+                    t.setStatus(TicketStatusEnum.APPROVED);
                 });
                 
+                ticketService.saveBatch(out);                
+                
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
+                
                 fileService.setValidationTime(idFile, timeValidation);
 
-                fileService.setStatus(idFile, ValidatorShortLayout.countErrors > 0 ? StatusEnum.VALIDATION_ERROR : StatusEnum.VALIDATION_SUCCESS);
-                fileService.setStage(idFile, 4);
-                ValidatorShortLayout.countErrors = 0;
+                fileService.setStatus(idFile, Validator.countErrors > 0 ? StatusEnum.VALIDATION_ERROR : StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
+                Validator.countErrors = 0;
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
         } catch (Throwable e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
-            logService.logGeneric((f != null ? f.getId() : 0l), e.getLocalizedMessage());
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);            
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {

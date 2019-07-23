@@ -7,6 +7,7 @@ package com.core.behavior.services;
 
 import com.core.behavior.dto.LineErrorDTO;
 import com.core.behavior.model.Log;
+import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.repository.LogRepository;
 import com.core.behavior.util.Utils;
@@ -45,6 +46,10 @@ public class GeneratorFileReturnService {
 
     @Autowired
     private LogRepository logRepository;
+    
+    @Autowired
+    private AgencyRepository agencyRepository;
+    
 
     @Autowired
     private FileRepository fileRepository;
@@ -52,8 +57,10 @@ public class GeneratorFileReturnService {
     public File generateFileReturnFriendly(Long id) throws IOException {
 
         final List<Log> logs = logRepository.findByFileId(id);
-        final String fileName = fileRepository.findById(id).get().getName();
-
+        final com.core.behavior.model.File file = fileRepository.findById(id).get();
+        final String fileName = file.getName();
+        
+        final long layout = agencyRepository.findById(file.getCompany()).get().getLayoutFile();
         final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
 
         List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
@@ -71,14 +78,13 @@ public class GeneratorFileReturnService {
             });
             e.add(error);
         });
-
-        //e.stream().sorted(Comparator.comparingInt(LineErrorDTO::getLine));
-        return generateFile(e, fileName);
+        
+        return generateFile(e, layout);
     }
 
-    private File generateFile(List<LineErrorDTO> errors, String fileName) throws FileNotFoundException, IOException {
+    private File generateFile(List<LineErrorDTO> errors, long layout) throws FileNotFoundException, IOException {
 
-        String sheetName = "Erros";//name of sheet
+        String sheetName = "Erros";
 
         XSSFWorkbook wb = new XSSFWorkbook();
         XSSFSheet sheet = wb.createSheet(sheetName);
@@ -99,16 +105,8 @@ public class GeneratorFileReturnService {
         font.setBold(true);
         font.setItalic(true);
 
-//        borderStyle.setBorderBottom(BorderStyle.MEDIUM_DASH_DOT_DOT);
-//        borderStyle.setBottomBorderColor(IndexedColors.BLUE1.getIndex());
-//        borderStyle.setBorderLeft(BorderStyle.MEDIUM);
-//        borderStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-//        borderStyle.setBorderRight(BorderStyle.MEDIUM);
-//        borderStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-//        borderStyle.setBorderTop(BorderStyle.MEDIUM);
-//        borderStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-        //iterating r number of rows
-        String[] header = Utils.headerMinLayoutFile.split(";");
+
+        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");;
         XSSFRow rr = sheet.createRow(0);
         cellBold.setFont(font);
 

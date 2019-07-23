@@ -5,6 +5,7 @@
  */
 package com.core.behavior.writer;
 
+import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.io.BufferedWriter;
@@ -31,7 +32,7 @@ public class BeanIoWriter {
     private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_hh_mm_ss");
     
     
-    public static <T> File writer(File directory,TicketLayoutEnum layout, T object,  Stream stream)  {
+    public static <T> File writer(File directory,TicketLayoutEnum layout, T object,  Stream stream) {
 
         BeanWriter writer = null;
         Writer out = null;
@@ -46,16 +47,11 @@ public class BeanIoWriter {
             factory.load(inputStream);
 
             out = new BufferedWriter(new FileWriter(file));
-            writer = factory.createWriter(stream.getStreamId(), out);
-
-            
-            writer.write(object);
-            
+            writer = factory.createWriter(stream.getStreamId(), out);            
+            writer.write(object);           
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, ex);            
         } finally {
             if (writer != null) {
                 writer.flush();

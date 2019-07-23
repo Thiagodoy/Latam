@@ -11,7 +11,12 @@ package com.core.behavior.util;
  */
 public enum Stream {	
 	
-	SHORT_LAYOUT("ticket","static/INTEGRATION_CSV.xml");
+    
+        SHORT_LAYOUT_PARSER("ticket","static/TICKET_SHORT_LAYOUT.xml"),
+        FULL_LAYOUT_PARSER("ticket","static/TICKET.xml"),
+        
+	SHORT_LAYOUT_INTEGRATION("ticket","static/SHORT_INTEGRATION_CSV.xml"),
+        FULL_LAYOUT_INTEGRATION("ticket","static/FULL_INTEGRATION_CSV.xml");
 	
 	private String streamId;
 	private String streamFile;

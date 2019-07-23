@@ -15,6 +15,7 @@ import com.amazonaws.services.s3.model.EncryptedPutObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.core.behavior.properties.AmazonIntegrationProperties;
 import com.core.behavior.properties.AmazonProperties;
 import java.io.File;
 import java.io.IOException;
@@ -29,13 +30,13 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Data
-public class ClientAws {
+public class ClientIntegrationAws {
 
     private AmazonS3 amazonS3;
-    private static final String REGION = "sa-east-1";
+    private static final String REGION = "us-east-1";
 
     @Autowired
-    private AmazonProperties amazonConfiguration;
+    private AmazonIntegrationProperties amazonConfiguration;
 
     @PostConstruct
     private void initializeAmazon() {
@@ -54,12 +55,6 @@ public class ClientAws {
         return result.getETag();        
     }
     
-    public File downloadFile(String fileName,String folder) throws IOException{
-        GetObjectRequest request = new GetObjectRequest(amazonConfiguration.getBucketName(), folder + "/" + fileName);
-        File fileTemp = File.createTempFile("down", "load");
-        this.amazonS3.getObject(request, fileTemp);
-        
-        return fileTemp;
-    }
+   
 
 }

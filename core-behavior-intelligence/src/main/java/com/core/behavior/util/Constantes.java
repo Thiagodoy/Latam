@@ -33,5 +33,7 @@ public class Constantes {
     public static final String IMAGE_LOGO_001 = "static/logo001.png";
     public static final String IMAGE_LOGO_002 = "static/logo002.png";
     
+    public static final String PATH_INTEGRATION = "latam/air-moviment";
     
+    public static final String DIR_UPLOAD = System.getProperty("user.dir") + "\\upload\\";
 }
