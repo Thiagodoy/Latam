@@ -19,9 +19,9 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false&useServerPrepStmts=true
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
             port: 3306            
             connectionTestQuery: SELECT 1  
             
@@ -38,9 +38,9 @@ activiti:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false&useServerPrepStmts=true
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataSourceUser: behint_hmg
+            dataSourcePassword: Beh1ntHmg_App#2018
             port: 3306            
             connectionTestQuery: SELECT 1 
             
