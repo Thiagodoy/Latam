@@ -91,6 +91,7 @@ public class AgencyEmailJob extends QuartzJobBean {
             } else {
                 parameter.put(":email", u.getEmail());
                 parameter.put(":nome", Utils.replaceAccentToEntityHtml(u.getFirstName()));
+                parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
                 notificacao.setParameters(Utils.mapToString(parameter));
                 notificacao.setLayout(LayoutEmailEnum.ATIVO);
             }
