@@ -140,8 +140,8 @@ public class Utils {
         positionColumnByField.put("destino","H");
         positionColumnByField.put("cupom","I");
         positionColumnByField.put("bilhete","J");
-        positionColumnByField.put("tipo","L");
-        positionColumnByField.put("cabine","K");
+        positionColumnByField.put("tipo","K");
+        positionColumnByField.put("cabine","L");
         positionColumnByField.put("ciaVoo","M");
         positionColumnByField.put("valorBrl","N");
         positionColumnByField.put("empresa","O");

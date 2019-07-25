@@ -9,7 +9,9 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
+import com.core.behavior.model.FileIntegration;
 import com.core.behavior.model.Ticket;
+import com.core.behavior.repository.FileIntegrationRepository;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.Stream;
@@ -44,6 +46,9 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private ClientIntegrationAws clientAws;
+    
+    @Autowired
+    private FileIntegrationRepository fileIntegrationRepository;
 
     
 
@@ -90,7 +95,12 @@ public class IntegrationJob extends QuartzJobBean {
             try {
                 String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);
 
+                
+                
                 if (Optional.ofNullable(hash).isPresent()) {
+                    
+                    FileIntegration integration = new FileIntegration(hash, f.getName());
+                    fileIntegrationRepository.save(integration);
                     f.delete();
                 }
             } catch (AmazonS3Exception e) {

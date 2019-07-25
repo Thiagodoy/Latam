@@ -5,9 +5,7 @@ import br.com.caelum.stella.validation.CNPJValidator;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.LogService;
-import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketLayoutEnum;
-import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -485,15 +483,15 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkNumVoo() {
 
-        int countError = 0;
-
-        if (ticket.getNumVoo() == 0l) {
-            countError++;
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.numVoo.type"), "numVoo");
-        }
+//        int countError = 0;
+//
+//        if (ticket.getNumVoo() == 0l) {
+//            countError++;
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticket, props.getProperty("fielderror.ticket.numVoo.type"), "numVoo");
+//        }
 
         return this;
     }

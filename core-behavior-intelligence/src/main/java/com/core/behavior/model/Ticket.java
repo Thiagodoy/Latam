@@ -19,7 +19,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
@@ -173,7 +172,7 @@ public class Ticket {
 
     @PositionParameter(value = 28)
     @Column(name = "NUM_VOO")
-    public Long numVoo;
+    public String numVoo;
 
     @PositionParameter(value = 29)
     @Column(name = "PNR_AGENCIA")

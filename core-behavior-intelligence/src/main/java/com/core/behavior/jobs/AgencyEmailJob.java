@@ -15,7 +15,6 @@ import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.Utils;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

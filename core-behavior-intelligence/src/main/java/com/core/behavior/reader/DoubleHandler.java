@@ -5,7 +5,8 @@
  */
 package com.core.behavior.reader;
 
-import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.beanio.types.TypeConversionException;
 import org.beanio.types.TypeHandler;
 
@@ -13,22 +14,33 @@ import org.beanio.types.TypeHandler;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-public class DoubleHandler implements TypeHandler{
+public class DoubleHandler implements TypeHandler {
 
     @Override
     public Object parse(String string) throws TypeConversionException {
-        
-        
-        
+
         try {
-             return Optional.of(string).isPresent() ? Double.valueOf(string.replace(",", "").replace(".", "")) / 100 : Double.valueOf("0.0");
+            Pattern p = Pattern.compile("^([0-9]{1,3}\\.?)+(,[0-9]{1,2})?$");
+            Matcher m = p.matcher(string);
+
+            if (m.matches()) {
+                Double value = Double.valueOf(string.replace(".", "").replace(",", "."));
+
+                if (value.equals(0.0D)) {
+                    throw new TypeConversionException("");
+                }
+
+                return value;
+
+            } else {
+                throw new TypeConversionException("");
+            }
+
         } catch (Exception e) {
-            
-            throw  new TypeConversionException("Não foi possivel realizar a conversão para o valor primitivo!");
+
+            throw new TypeConversionException("");
         }
-        
-        
-       
+
     }
 
     @Override
@@ -40,5 +52,5 @@ public class DoubleHandler implements TypeHandler{
     public Class<?> getType() {
         return Double.class;
     }
-    
+
 }
