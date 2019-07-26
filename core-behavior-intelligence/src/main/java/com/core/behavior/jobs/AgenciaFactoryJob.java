@@ -30,7 +30,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @DisallowConcurrentExecution
-public class AgenciaFactoryJob extends QuartzJobBean {   
+public class AgenciaFactoryJob extends QuartzJobBean {
 
     @Autowired
     private AgencyService agencyService;
@@ -63,7 +63,7 @@ public class AgenciaFactoryJob extends QuartzJobBean {
                     .withIdentity("JOB-" + jobName + "-EMAIL", "send-email")
                     .usingJobData(AgencyEmailJob.JOB_KEY_AGENCIA, a.getId())
                     .build();
-            
+
             Date dateStart = generateDate(a);
             SimpleTrigger trigger = TriggerBuilder
                     .newTrigger()
@@ -71,8 +71,7 @@ public class AgenciaFactoryJob extends QuartzJobBean {
                     .startAt(dateStart)
                     .withSchedule(simpleSchedule())
                     .build();
-            
-            
+
             try {
                 bean.getScheduler().scheduleJob(detail, trigger);
             } catch (SchedulerException ex) {
@@ -80,22 +79,24 @@ public class AgenciaFactoryJob extends QuartzJobBean {
             }
 
         });
+
+        Logger.getLogger(AgenciaFactoryJob.class.getName()).log(Level.INFO, "Agendamento realizado dos Jobs de envio de email");
     }
-    
-    private Date generateDate(Agency agency){
-        
-        String[]time = agency.getTimeLimit().split(":");
-        
+
+    private Date generateDate(Agency agency) {
+
+        String[] time = agency.getTimeLimit().split(":");
+
         int hour = Integer.parseInt(time[0]);
         int minute = Integer.parseInt(time[1]);
-        
+
         Long hourAdvace = agency.getHoursAdvance();
-        
+
         LocalDateTime now = LocalDateTime.now();
         now = now.withHourOfDay(hour).withMinuteOfHour(minute).minusHours(hourAdvace.intValue());
-        
-        return now.toDate();        
-        
+
+        return now.toDate();
+
     }
 
 }
