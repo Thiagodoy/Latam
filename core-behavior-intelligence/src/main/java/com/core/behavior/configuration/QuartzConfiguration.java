@@ -51,15 +51,15 @@ public class QuartzConfiguration {
         
         //:FIXME
 
-//        JobDetail detail2= JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
-//                .withDescription("Integrador")
-//                .build();
-//        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
-//                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
-//                        .withMisfireHandlingInstructionFireAndProceed())
-//                .build();
-//
-//        scheduler.scheduleJob(detail2, crontrigger2);
+        JobDetail detail2= JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
+                .withDescription("Integrador")
+                .build();
+        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                        .withMisfireHandlingInstructionFireAndProceed())
+                .build();
+
+        scheduler.scheduleJob(detail2, crontrigger2);
     }
 
 }

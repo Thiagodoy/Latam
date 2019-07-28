@@ -5,8 +5,9 @@
  */
 package com.core.behavior.validator;
 
+import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.model.Ticket;
-import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -67,5 +68,5 @@ public interface IValidator {
     
     
     
-    void validate(Ticket ticket,List<Ticket> out);
+    Optional<Ticket> validate(TicketDTO ticketDto);
 }

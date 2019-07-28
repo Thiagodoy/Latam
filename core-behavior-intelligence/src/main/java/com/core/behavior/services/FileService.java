@@ -196,7 +196,7 @@ public class FileService {
                 throw new ActivitiException(MessageCode.FILE_HEADER_INVALID);
             }
 
-            com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 1);
+            com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1);
             this.processFile(userId, id, file, layout, f.getId());
         }
 

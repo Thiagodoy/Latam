@@ -19,6 +19,9 @@ import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.writer.BeanIoWriter;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +59,12 @@ public class IntegrationJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         File uploadFolder = new File(Constantes.DIR_UPLOAD);
+        File uploadedFolder = new File(Constantes.DIR_UPLOADED);
+        
+        if (!uploadedFolder.isDirectory()) {
+            uploadedFolder.mkdir();
+        }
+        
 
         if (!uploadFolder.isDirectory()) {
             uploadFolder.mkdir();
@@ -93,15 +102,13 @@ public class IntegrationJob extends QuartzJobBean {
         Arrays.asList(uploadFolder.listFiles()).forEach(f -> {
 
             try {
-                String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);
-
-                
+                String hash = " ";//clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);                
                 
                 if (Optional.ofNullable(hash).isPresent()) {
                     
                     FileIntegration integration = new FileIntegration(hash, f.getName());
                     fileIntegrationRepository.save(integration);
-                    f.delete();
+                    Files.move(f.toPath(), Paths.get(Constantes.DIR_UPLOADED).resolve(f.getName()),StandardCopyOption.REPLACE_EXISTING );
                 }
             } catch (AmazonS3Exception e) {
                 Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, e);

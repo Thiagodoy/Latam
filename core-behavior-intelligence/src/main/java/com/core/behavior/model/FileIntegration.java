@@ -33,6 +33,8 @@ public class FileIntegration {
     @Column(name = "CREATED_AT")    
     private LocalDateTime createdAt;
     
+    public FileIntegration(){ }
+    
     public FileIntegration(String etag, String fileName){
         this.etag = etag;
         this.fileName = fileName;

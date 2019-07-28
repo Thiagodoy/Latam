@@ -1,6 +1,6 @@
 package com.core.behavior.validator;
 
-import br.com.caelum.stella.validation.CNPJValidator;
+import com.core.behavior.dto.TicketDTO;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
@@ -10,11 +10,17 @@ import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
+import static java.lang.System.out;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -29,14 +35,32 @@ import org.beanio.StreamFactory;
  */
 public class Validator implements IValidator {
 
-    private LogService logService;
+   
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
 
-    private Ticket ticket;
-    private List<Log> errors = new ArrayList<>();
+    private TicketDTO ticketDTO;
+    private Ticket ticket = new Ticket();
+    
+    private SimpleDateFormat formatter4 = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"));
 
-    public static long countErrors;
+    private final static int DATA_VOO_LIMITE_DIAS = 365;
+    private final static String REGEX_HORA_VOO = "([01]?[0-9]|2[0-3]):([0-5][0-9]):?([0-5][0-9])?";
+    private final static String REGEX_TRECHO = "([A-Z]{3}[/]*)+";
+    private final static String REGEX_ORIGEM_DESTINO = "([A-Z]){3}";
+    private final static String REGEX_CUPOM = "((^0*[1-9]$)|(^[1-9][0-9]$))";
+    private final static String REGEX_BILHETE = "[A-Z0-9]{3,11}";
+    private final static String REGEX_TIPO = "(I|N){1}";
+    private final static String REGEX_CABINE = "[A-Z]{1}";
+    private final static String REGEX_CIA_VOO = "([A-Z]{1}[0-9]{1})|([A-Z]{1}[A-Z]{1})|([0-9]{1}[A-Z]{1})";
+    private final static String REGEX_VALOR_BRL = "^([0-9]{1,3}\\.?)+(,[0-9]{1,2})?$";
+    private final static String REGEX_CNPJ = "(^\\d{2}.\\d{3}.\\d{3}/\\d{4}-\\d{2}$)";
+    private final static String REGEX_IATA_AGENCIA = "[0-9]{7,8}";
+    private final static String REGEX_BASE_VENDA = "[A-Z]{3}";
+    private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";
+    private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
+
+    
     private static Properties props = new Properties();
 
     static {
@@ -51,46 +75,67 @@ public class Validator implements IValidator {
     }
 
     public Validator() {
+        this.formatter4.setLenient(false);
+    }   
 
-    }
-
-    public Validator(LogService logService) {
-        this.logService = logService;
-    }
-
-    private static synchronized void countLog() {
-        ++com.core.behavior.validator.Validator.countErrors;
-    }
-
-    private void generateLog(Ticket t, String message, String field) {
+    private  void generateLog(TicketDTO t, String message, String field) {
         Log log = new Log();
         log.setCreatedAt(LocalDateTime.now());
-        log.setFileId(this.ticket.getFileId());
+        log.setFileId(Long.parseLong(this.ticketDTO.getFileId()));
         log.setFieldName(field);
         log.setMessageError(message);
-        log.setLineNumber(t.getLineFile());
-        log.setRecordContent(ticket.toString());
+        log.setLineNumber(Long.parseLong(t.getLineFile()));
+        log.setRecordContent(ticketDTO.toString());
         log.setType(TypeErrorEnum.RECORD);
-        errors.add(log);
+        ticket.getErrors().add(log);
+    }
+
+    private LocalDateTime dateToLocalDateTime(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
     @Override
     public IValidator checkDataEmissao() {
 
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime emissao = Utils.dateToLocalDateTime(ticket.getDataEmissao());
-        LocalDateTime voo = Utils.dateToLocalDateTime(ticket.getDataEmbarque());
         int countError = 0;
 
-        if (emissao.isAfter(now)) {
+        Date dataEmbarque = null;
+        Date dataEmissao = null;
+
+        if (!Optional.ofNullable(ticketDTO.getDataEmissao()).isPresent()) {
             countError++;
         }
-        if (emissao.isAfter(voo)) {
+
+        if (countError == 0 && ticketDTO.getDataEmissao().length() != 10) {
             countError++;
+        }
+
+        try {
+            dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
+            dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+        } catch (ParseException e3) {
+            countError++;
+        }
+
+        if (dataEmbarque != null && dataEmissao != null && countError == 0) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime emissao = this.dateToLocalDateTime(dataEmissao);
+            LocalDateTime voo = this.dateToLocalDateTime(dataEmbarque);
+
+            if (emissao.isAfter(now)) {
+                countError++;
+            }
+            if (emissao.isAfter(voo)) {
+                countError++;
+            }
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.dataEmissao.type"), "dataEmissao");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataEmissao.type"), "dataEmissao");
+        } else {
+            ticket.setDataEmissao(dataEmissao);
         }
 
         return this;
@@ -99,21 +144,40 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkDataVoo() {
 
-        LocalDateTime emissao = Utils.dateToLocalDateTime(ticket.getDataEmissao());
-        LocalDateTime dataLimite = Utils.dateToLocalDateTime(ticket.getDataEmissao()).plusDays(360);
-        LocalDateTime dataVoo = Utils.dateToLocalDateTime(ticket.getDataEmbarque());
         int countError = 0;
+        Date dataEmbarque = null;
+        Date dataEmissao = null;
 
-        if (dataVoo.isAfter(dataLimite)) {
+        if (!Optional.ofNullable(ticketDTO.getDataEmbarque()).isPresent()) {
             countError++;
         }
 
-        if (dataVoo.isBefore(emissao)) {
+        try {
+            dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
+            dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+        } catch (ParseException e3) {
             countError++;
+        }
+
+        if (countError == 0 && dataEmbarque != null && dataEmissao != null) {
+
+            LocalDateTime emissao = Utils.dateToLocalDateTime(dataEmissao);
+            LocalDateTime dataLimite = Utils.dateToLocalDateTime(dataEmissao).plusDays(DATA_VOO_LIMITE_DIAS);
+            LocalDateTime dataVoo = Utils.dateToLocalDateTime(dataEmbarque);
+
+            if (dataVoo.isAfter(dataLimite)) {
+                countError++;
+            }
+
+            if (dataVoo.isBefore(emissao)) {
+                countError++;
+            }
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.dataEmbarque.type"), "dataEmbarque");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataEmbarque.type"), "dataEmbarque");
+        } else {
+            ticket.setDataEmbarque(dataEmbarque);
         }
 
         return this;
@@ -121,6 +185,29 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkHoraVoo() {
+
+        Pattern p = Pattern.compile(REGEX_HORA_VOO);
+        int countError = 0;
+
+        if (!Optional.ofNullable(ticketDTO.getHoraEmbarque()).isPresent()) {
+            countError++;
+        }
+
+        try {
+            Matcher m = p.matcher(ticketDTO.getHoraEmbarque());
+            if (!m.matches()) {
+                countError++;
+            }
+        } catch (Exception e) {
+            countError++;
+        }
+
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.horaEmbarque.type"), "horaEmbarque");
+        } else {
+            ticket.setHoraEmbarque(ticketDTO.getHoraEmbarque());
+        }
+
         return this;
     }
 
@@ -129,12 +216,18 @@ public class Validator implements IValidator {
 
         int countError = 0;
 
-        if (ticket.getCiaBilhete().length() > 2 || ticket.getCiaBilhete().length() < 1) {
+        if (!Optional.ofNullable(ticketDTO.getCiaBilhete()).isPresent()) {
+            countError++;
+        }
+
+        if (countError == 0 && ticketDTO.getCiaBilhete().length() > 2 || ticketDTO.getCiaBilhete().length() < 1) {
             countError++;
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.ciaBilhete.type"), "ciaBilhete");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.ciaBilhete.type"), "ciaBilhete");
+        } else {
+            ticket.setCiaBilhete(ticketDTO.getCiaBilhete());
         }
 
         return this;
@@ -144,21 +237,28 @@ public class Validator implements IValidator {
     public IValidator checkTrechoTkt() {
 
         int countError = 0;
+        Pattern p = Pattern.compile(REGEX_TRECHO);
 
-        String trecho = ticket.getTrecho();
-
-        String[] tr = trecho.split("/");
-
-        if (tr.length <= 1) {
+        if (!Optional.ofNullable(ticketDTO.getTrecho()).isPresent()) {
             countError++;
         }
 
-        if (trecho.length() < 7) {
+        String trecho = ticketDTO.getTrecho();
+
+        Matcher matcher = p.matcher(trecho);
+
+        if (countError == 0 && !matcher.matches()) {
+            countError++;
+        }
+
+        if (trecho != null && trecho.length() < 7) {
             countError++;
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.trecho.type"), "trecho");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.trecho.type"), "trecho");
+        } else {
+            ticket.setTrecho(trecho);
         }
 
         return this;
@@ -167,58 +267,53 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkAtoOrigem() {
 
-        String destino = ticket.getDestino();
-        String origem = ticket.getOrigem();
+        String destino = ticketDTO.getDestino();
+        String origem = ticketDTO.getOrigem();
 
         int countError = 0;
+
+        Pattern pattern = Pattern.compile(REGEX_ORIGEM_DESTINO);
+        Matcher m = pattern.matcher(origem);
+
+        if (!m.matches()) {
+            countError++;
+        }
 
         if (destino.equals(origem)) {
             countError++;
         }
 
-        if (origem.length() < 3 || origem.length() > 3) {
-            countError++;
-        }
-
-        Pattern p = Pattern.compile("\\d*");
-        Matcher m = p.matcher(origem);
-        m.find();
-
-        if (m.group().length() > 0) {
-            countError++;
-        }
-
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.origem.type"), "origem");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.origem.type"), "origem");
+        } else {
+            ticket.setOrigem(origem);
         }
+
         return this;
     }
 
     @Override
     public IValidator checkAtoDestino() {
 
-        String destino = ticket.getDestino();
-        String origem = ticket.getOrigem();
+        String destino = ticketDTO.getDestino();
+        String origem = ticketDTO.getOrigem();
         int countError = 0;
+
+        Pattern pattern = Pattern.compile(REGEX_ORIGEM_DESTINO);
+        Matcher m = pattern.matcher(destino);
+
+        if (!m.matches()) {
+            countError++;
+        }
 
         if (destino.equals(origem)) {
             countError++;
         }
 
-        if (destino.length() < 3 || destino.length() > 3) {
-            countError++;
-        }
-
-        Pattern p = Pattern.compile("\\d*");
-        Matcher m = p.matcher(destino);
-        m.find();
-
-        if (m.group().length() > 0) {
-            countError++;
-        }
-
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.destino.type"), "destino");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.destino.type"), "destino");
+        } else {
+            ticket.setDestino(destino);
         }
 
         return this;
@@ -229,17 +324,19 @@ public class Validator implements IValidator {
 
         int countError = 0;
 
-        if (ticket.getCupom().equals(0l)) {
-            countError++;
-        }
+        Pattern pattern = Pattern.compile(REGEX_CUPOM);
+        Matcher m = pattern.matcher(ticketDTO.getCupom());
 
-        if (ticket.getCupom() >= 100) {
+        if (!m.matches()) {
             countError++;
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.cupom.type"), "cupom");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cupom.type"), "cupom");
+        } else {
+            ticket.setCupom(Long.parseLong(ticketDTO.getCupom()));
         }
+
         return this;
     }
 
@@ -248,27 +345,23 @@ public class Validator implements IValidator {
 
         int countError = 0;
 
-        String bilhete = ticket.getBilhete();
-
-        if (bilhete.length() < 3) {
+        if (!Optional.ofNullable(ticketDTO.getBilhete()).isPresent()) {
             countError++;
         }
 
-        if (bilhete.length() > 11) {
-            countError++;
-        }
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_BILHETE);
+            Matcher m = p.matcher(ticketDTO.getBilhete());
 
-        String regex = "(0){" + bilhete.length() + "}";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(bilhete);
-        m.find();
-
-        if (m.matches()) {
-            countError++;
+            if (!m.matches()) {
+                countError++;
+            }
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.bilhete.type"), "bilhete");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.bilhete.type"), "bilhete");
+        } else {
+            ticket.setBilhete(ticketDTO.getBilhete());
         }
 
         return this;
@@ -277,21 +370,26 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkTipoVenda() {
 
-        String tipo = ticket.getTipo();
+        String tipo = ticketDTO.getTipo();
         int countError = 0;
 
-        if (Optional.ofNullable(tipo).isPresent()) {
-            if (tipo.length() > 1) {
+        if (!Optional.ofNullable(tipo).isPresent()) {
+            countError++;
+        }
+
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_TIPO);
+            Matcher m = p.matcher(tipo);
+
+            if (!m.matches()) {
                 countError++;
             }
+        }
 
-            if (!(tipo.equals("N") || tipo.equals("I"))) {
-                countError++;
-            }
-
-            if (countError > 0) {
-                this.generateLog(ticket, props.getProperty("fielderror.ticket.tipo.type"), "tipo");
-            }
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tipo.type"), "tipo");
+        } else {
+            this.ticket.setTipo(tipo);
         }
 
         return this;
@@ -301,25 +399,25 @@ public class Validator implements IValidator {
     public IValidator checkClasseCabine() {
 
         int countError = 0;
-        String cabine = ticket.getCabine();
+        String cabine = ticketDTO.getCabine();
 
-        if (Optional.ofNullable(cabine).isPresent()) {
+        if (!Optional.ofNullable(cabine).isPresent()) {
+            countError++;
+        }
 
-            if (cabine.length() > 1) {
-                countError++;
-            }
-
-            Pattern p = Pattern.compile("\\d+");
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_CABINE);
             Matcher m = p.matcher(cabine);
-            m.find();
 
-            if (m.matches()) {
+            if (!m.matches()) {
                 countError++;
             }
+        }
 
-            if (countError > 0) {
-                this.generateLog(ticket, props.getProperty("fielderror.ticket.cabine.type"), "cabine");
-            }
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cabine.type"), "cabine");
+        } else {
+            this.ticket.setCabine(cabine);
         }
 
         return this;
@@ -329,28 +427,26 @@ public class Validator implements IValidator {
     public IValidator checkCiaVoo() {
 
         int countError = 0;
-        String voo = ticket.getCiaVoo();
+        String voo = ticketDTO.getCiaVoo();
 
-        if (Optional.ofNullable(voo).isPresent()) {
-            if (voo.length() > 2) {
-                countError++;
-            }
+        if (!Optional.ofNullable(voo).isPresent()) {
 
-            if (voo.length() < 2) {
-                countError++;
-            }
+            countError++;
+        }
 
-            Pattern p = Pattern.compile("\\d*");
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_CIA_VOO);
             Matcher m = p.matcher(voo);
-            m.find();
 
-            if (m.group().length() > 0) {
+            if (!m.matches()) {
                 countError++;
             }
+        }
 
-            if (countError > 0) {
-                this.generateLog(ticket, props.getProperty("fielderror.ticket.ciaVoo.type"), "ciaVoo");
-            }
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.ciaVoo.type"), "ciaVoo");
+        } else {
+            ticket.setCiaVoo(voo);
         }
 
         return this;
@@ -360,16 +456,40 @@ public class Validator implements IValidator {
     public IValidator checkValorBrl() {
 
         int countError = 0;
-        if (ticket.getValorBrl() == 0) {
+        Double value = null;
+
+        String valor = ticketDTO.getValorBrl();
+        if (!Optional.ofNullable(valor).isPresent()) {
             countError++;
         }
 
-        if (ticket.getValorBrl() < 0) {
-            countError++;
+        if (countError == 0) {
+
+            Pattern p = Pattern.compile(REGEX_VALOR_BRL);
+            Matcher m = p.matcher(valor);
+
+            if (!m.matches()) {
+                countError++;
+            }
+
+            if (countError == 0) {
+                try {
+                    value = Double.valueOf(valor.replace(".", "").replace(",", "."));
+                    if (value.equals(0.0d)) {
+                        countError++;
+                    }
+                } catch (Exception e) {
+                    countError++;
+                }
+
+            }
+
         }
 
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.valorBrl.type"), "valorBrl");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.valorBrl.type"), "valorBrl");
+        } else {
+            ticket.setValorBrl(value);
         }
 
         return this;
@@ -377,34 +497,39 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkClienteEmpresa() {
+
+        if (Optional.ofNullable(ticketDTO.getEmpresa()).isPresent()) {
+            this.ticket.setEmpresa(ticketDTO.getEmpresa());
+        } else {
+            this.ticket.setEmpresa("");
+        }
+
         return this;
     }
 
     @Override
     public IValidator checkCnpjClienteEmpresa() {
 
-        String cnpj = ticket.getCnpj();
+        String cnpj = ticketDTO.getCnpj();
 
-        br.com.caelum.stella.validation.Validator<String> validator = new CNPJValidator(true);
         int countError = 0;
 
-        if (Optional.ofNullable(cnpj).isPresent() && cnpj.length() > 0) {
-            if (cnpj.length() < 18) {
-                countError++;
-            }
+        if (cnpj != null && cnpj.length() > 0) {
 
-            if (cnpj.length() > 18) {
-                countError++;
-            }
+            Pattern p = Pattern.compile(REGEX_CNPJ);
+            Matcher m = p.matcher(cnpj);
 
-            if (!validator.isEligible(cnpj)) {
+            if (!m.matches()) {
                 countError++;
-            }
-
-            if (countError > 0) {
-                this.generateLog(ticket, props.getProperty("fielderror.ticket.cnpj.type"), "cnpj");
             }
         }
+
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cnpj.type"), "cnpj");
+        } else {
+            ticket.setCnpj(cnpj);
+        }
+
         return this;
     }
 
@@ -412,19 +537,27 @@ public class Validator implements IValidator {
     public IValidator checkIataAgenciaEmissora() {
 
         int countError = 0;
-        if (Optional.ofNullable(ticket.getIataAgencia()).isPresent()) {
-            BigDecimal iata = BigDecimal.valueOf(ticket.getIataAgencia());
-            if (iata.compareTo(BigDecimal.valueOf(1000000)) < 0) {
-                countError++;
-            }
+        Long value = null;
+        String iataAgencia = ticketDTO.getIataAgencia();
+        if (!Optional.ofNullable(iataAgencia).isPresent()) {
+            countError++;
+        }
 
-            if (iata.compareTo(BigDecimal.valueOf(99000000)) > 0) {
-                countError++;
-            }
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_IATA_AGENCIA);
+            Matcher m = p.matcher(iataAgencia);
 
-            if (countError > 0) {
-                this.generateLog(ticket, props.getProperty("fielderror.ticket.iataAgencia.type"), "iataAgencia");
+            if (!m.matches()) {
+                countError++;
+            } else {
+                value = Long.valueOf(iataAgencia);
             }
+        }
+
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.iataAgencia.type"), "iataAgencia");
+        } else {
+            ticket.setIataAgencia(value);
         }
 
         return this;
@@ -434,29 +567,28 @@ public class Validator implements IValidator {
     public IValidator checkBaseVenda() {
 
         int countError = 0;
-        String base = ticket.getBaseVenda();
+        String base = ticketDTO.getBaseVenda();
 
-        if (Optional.ofNullable(base).isPresent()) {
+        if (!Optional.ofNullable(base).isPresent()) {
 
-            if (base.length() > 3 || base.length() < 3) {
-                countError++;
-            }
+            countError++;
+        }
 
-            if (base.length() > 3 || base.length() < 3) {
-                countError++;
-            }
+        if (countError == 0) {
 
-            Pattern p = Pattern.compile("\\d*");
+            Pattern p = Pattern.compile(REGEX_BASE_VENDA);
             Matcher m = p.matcher(base);
-            m.find();
 
-            if (m.group().length() > 0) {
+            if (!m.matches()) {
                 countError++;
             }
 
-            if (countError > 0) {
-                this.generateLog(ticket,  props.getProperty("fielderror.ticket.baseVenda.type"), "baseVenda");
-            }
+        }
+
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.baseVenda.type"), "baseVenda");
+        } else {
+            ticket.setBaseVenda(base);
         }
 
         return this;
@@ -466,15 +598,27 @@ public class Validator implements IValidator {
     public IValidator checkQtdPax() {
 
         int countError = 0;
-
-        ticket.setQtdPax(Optional.ofNullable(ticket.getQtdPax()).isPresent() ? ticket.getQtdPax() : 1L);
-
-        if (ticket.getQtdPax() == 0l) {
+        String qtdPax = ticketDTO.getQtdPax();
+        Long value = null;
+        if (!Optional.ofNullable(qtdPax).isPresent()) {
             countError++;
         }
 
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_QTD_PAX);
+            Matcher m = p.matcher(qtdPax);
+
+            if (!m.matches()) {
+                countError++;
+            } else {
+                value = Long.valueOf(qtdPax);
+            }
+        }
+
         if (countError > 0) {
-            this.generateLog(ticket, props.getProperty("fielderror.ticket.qtdPax.type"), "qtdPax");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.qtdPax.type"), "qtdPax");
+        } else {
+            ticket.setQtdPax(value);
         }
 
         return this;
@@ -483,21 +627,41 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkNumVoo() {
 
-//        int countError = 0;
-//
-//        if (ticket.getNumVoo() == 0l) {
-//            countError++;
-//        }
-//
-//        if (countError > 0) {
-//            this.generateLog(ticket, props.getProperty("fielderror.ticket.numVoo.type"), "numVoo");
-//        }
+        int countError = 0;
+
+        String numVoo = ticketDTO.getNumVoo();
+
+        if (!Optional.ofNullable(numVoo).isPresent()) {
+            countError++;
+        }
+
+        if (countError == 0) {
+            Pattern p = Pattern.compile(REGEX_NUM_VOO);
+            Matcher m = p.matcher(numVoo);
+
+            if (!m.matches()) {
+                countError++;
+            }
+        }
+
+        if (countError > 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.numVoo.type"), "qtdPax");
+        } else {
+            ticket.setNumVoo(numVoo);
+        }
 
         return this;
     }
 
     @Override
     public IValidator checkAgenciaConsolidada() {
+
+        if (Optional.ofNullable(ticketDTO.getConsolidada()).isPresent()) {
+            this.ticket.setConsolidada(ticketDTO.getConsolidada());
+        } else {
+            this.ticket.setConsolidada("");
+        }
+
         return this;
     }
 
@@ -566,12 +730,12 @@ public class Validator implements IValidator {
 
         StringBuilder message = new StringBuilder();
 
-        if (ticket.getRtOw() != null && (ticket.getRtOw().equals("RT") || ticket.getRtOw().equals("OW"))) {
+        if (ticketDTO.getRtOw() != null && (ticketDTO.getRtOw().equals("RT") || ticketDTO.getRtOw().equals("OW"))) {
             message.append("Rt_Ow inválido.\n");
         }
 
         if (message.length() > 0) {
-            this.generateLog(ticket, message.toString(), "rtOw");
+            this.generateLog(ticketDTO, message.toString(), "rtOw");
         }
 
         return this;
@@ -658,8 +822,9 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public void validate(Ticket ticket, List<Ticket> out) {
-        this.ticket = ticket;
+    public Optional<Ticket> validate(TicketDTO ticketDTO) {
+        this.ticketDTO = ticketDTO;
+        this.ticket.setErrors(new ArrayList<>());
         try {
 
             this.checkDataEmissao().
@@ -683,7 +848,7 @@ public class Validator implements IValidator {
                     checkNumVoo().
                     checkAgenciaConsolidada();
 
-            if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
+            if (ticketDTO.getLayout().equals(TicketLayoutEnum.FULL)) {
                 this.checkDataExtracao()
                         .checkHoraEmissao()
                         .checkDataReserva()
@@ -715,15 +880,16 @@ public class Validator implements IValidator {
                         .checkGrupoConsolida();
             }
 
-            if (!errors.isEmpty()) {
-                logService.saveAll(errors);
-                com.core.behavior.validator.Validator.countLog();
-            } else {
-                out.add(ticket);
-            }
+            
+            this.ticket.setFileId(Long.valueOf(ticketDTO.getFileId()));
+            this.ticket.setLayout(TicketLayoutEnum.valueOf(ticketDTO.getLayout()));
+            
+            return Optional.of(this.ticket);
 
         } catch (Exception e) {
-            Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(com.core.behavior.validator.Validator.class
+                    .getName()).log(Level.SEVERE, null, e);
+            return Optional.empty();
         }
     }
 

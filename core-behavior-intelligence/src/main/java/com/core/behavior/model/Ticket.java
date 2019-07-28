@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
@@ -22,6 +23,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Data;
 
 /**
@@ -285,6 +287,10 @@ public class Ticket {
     @PositionParameter(value = 55)
     @Column(name = "GRUPO_CONSOLIDADA")
     public String grupoConsolidada;
+    
+    
+    @Transient
+    private List<Log>errors;
 
     public Ticket() {
         this.createdAt = LocalDateTime.now();

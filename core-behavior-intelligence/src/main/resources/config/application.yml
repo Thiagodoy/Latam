@@ -46,10 +46,10 @@ activiti:
             
             
 email:
-    host: smtp.gmail.com
+    host: smtp.office365.com
     port: 587
-    username: behavior47@gmail.com
-    password: beh@vior2019
+    username: latamupload@behint.net.br
+    password: behavior@2019
     auth: true  
     protocol: smtp
     starttls:

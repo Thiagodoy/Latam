@@ -5,9 +5,6 @@
  */
 package com.core.behavior.validator;
 
-import com.core.behavior.services.LogService;
-import com.core.behavior.services.TicketService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -17,14 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidatorFactoryBean implements ValidatorFactory {
 
-    @Autowired
-    private LogService logService;
-
     
 
     @Override
     public IValidator getBean() {
-        return  new Validator(logService);              
+        return  new Validator();              
     }
 
 }

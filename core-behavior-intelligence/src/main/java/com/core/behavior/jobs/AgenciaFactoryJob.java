@@ -2,8 +2,6 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.model.Agency;
 import com.core.behavior.services.AgencyService;
-import com.core.behavior.services.TicketService;
-import com.core.behavior.specifications.AgenciaSpecification;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Date;
