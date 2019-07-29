@@ -38,26 +38,26 @@
             </record>    
             
             <record name="ticket" class="com.core.behavior.dto.TicketDTO" minOccurs="1" maxOccurs="unbounded" collection="list" order="2" >
-                <field type="string" name="dataEmissao" />
-                <field type="string" name="dataEmbarque" />
+                <field type="string" name="dataEmissao" trim="true" />
+                <field type="string" name="dataEmbarque" trim="true" />
                 <field type="string" name="horaEmbarque" trim="true" />
-                <field type="string" name="ciaBilhete" />
-                <field type="string" name="trecho" />
-                <field type="string" name="origem"  />
-                <field type="string" name="destino" />
-                <field type="string" name="cupom"/>
-                <field type="string" name="bilhete" />
-                <field type="string" name="tipo" />
-                <field type="string" name="cabine" />
-                <field type="string" name="ciaVoo" />
-                <field type="string" name="valorBrl"/>
-                <field type="string" name="empresa"/>
-                <field type="string" name="cnpj" />
-                <field type="string" name="iataAgencia" />
-                <field type="string" name="baseVenda" />
-                <field type="string" name="qtdPax" />
-                <field type="string" name="numVoo" />
-                <field type="string" name="consolidada" />
+                <field type="string" name="ciaBilhete" trim="true" />
+                <field type="string" name="trecho" trim="true" />
+                <field type="string" name="origem" trim="true" />
+                <field type="string" name="destino" trim="true"/>
+                <field type="string" name="cupom" trim="true"/>
+                <field type="string" name="bilhete" trim="true" />
+                <field type="string" name="tipo" trim="true" />
+                <field type="string" name="cabine" trim="true" />
+                <field type="string" name="ciaVoo" trim="true" />
+                <field type="string" name="valorBrl" trim="true"/>
+                <field type="string" name="empresa" trim="true"/>
+                <field type="string" name="cnpj" trim="true" />
+                <field type="string" name="iataAgencia" trim="true" />
+                <field type="string" name="baseVenda" trim="true" />
+                <field type="string" name="qtdPax" trim="true" />
+                <field type="string" name="numVoo" trim="true" />
+                <field type="string" name="consolidada" trim="true" />
             </record>
         </group>
     </stream>  
