@@ -64,7 +64,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 String content = this.getContentEmail(n.getLayout().getPath());
                
                 helper.setSubject(n.getLayout().getSubject());
-                 helper.setFrom(properties.getUsername());
+                helper.setFrom(properties.getUsername());
 
                 if (parameters != null && parameters.size() > 0) {
                     for (String key : parameters.keySet()) {
