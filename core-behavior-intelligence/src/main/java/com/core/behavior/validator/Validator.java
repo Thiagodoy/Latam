@@ -4,13 +4,11 @@ import com.core.behavior.dto.TicketDTO;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
-import com.core.behavior.services.LogService;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
 import java.io.InputStream;
-import static java.lang.System.out;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -220,7 +218,7 @@ public class Validator implements IValidator {
             countError++;
         }
 
-        if (countError == 0 && ticketDTO.getCiaBilhete().length() > 2 || ticketDTO.getCiaBilhete().length() < 1) {
+        if (countError == 0 && ticketDTO.getCiaBilhete().length() > 2 || ticketDTO.getCiaBilhete().length() < 2) {
             countError++;
         }
 
@@ -645,7 +643,7 @@ public class Validator implements IValidator {
         }
 
         if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.numVoo.type"), "qtdPax");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.numVoo.type"), "numVoo");
         } else {
             ticket.setNumVoo(numVoo);
         }

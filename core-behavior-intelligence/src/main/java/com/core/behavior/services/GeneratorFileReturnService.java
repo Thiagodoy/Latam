@@ -37,6 +37,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.core.behavior.repository.FileIntegrationRepository;
+import java.util.Comparator;
 
 /**
  *
@@ -62,8 +63,9 @@ public class GeneratorFileReturnService {
         final String fileName = file.getName();
         
         final long layout = agencyRepository.findById(file.getCompany()).get().getLayoutFile();
+       Comparator lineNumber = Comparator.comparingLong(Log::getLineNumber);
         final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
-
+        logDistinct.sort(lineNumber);
         List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
         LineErrorDTO.reset();
 
