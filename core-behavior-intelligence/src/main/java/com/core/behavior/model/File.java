@@ -99,7 +99,10 @@ public class File {
     private Long validationTime;
     
     @Column(name = "stage")
-    private Long stage;
+    private Long stage;    
+    
+    @Column(name = "version")
+    private Long version;
 
 
     @Transient
