@@ -156,7 +156,11 @@ public class Validator implements IValidator {
         } catch (ParseException e3) {
             countError++;
         }
-
+        
+        if(countError == 0 && dataEmbarque.getTime() < dataEmissao.getTime()){
+            countError++;
+        }
+        
         if (countError == 0 && dataEmbarque != null && dataEmissao != null) {
 
             LocalDateTime emissao = Utils.dateToLocalDateTime(dataEmissao);
