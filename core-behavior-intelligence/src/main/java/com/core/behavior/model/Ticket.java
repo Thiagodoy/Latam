@@ -288,6 +288,10 @@ public class Ticket {
     @Column(name = "GRUPO_CONSOLIDADA")
     public String grupoConsolidada;
     
+    @PositionParameter(value = 56)
+    @Column(name = "FILE_INTEGRATION")
+    public String fileIntegration;
+    
     
     @Transient
     private List<Log>errors;

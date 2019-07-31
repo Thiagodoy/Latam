@@ -9,6 +9,7 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Optional;
 import lombok.Data;
@@ -72,6 +73,8 @@ public class TicketIntegrationDTO {
 
     private static final SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");
     private static final NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+    
+      
 
     public TicketIntegrationDTO(Ticket ticket) {
 

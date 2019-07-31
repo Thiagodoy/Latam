@@ -10,10 +10,13 @@ import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +49,8 @@ public class BeanIoWriter {
             
             factory.load(inputStream);
 
-            out = new BufferedWriter(new FileWriter(file));
+            
+            out = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);            
             writer = factory.createWriter(stream.getStreamId(), out);            
             writer.write(object);           
 

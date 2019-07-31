@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -49,22 +48,19 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private ClientIntegrationAws clientAws;
-    
+
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
-
-    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         File uploadFolder = new File(Constantes.DIR_UPLOAD);
         File uploadedFolder = new File(Constantes.DIR_UPLOADED);
-        
+
         if (!uploadedFolder.isDirectory()) {
             uploadedFolder.mkdir();
         }
-        
 
         if (!uploadFolder.isDirectory()) {
             uploadFolder.mkdir();
@@ -76,48 +72,56 @@ public class IntegrationJob extends QuartzJobBean {
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
 
-        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());        
+        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
 
         if (!shortLayout.isEmpty()) {
-
-            FileIntegrationDTO dTO = mountDTO(shortLayout);
-            File file = BeanIoWriter.writer(uploadFolder, TicketLayoutEnum.SHORT, dTO, Stream.SHORT_LAYOUT_INTEGRATION);
-
-            if (file != null) {
-                changeStatus(shortLayout);              
-            }
-
+            this.generateFile(shortLayout, uploadFolder, TicketLayoutEnum.SHORT, Stream.SHORT_LAYOUT_INTEGRATION);
         }
 
         if (!fullLayout.isEmpty()) {
-            FileIntegrationDTO dTO = mountDTO(fullLayout);
-            File file = BeanIoWriter.writer(uploadFolder, TicketLayoutEnum.FULL, dTO, Stream.FULL_LAYOUT_INTEGRATION);
-
-            if (file != null) {
-                changeStatus(fullLayout);              
-            }
+           this.generateFile(shortLayout, uploadFolder, TicketLayoutEnum.FULL, Stream.FULL_LAYOUT_INTEGRATION);
         }
 
-       
-        Arrays.asList(uploadFolder.listFiles()).forEach(f -> {
+    }
 
-            try {
-                String hash = " ";//clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);                
-                
-                if (Optional.ofNullable(hash).isPresent()) {
-                    
-                    FileIntegration integration = new FileIntegration(hash, f.getName());
-                    fileIntegrationRepository.save(integration);
-                    Files.move(f.toPath(), Paths.get(Constantes.DIR_UPLOADED).resolve(f.getName()),StandardCopyOption.REPLACE_EXISTING );
-                }
-            } catch (AmazonS3Exception e) {
-                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, e);
-            } catch (Exception ex) {
-                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, ex);
+    private void generateFile(List<Ticket> list, File uploadFolder, TicketLayoutEnum layout, Stream stream) {
+
+        FileIntegrationDTO dTO = mountDTO(list);
+        File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream);
+
+        final String fileName = file.getName();
+        boolean isUploaded = this.uploadAndMoveFile(file);
+
+        if (isUploaded) {            
+            list.parallelStream().forEach(t->{            
+                t.setFileIntegration(fileName);
+                t.setStatus(TicketStatusEnum.WRITED);
+                this.ticketService.save(t);
+            });            
+        } else {
+            file.delete();
+        }
+
+    }
+
+    private boolean uploadAndMoveFile(File f) {
+
+        try {
+            String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);
+
+            if (Optional.ofNullable(hash).isPresent()) {
+                Files.move(f.toPath(), Paths.get(Constantes.DIR_UPLOADED).resolve(f.getName()), StandardCopyOption.REPLACE_EXISTING);
+                FileIntegration integration = new FileIntegration(hash, f.getName());
+                fileIntegrationRepository.save(integration);
             }
-
-        });
-
+            return true;
+        } catch (AmazonS3Exception e) {
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, e);
+            return false;
+        } catch (Exception ex) {
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 
     private FileIntegrationDTO mountDTO(List<Ticket> list) {
@@ -130,13 +134,6 @@ public class IntegrationJob extends QuartzJobBean {
         dTO.setIntegrationDTOs(l);
 
         return dTO;
-    }
-
-    private void changeStatus(List<Ticket> list) {
-        list.parallelStream().forEach(l -> {
-            l.setStatus(TicketStatusEnum.WRITED);
-            ticketService.save(l);
-        });
     }
 
 }
