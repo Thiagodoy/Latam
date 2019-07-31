@@ -50,7 +50,6 @@ public class QuartzConfiguration {
         scheduler.scheduleJob(detail1, crontrigger1);
         
         //:FIXME
-
         JobDetail detail2= JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
                 .withDescription("Integrador")
                 .build();
