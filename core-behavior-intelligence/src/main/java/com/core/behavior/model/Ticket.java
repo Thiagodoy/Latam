@@ -96,6 +96,7 @@ public class Ticket {
     @PositionParameter(value = 8)
     @Column(name = "CIA_VOO")
     public String ciaVoo;
+    
     @PositionParameter(value = 9)
     @Column(name = "CABINE")
     public String cabine;
@@ -118,7 +119,7 @@ public class Ticket {
 
     @PositionParameter(value = 14)
     @Column(name = "CPF_PAX")
-    public Long cpfPax;
+    public String cpfPax;
 
     @PositionParameter(value = 15)
     @Column(name = "DATA_EMISSAO")
