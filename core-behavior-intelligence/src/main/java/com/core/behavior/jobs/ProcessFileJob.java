@@ -70,20 +70,15 @@ public class ProcessFileJob extends QuartzJobBean {
 
         long start = System.currentTimeMillis();
 
-        File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
-        String user = jec.getJobDetail().getJobDataMap().getString(DATA_USER_ID);
-        Long company = jec.getJobDetail().getJobDataMap().getLong(DATA_COMPANY);
+        File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);        
         Long layout = jec.getJobDetail().getJobDataMap().getLong(DATA_LAYOUT_FILE);
         Long fileId = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
 
-        com.core.behavior.model.File f = new com.core.behavior.model.File();
-        f.setCompany(company);
-        f.setId(fileId);
-        f.setName(file.getName());
-        f.setUserId(user);
+        
+        com.core.behavior.model.File f = fileService.findById(fileId);        
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
         f.setStage(StageEnum.UPLOAD.getCode());
-        f.setCreatedDate(LocalDateTime.now());
+        
 
         f = fileService.saveFile(f);
         final long idFile = f.getId();

@@ -23,19 +23,19 @@ public class BehaviorApplicationTests {
 	@Test
 	public void contextLoads() {
             
-            List<Ticket> a = new  ArrayList<Ticket>();
-            
-            for (int i = 0; i < 10; i++) {
-                Ticket t = new  Ticket();
-                t.setFileId(400l);
-                a.add(t);
-            }
-            
-        try {
-            service.saveBatch(a);
-        } catch (SQLException ex) {
-            Logger.getLogger(BehaviorApplicationTests.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//            List<Ticket> a = new  ArrayList<Ticket>();
+//            
+//            for (int i = 0; i < 10; i++) {
+//                Ticket t = new  Ticket();
+//                t.setFileId(400l);
+//                a.add(t);
+//            }
+//            
+//        try {
+//            service.saveBatch(a);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(BehaviorApplicationTests.class.getName()).log(Level.SEVERE, null, ex);
+//        };
 	}
 
 }

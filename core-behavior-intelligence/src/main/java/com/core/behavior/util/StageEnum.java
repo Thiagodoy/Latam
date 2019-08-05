@@ -10,7 +10,7 @@ package com.core.behavior.util;
  * @author thiag
  */
 public enum StageEnum {
-    UPLOAD(1),VALIDATION_LAYOUT(2),VALIDATION_CONTENT(3),FINISHED(4);
+    UPLOADED(0),UPLOAD(1),VALIDATION_LAYOUT(2),VALIDATION_CONTENT(3),FINISHED(4);
     private long code;
 
     private StageEnum(long code) {

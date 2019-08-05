@@ -15,6 +15,9 @@ public enum Stream {
         SHORT_LAYOUT_PARSER("ticket","static/TICKET_SHORT_LAYOUT.xml"),
         FULL_LAYOUT_PARSER("ticket","static/TICKET.xml"),
         
+        HEADER_LAYOUT_SHORT("streamHeader","static/HEADER_LAYOUT_SHORT.xml"),
+        HEADER_LAYOUT_FULL("streamHeader","static/HEADER_LAYOUT.xml"),
+        
 	SHORT_LAYOUT_INTEGRATION("ticket","static/SHORT_INTEGRATION_CSV.xml"),
         FULL_LAYOUT_INTEGRATION("ticket","static/FULL_INTEGRATION_CSV.xml");
 	

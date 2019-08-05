@@ -15,7 +15,6 @@ import java.io.LineNumberReader;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
 import org.beanio.StreamFactory;
@@ -111,7 +110,7 @@ public class BeanIoReader {
         return 0l;
     }
 
-    public boolean headerIsValid(File file, String stream, String xmlParser) {
+    public boolean headerIsValid(File file, com.core.behavior.util.Stream stream) {
 
         FileReader reader = null;
         LineNumberReader readerLine = null;
@@ -128,11 +127,11 @@ public class BeanIoReader {
             writer.close();
 
             StreamFactory factory = StreamFactory.newInstance();
-            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
+            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
            
             factory.load(str);
 
-            BeanReader beanReader = factory.createReader(stream, file);
+            BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
             beanReader.close();
             
