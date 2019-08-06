@@ -521,7 +521,7 @@ public class Validator implements IValidator {
         }
         
         if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "empresa");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
         }
 
         return this;
