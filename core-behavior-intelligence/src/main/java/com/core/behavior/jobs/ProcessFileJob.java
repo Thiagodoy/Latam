@@ -115,9 +115,9 @@ public class ProcessFileJob extends QuartzJobBean {
 
                     synchronized (out) {
 
-                        if (op.get().getErrors().isEmpty()) {
+                        if (op.isPresent() && op.get().getErrors().isEmpty()) {
                             out.add(op.get());
-                        } else {                            
+                        } else if(op.isPresent()) {                            
                             error.addAll(op.get().getErrors());
                         }
                     }

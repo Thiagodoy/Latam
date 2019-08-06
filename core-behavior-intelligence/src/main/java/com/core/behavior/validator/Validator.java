@@ -561,8 +561,10 @@ public class Validator implements IValidator {
 
             if (!m.matches()) {
                 countError++;
-            } else {
+            } else if(iataAgencia.length() > 0) {
                 value = Long.valueOf(iataAgencia);
+            }else{
+                value = null;
             }
         }
 

@@ -52,7 +52,8 @@ public class Utils {
     private static SimpleDateFormat formmatDate2;
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
-    private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
+    private static final Map<String, String> positionColumnByFieldShort = new HashMap<String, String>();
+    private static final Map<String, String> positionColumnByFieldFull = new HashMap<String, String>();
     
     public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
     public static String headerMinLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
@@ -131,31 +132,31 @@ public class Utils {
         entitiesHtml.put("ç", "&#231;");           
         
         
-        positionColumnByField.put("dataEmissao","B");
-        positionColumnByField.put("dataEmbarque","C");
-        positionColumnByField.put("horaEmbarque","D");
-        positionColumnByField.put("ciaBilhete","E");
-        positionColumnByField.put("trecho","F");
-        positionColumnByField.put("origem","G");
-        positionColumnByField.put("destino","H");
-        positionColumnByField.put("cupom","I");
-        positionColumnByField.put("bilhete","J");
-        positionColumnByField.put("tipo","K");
-        positionColumnByField.put("cabine","L");
-        positionColumnByField.put("ciaVoo","M");
-        positionColumnByField.put("valorBrl","N");
-        positionColumnByField.put("empresa","O");
-        positionColumnByField.put("cnpj","P");
-        positionColumnByField.put("iataAgencia","Q");
-        positionColumnByField.put("baseVenda","R");
-        positionColumnByField.put("qtdPax","S");
-        positionColumnByField.put("numVoo","T");
-        positionColumnByField.put("consolidada","U");
+        positionColumnByFieldShort.put("dataEmissao","B");
+        positionColumnByFieldShort.put("dataEmbarque","C");
+        positionColumnByFieldShort.put("horaEmbarque","D");
+        positionColumnByFieldShort.put("ciaBilhete","E");
+        positionColumnByFieldShort.put("trecho","F");
+        positionColumnByFieldShort.put("origem","G");
+        positionColumnByFieldShort.put("destino","H");
+        positionColumnByFieldShort.put("cupom","I");
+        positionColumnByFieldShort.put("bilhete","J");
+        positionColumnByFieldShort.put("tipo","K");
+        positionColumnByFieldShort.put("cabine","L");
+        positionColumnByFieldShort.put("ciaVoo","M");
+        positionColumnByFieldShort.put("valorBrl","N");
+        positionColumnByFieldShort.put("empresa","O");
+        positionColumnByFieldShort.put("cnpj","P");
+        positionColumnByFieldShort.put("iataAgencia","Q");
+        positionColumnByFieldShort.put("baseVenda","R");
+        positionColumnByFieldShort.put("qtdPax","S");
+        positionColumnByFieldShort.put("numVoo","T");
+        positionColumnByFieldShort.put("consolidada","U");
 
     }
 
     public static  String getPositionExcelColumn(String field){
-        return positionColumnByField.get(field);
+        return positionColumnByFieldShort.get(field);
     }
     public static File convertToFile(MultipartFile file) throws FileNotFoundException, IOException {
 
