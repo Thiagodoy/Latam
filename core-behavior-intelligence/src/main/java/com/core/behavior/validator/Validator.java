@@ -519,6 +519,10 @@ public class Validator implements IValidator {
         if (!hasEmpresa && !hasConsolidada) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
         }
+        
+        if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "empresa");
+        }
 
         return this;
     }
@@ -686,6 +690,11 @@ public class Validator implements IValidator {
         } 
         
         if (!hasEmpresa && !hasConsolidada) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
+        }
+        
+        
+        if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
         }
 
