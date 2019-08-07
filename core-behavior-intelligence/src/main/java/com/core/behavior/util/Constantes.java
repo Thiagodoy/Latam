@@ -35,6 +35,6 @@ public class Constantes {
     
     public static final String PATH_INTEGRATION = "latam/air-moviment";
     
-    public static final String DIR_UPLOAD = "\\upload\\";
-    public static final String DIR_UPLOADED = "\\uploaded\\";
+    public static final String DIR_UPLOAD = "upload";
+    public static final String DIR_UPLOADED = "uploaded";
 }
