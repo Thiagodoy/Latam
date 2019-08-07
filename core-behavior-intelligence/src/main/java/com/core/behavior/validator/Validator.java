@@ -511,15 +511,15 @@ public class Validator implements IValidator {
         if (!hasEmpresa && hasConsolidada) {
             this.ticket.setEmpresa("");
         }
-        
+
         if (hasEmpresa) {
             this.ticket.setEmpresa(ticketDTO.getEmpresa());
-        } 
-        
+        }
+
         if (!hasEmpresa && !hasConsolidada) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
         }
-        
+
         if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
         }
@@ -569,9 +569,9 @@ public class Validator implements IValidator {
 
             if (!m.matches()) {
                 countError++;
-            } else if(iataAgencia.length() > 0) {
+            } else if (iataAgencia.length() > 0) {
                 value = Long.valueOf(iataAgencia);
-            }else{
+            } else {
                 value = null;
             }
         }
@@ -683,17 +683,16 @@ public class Validator implements IValidator {
 
         if (hasEmpresa && !hasConsolidada) {
             this.ticket.setConsolidada("");
-        } 
-        
-        if(hasConsolidada) {
+        }
+
+        if (hasConsolidada) {
             this.ticket.setConsolidada(ticketDTO.getConsolidada());
-        } 
-        
+        }
+
         if (!hasEmpresa && !hasConsolidada) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
         }
-        
-        
+
         if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
         }
@@ -1313,18 +1312,23 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkGrupoEmpresa() {
+        boolean hasConsolidada = Optional.ofNullable(this.ticketDTO.getGrupoConsolidada()).isPresent();
+        boolean hasEmpresa = Optional.ofNullable(this.ticketDTO.getGrupoEmpresa()).isPresent();
+        
+        if (!hasEmpresa && hasConsolidada) {
+            this.ticket.setEmpresa("");
+        }
 
-        String grupoEmpresa = ticketDTO.getGrupoEmpresa();
-        String grupoConsolidada = ticketDTO.getGrupoConsolidada();
-        boolean hasGrupoEmpresa = Optional.ofNullable(grupoEmpresa).isPresent();
-        boolean hasGrupoConsolidada = Optional.ofNullable(grupoConsolidada).isPresent();
+        if (hasEmpresa) {
+            this.ticket.setEmpresa(ticketDTO.getEmpresa());
+        }
 
-        if (hasGrupoConsolidada && !hasGrupoEmpresa) {
-            ticket.setGrupoEmpresa("");
-        } else if (hasGrupoEmpresa && !hasGrupoConsolidada) {
-            ticket.setGrupoEmpresa(grupoEmpresa);
-        } else {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoEmpresa.type"), "grupoEmpresa");
+        if (!hasEmpresa && !hasConsolidada) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
+        }
+
+        if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
         }
 
         return this;
@@ -1333,20 +1337,27 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkGrupoConsolida() {
 
-        String grupoEmpresa = ticketDTO.getGrupoEmpresa();
-        String grupoConsolidada = ticketDTO.getGrupoConsolidada();
-        boolean hasGrupoEmpresa = Optional.ofNullable(grupoEmpresa).isPresent();
-        boolean hasGrupoConsolidada = Optional.ofNullable(grupoConsolidada).isPresent();
+        boolean hasConsolidada = Optional.ofNullable(this.ticketDTO.getGrupoConsolidada()).isPresent();
+        boolean hasEmpresa = Optional.ofNullable(this.ticketDTO.getGrupoEmpresa()).isPresent();
 
-        if (!hasGrupoConsolidada && hasGrupoEmpresa) {
-            ticket.setGrupoConsolidada("");
-        } else if (!hasGrupoEmpresa && hasGrupoConsolidada) {
-            ticket.setGrupoEmpresa(grupoConsolidada);
-        } else {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoConsolidada.type"), "grupoConsolidada");
+        if (hasEmpresa && !hasConsolidada) {
+            this.ticket.setConsolidada("");
+        }
+
+        if (hasConsolidada) {
+            this.ticket.setConsolidada(ticketDTO.getConsolidada());
+        }
+
+        if (!hasEmpresa && !hasConsolidada) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
+        }
+
+        if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
         }
 
         return this;
+
     }
 
     @Override
