@@ -8,25 +8,25 @@
         </parser>  
         <record  name="header" class="com.core.behavior.dto.HeaderDTO"  minOccurs="1" maxOccurs="1" order="1" >
             <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
-            <field name="headerDataVoo" trim="true" type="string"  literal="DATA_VOO"/>
-            <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_VOO"/>
+            <field name="headerDataVoo" trim="true" type="string"  literal="DATA_EMBARQUE"/>
+            <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_EMBARQUE"/>
             <field name="headerCiaBilhete" trim="true" type="string"  literal="CIA_BILHETE"/>
-            <field name="headerTrechoTkt" trim="true" type="string"  literal="TRECHO_TKT"/>
-            <field name="headerAtoOrigem" trim="true" type="string"  literal="ATO_ORIGEM"/>
-            <field name="headerAtoDestino" trim="true" type="string"  literal="ATO_DESTINO"/>
-            <field name="headerNumeroCupom" trim="true" type="string"  literal="NUMERO_CUPOM"/>
+            <field name="headerTrechoTkt" trim="true" type="string"  literal="TRECHO"/>
+            <field name="headerAtoOrigem" trim="true" type="string"  literal="ORIGEM"/>
+            <field name="headerAtoDestino" trim="true" type="string"  literal="DESTINO"/>
+            <field name="headerNumeroCupom" trim="true" type="string"  literal="CUPOM"/>
             <field name="headerBilhete" trim="true" type="string"  literal="BILHETE"/>
-            <field name="headerTipoVenda" trim="true" type="string"  literal="TIPO_VENDA"/>
-            <field name="headerClasseCabine" trim="true" type="string"  literal="CLASSE_CABINE"/>
+            <field name="headerTipoVenda" trim="true" type="string"  literal="TIPO"/>
+            <field name="headerClasseCabine" trim="true" type="string"  literal="CABINE"/>
             <field name="headerCiaVoo" trim="true" type="string"  literal="CIA_VOO"/>
             <field name="headerValorBrl" trim="true" type="string"  literal="VALOR_BRL"/>
-            <field name="headerClienteEmpresa" trim="true" type="string"  literal="CLIENTE_EMPRESA"/>
-            <field name="headerCnpjClienteEmpresa" trim="true" type="string"  literal="CNPJ_CLIENTE_EMPRESA"/>
-            <field name="headerIataAgenciaEmissora" trim="true" type="string"  literal="IATA_AGENCIA_EMISSORA"/>
+            <field name="headerClienteEmpresa" trim="true" type="string"  literal="EMPRESA"/>
+            <field name="headerCnpjClienteEmpresa" trim="true" type="string"  literal="CNPJ"/>
+            <field name="headerIataAgenciaEmissora" trim="true" type="string"  literal="IATA_AGENCIA"/>
             <field name="headerBaseVenda" trim="true" type="string"  literal="BASE_VENDA"/>
-            <field name="headerQtdePax" trim="true" type="string"  literal="QTDE_PAX"/>
+            <field name="headerQtdePax" trim="true" type="string"  literal="QTD_PAX"/>
             <field name="headerNumVoo" trim="true" type="string"  literal="NUM_VOO"/>
-            <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="AGENCIA_CONSOLIDADA"/>
+            <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="CONSOLIDADA"/>
             <field name="headerDataExtracao" trim="true" type="string"  literal="DATA_EXTRACAO"/>
             <field name="headerHoraEmissao" trim="true" type="string"  literal="HORA_EMISSAO"/>
             <field name="headerDataReserva" trim="true" type="string"  literal="DATA_RESERVA"/>
