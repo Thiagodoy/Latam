@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Data;
 import org.beanio.BeanReaderErrorHandler;
 import org.beanio.BeanReaderException;
@@ -51,6 +53,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
                     log.setRecordContent(recordContext.getRecordText());
                     log.setLineNumber((long) recordContext.getLineNumber());
                     logs.add(log);
+                    Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, error);
 
                 }
             }
@@ -67,10 +70,15 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
                         log.setType(TypeErrorEnum.COLUMN);
                         log.setMessageError(erro);
                         logs.add(log);
+                        Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, erro);
                     }
+                    
+                      
+                    
                 }
             }
 
+            
         }
 
         if (e.getRecordCount() == 0) {
@@ -83,6 +91,8 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
             log.setLineNumber(0l);
             log.setMessageError(e.getMessage());
             logs.add(log);
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, e.getMessage());
+            
         }
     }
     
