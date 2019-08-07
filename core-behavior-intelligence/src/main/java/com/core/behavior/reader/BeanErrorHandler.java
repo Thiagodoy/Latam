@@ -53,7 +53,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
                     log.setRecordContent(recordContext.getRecordText());
                     log.setLineNumber((long) recordContext.getLineNumber());
                     logs.add(log);
-                    Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, error);
+                    Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, error);
 
                 }
             }
@@ -70,7 +70,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
                         log.setType(TypeErrorEnum.COLUMN);
                         log.setMessageError(erro);
                         logs.add(log);
-                        Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, erro);
+                        Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, erro);
                     }
                     
                       
@@ -91,7 +91,7 @@ public class BeanErrorHandler implements BeanReaderErrorHandler {
             log.setLineNumber(0l);
             log.setMessageError(e.getMessage());
             logs.add(log);
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, e.getMessage());
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, e.getMessage());
             
         }
     }
