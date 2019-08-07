@@ -39,15 +39,15 @@ public class BeanIoReader {
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
-        long end;       
-        
+        long end;
+
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
         T record = null;
         try {
             StreamFactory factory = StreamFactory.newInstance();
             InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
-           
+
             factory.load(str);
 
             reader = factory.createReader(stream.getStreamId(), file);
@@ -59,9 +59,8 @@ public class BeanIoReader {
             beanErrorHandler.setFileId(f.getId());
             reader.setErrorHandler(beanErrorHandler);
 
-            record = (T) reader.read();       
-            
-            
+            record = (T) reader.read();
+
             if (beanErrorHandler.getLogs().size() > 0) {
                 logService.saveBatch(beanErrorHandler.getLogs());
             }
@@ -70,7 +69,7 @@ public class BeanIoReader {
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.VALIDATION_ERROR);
-            f = fileService.saveFile(f);           
+            f = fileService.saveFile(f);
         }
 
         reader.close();
@@ -114,6 +113,7 @@ public class BeanIoReader {
 
         FileReader reader = null;
         LineNumberReader readerLine = null;
+        beanErrorHandler = new BeanErrorHandler();
 
         try {
             reader = new FileReader(file);
@@ -128,20 +128,25 @@ public class BeanIoReader {
 
             StreamFactory factory = StreamFactory.newInstance();
             InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
-           
+
             factory.load(str);
 
             BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
+            beanReader.setErrorHandler(beanErrorHandler);
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
             beanReader.close();
             
+            if (beanErrorHandler.getLogs().size() > 0) {
+                logService.saveBatch(beanErrorHandler.getLogs());
+            }
+
             FileUtils.forceDelete(fileHeader);
 
             return Optional.ofNullable(headerDto).isPresent();
 
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
-           return false;        
+            return false;
         } finally {
             try {
                 readerLine.close();
