@@ -1324,11 +1324,11 @@ public class Validator implements IValidator {
         }
 
         if (!hasEmpresa && !hasConsolidada) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoEmpresa.type"), "grupoEmpresa");
         }
 
         if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.empresa.type"), "empresa");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoEmpresa.type"), "grupoEmpresa");
         }
 
         return this;
@@ -1349,11 +1349,11 @@ public class Validator implements IValidator {
         }
 
         if (!hasEmpresa && !hasConsolidada) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoConsolidada.type"), "grupoConsolidada");
         }
 
         if (hasEmpresa && this.ticketDTO.getEmpresa().length() == 0 && hasConsolidada && this.ticketDTO.getConsolidada().length() == 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.consolidada.type"), "consolidada");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.grupoConsolidada.type"), "grupoConsolidada");
         }
 
         return this;
