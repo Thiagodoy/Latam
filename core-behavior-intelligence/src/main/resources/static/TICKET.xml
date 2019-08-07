@@ -5,7 +5,7 @@
     <stream name="ticket" format="csv"  >  
         
         <parser>
-           <property name="delimiter" value=";" />
+            <property name="delimiter" value=";" />
         </parser>
         
         <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />  
@@ -15,7 +15,7 @@
               
         <group name="file" class="com.core.behavior.dto.FileParsedDTO">            
             <record  name="header" class="com.core.behavior.dto.HeaderDTO"  minOccurs="1" maxOccurs="1" order="1" >
-               <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
+                <field name="headerDataEmissao" trim="true" type="string"  literal="DATA_EMISSAO"/>
                 <field name="headerDataVoo" trim="true" type="string"  literal="DATA_EMBARQUE"/>
                 <field name="headerHoraVoo" trim="true" type="string"  literal="HORA_EMBARQUE"/>
                 <field name="headerCiaBilhete" trim="true" type="string"  literal="CIA_BILHETE"/>
@@ -34,17 +34,17 @@
                 <field name="headerBaseVenda" trim="true" type="string"  literal="BASE_VENDA"/>
                 <field name="headerQtdePax" trim="true" type="string"  literal="QTD_PAX"/>
                 <field name="headerNumVoo" trim="true" type="string"  literal="NUM_VOO"/>
-                <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="CONSOLIDADA"/>                
+                <field name="headerAgenciaConsolidada" trim="true" type="string"  literal="CONSOLIDADA"/>
                 <field name="headerDataExtracao" trim="true" type="string"  literal="DATA_EXTRACAO"/>
                 <field name="headerHoraEmissao" trim="true" type="string"  literal="HORA_EMISSAO"/>
                 <field name="headerDataReserva" trim="true" type="string"  literal="DATA_RESERVA"/>
                 <field name="headerHoraReserva" trim="true" type="string"  literal="HORA_RESERVA"/>
-                <field name="headerHoraPouso" trim="true" type="string"  literal="HORA_POUSO"/>                
+                <field name="headerHoraPouso" trim="true" type="string"  literal="HORA_POUSO"/>
                 <field name="headerBaseTarifaria" trim="true" type="string"  literal="BASE_TARIFARIA"/>
-                <field name="headerTktDesignator" trim="true" type="string"  literal="TKT_DESIGNATOR"/>                
+                <field name="headerTktDesignator" trim="true" type="string"  literal="TKT_DESIG"/>
                 <field name="headerFamiliaTarifaria" trim="true" type="string"  literal="FAMILIA_TARIFARIA"/>
                 <field name="headerClasseTarifaria" trim="true" type="string"  literal="CLASSE_TARIFA"/>
-                <field name="headerClasseServico" trim="true" type="string"  literal="CLASSE_SERVICO"/>
+                <field name="headerClasseServico" trim="true" type="string"  literal="CLASSE_SERVIÇO"/>
                 <field name="headerOndDirecional" trim="true" type="string"  literal="OnD_DIRECIONAL"/>
                 <field name="headerTourCode" trim="true" type="string"  literal="TOUR_CODE"/>
                 <field name="headerRtOw" trim="true" type="string"  literal="RT_OW"/>
@@ -58,13 +58,12 @@
                 <field name="headerTipoPax" trim="true" type="string"  literal="TIPO_PAX"/>
                 <field name="headerCpfPax" trim="true" type="string"  literal="CPF_PAX"/>
                 <field name="headerEmailPax" trim="true" type="string"  literal="E-MAIL_PAX"/>
-                <field name="headerCellPax" trim="true" type="string"  literal="CEL_PAX"/>                            
+                <field name="headerCellPax" trim="true" type="string"  literal="CELULAR_PAX"/>
                 <field name="headerTierFidelidadePax" trim="true" type="string"  literal="TIER_FIDELIDADE_PAX"/>
                 <field name="headerTipoPagamento" trim="true" type="string"  literal="TIPO_PAGAMENTO"/>
-                <field name="headerDigitoVerificadorCC" trim="true" type="string"  literal="DIGITO_VERIFICADOR_CC"/>
-                <field name="headerNomeCliente" trim="true" type="string"  literal="NOME_CLIENTE"/>                                    
+                <field name="headerDigitoVerificadorCC" trim="true" type="string"  literal="06_DIGITOS_CC"/>
                 <field name="headerGrupoEmpresa" trim="true" type="string"  literal="GRUPO_EMPRESA"/>
-                <field name="headerGrupoConsolidada" trim="true" type="string"  literal="GRUPO_CONSOLIDADA"/>                                    
+                <field name="headerGrupoConsolidada" trim="true" type="string"  literal="GRUPO_CONSOLIDADA"/>                                   
             </record>
             
             <record name="ticket" class="com.core.behavior.dto.TicketDTO" minOccurs="1" maxOccurs="unbounded" collection="list" order="2">
