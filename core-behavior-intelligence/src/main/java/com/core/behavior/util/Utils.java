@@ -53,11 +53,11 @@ public class Utils {
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
     private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
-    
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
+    public static final List<String> layoutFull = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada", "dataExtracao", "horaEmissao", "dataReserva", "horaReserva", "horaPouso", "baseTarifaria", "tktDesignator", "familiaTarifaria", "classeTarifa", "classeServico", "ondDirecional", "tourCode", "rtOw", "valorUs", "tarifaPublica", "tarifaPublicUs", "pnrAgencia", "pnrCiaArea", "selfBookingOffiline", "nomePax", "tipoPax", "cpfPax", "emailPax", "cellPax", "tierFidelidadePax", "tipoPagamento", "digitoVerificadorCC", "grupoEmpresa", "grupoConsolidada");
     public static String headerMinLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
-    public static String headerFullLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
+    public static String headerFullLayoutFile = "DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA;DATA_EXTRACAO;HORA_EMISSAO;DATA_RESERVA;HORA_RESERVA;HORA_POUSO;BASE_TARIFARIA;TKT_DESIG;FAMILIA_TARIFARIA;CLASSE_TARIFA;CLASSE_SERVIÇO;OnD_DIRECIONAL;TOUR_CODE;RT_OW;VALOR_US$;TARIFA_PUBLICA_R$;TARIFA_PUBLICA_US$;PNR_AGENCIA;PNR_CIA_AEREA;SELFBOOKING_OFFLINE;NOME_PAX;TIPO_PAX;CPF_PAX;E-MAIL_PAX;CELULAR_PAX;TIER_FIDELIDADE_PAX;TIPO_PAGAMENTO;06_DIGITOS_CC;GRUPO_EMPRESA;GRUPO_CONSOLIDADA";
 
     public static enum TypeField {
         TICKET, LOG
@@ -347,8 +347,9 @@ public class Utils {
 
         if (layout == 1) {
             return layoutMin.contains(atribute);
+        } else {
+            return layoutFull.contains(atribute);
         }
-        return true;
 
     }
 

@@ -144,7 +144,7 @@ public class GeneratorFileReturnService {
         });
 
         //Create a comments
-        comments.forEach((key, value) -> {
+        comments.forEach((key, value) -> {            
             CellReference cellReference = new CellReference(key);
             XSSFRow row = sheet.getRow(cellReference.getRow());
 
