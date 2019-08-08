@@ -141,14 +141,14 @@ public class BeanIoReader {
             return Optional.ofNullable(headerDto).isPresent();
 
         } catch (Exception ex) {
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE,ex.getMessage());
             return false;
         } finally {
             try {
                 readerLine.close();
                 reader.close();
             } catch (IOException ex) {
-                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
         }
