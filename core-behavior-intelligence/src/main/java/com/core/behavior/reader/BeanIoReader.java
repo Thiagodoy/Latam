@@ -132,18 +132,9 @@ public class BeanIoReader {
             factory.load(str);
 
             BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
-            beanReader.setErrorHandler(beanErrorHandler);
+            
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
-            beanReader.close();
-
-            if (beanErrorHandler.getLogs().size() > 0) {
-
-                beanErrorHandler.getLogs().parallelStream().forEach(l -> {
-                    l.setFileId(0L);
-                });
-
-                logService.saveBatch(beanErrorHandler.getLogs());
-            }
+            beanReader.close();          
 
             FileUtils.forceDelete(fileHeader);
 
