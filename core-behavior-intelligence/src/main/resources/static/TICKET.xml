@@ -44,7 +44,7 @@
                 <field name="headerTktDesignator" trim="true" type="string"  literal="TKT_DESIG"/>
                 <field name="headerFamiliaTarifaria" trim="true" type="string"  literal="FAMILIA_TARIFARIA"/>
                 <field name="headerClasseTarifaria" trim="true" type="string"  literal="CLASSE_TARIFA"/>
-                <field name="headerClasseServico" trim="true" type="string"  literal="CLASSE_SERVIÇO"/>
+                <field name="headerClasseServico" trim="true" type="string"  literal="CLASSE_SERVICO"/>
                 <field name="headerOndDirecional" trim="true" type="string"  literal="OnD_DIRECIONAL"/>
                 <field name="headerTourCode" trim="true" type="string"  literal="TOUR_CODE"/>
                 <field name="headerRtOw" trim="true" type="string"  literal="RT_OW"/>
