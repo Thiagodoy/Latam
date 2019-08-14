@@ -167,6 +167,11 @@ public class FileService {
                 
             }
 
+            
+            if( !Optional.ofNullable(agency.getLayoutFile()).isPresent()){
+                throw new ActivitiException(MessageCode.FILE_LAYOUT_NOT_DEFINED);
+            }
+            
             Stream layoutHeader = agency.getLayoutFile().equals(1L) ? Stream.HEADER_LAYOUT_SHORT : Stream.HEADER_LAYOUT_FULL;
 
             //Valida o header do arquivo

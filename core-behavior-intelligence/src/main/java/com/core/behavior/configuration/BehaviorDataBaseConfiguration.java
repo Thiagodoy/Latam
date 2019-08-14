@@ -45,13 +45,15 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         em.setPackagesToScan(
           new String[] { "com.core.behavior.model", "com.core.behavior.repository" });
  
+        System.out.println("hibernate.dialect" +  environment.getProperty("hibernate.dialect"));
+        
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto",
           environment.getProperty("hibernate.hbm2ddl.auto"));
         properties.put("hibernate.dialect",
-          environment.getProperty("hibernate.dialect"));
+          "org.hibernate.dialect.MySQL5InnoDBDialect");
         em.setJpaPropertyMap(properties);
  
         return em;

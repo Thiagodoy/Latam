@@ -28,5 +28,11 @@ public class AssetResource {
         InputStream in = getClass().getResourceAsStream("/static/" + fileName + ".png");
         return IOUtils.toByteArray(in);
     }
+    
+    @GetMapping(value = "/download/documents/{fileName}", produces = MediaType.APPLICATION_PDF_VALUE)
+    public @ResponseBody byte[] getDocument(@PathVariable(name = "fileName") String fileName) throws IOException {
+        InputStream in = getClass().getResourceAsStream("/static/" + fileName + ".pdf" );
+        return IOUtils.toByteArray(in);
+    }
 
 }

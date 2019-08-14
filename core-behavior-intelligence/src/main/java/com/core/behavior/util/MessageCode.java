@@ -19,4 +19,5 @@ public class MessageCode {
     public static final Long FILE_HEADER_INVALID = 1333L;
     public static final Long FILE_EMPTY = 1986L;
     public static final Long FILE_UPLOADED_SUCCESS = 1988L;
+    public static final Long FILE_LAYOUT_NOT_DEFINED = 1989L;
 }

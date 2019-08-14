@@ -15,10 +15,8 @@ import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.validator.ValidatorFactoryBean;
-import com.core.behavior.validator.Validator;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -138,7 +136,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 fileService.setValidationTime(idFile, timeValidation);
 
-                fileService.setStatus(idFile, !error.isEmpty() ? StatusEnum.VALIDATION_ERROR : StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
                 
             } else if (logService.fileHasError(fileId)) {
