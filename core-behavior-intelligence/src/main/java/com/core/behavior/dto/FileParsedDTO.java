@@ -1,7 +1,6 @@
 package com.core.behavior.dto;
 
 import com.core.behavior.model.File;
-import com.core.behavior.model.Ticket;
 import java.util.List;
 import lombok.Data;
 
@@ -12,7 +11,7 @@ import lombok.Data;
 @Data
 public class FileParsedDTO {
     private HeaderDTO header;
-    private List<Ticket> ticket;
+    private List<TicketDTO> ticket;
     private File file;    
     
 }

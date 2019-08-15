@@ -2,6 +2,7 @@ package com.core.behavior.services;
 
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
+import com.core.behavior.util.TicketStatusEnum;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,7 +19,8 @@ import org.springframework.stereotype.Service;
 
 import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+
 
 /**
  *
@@ -38,6 +40,11 @@ public class TicketService {
 
     public void saveBatch(List<Ticket> ticket) throws SQLException {
         
+        
+        if(ticket.isEmpty()){
+            return;
+        }
+        
         long start = System.currentTimeMillis();
         long end;
         long fileId = ticket.get(0).getFileId();
@@ -52,7 +59,7 @@ public class TicketService {
                 if (count == 1000) {
                     String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     PreparedStatement ps = con.prepareStatement(query);
-                    ps.execute();
+                    ps.execute();                    
                     con.commit();
                     count = 0;
                     inserts.clear();
@@ -103,6 +110,10 @@ public class TicketService {
     
     public List<Ticket> listDuplicityByFileId(Long fileId){
         return null;
+    }
+    
+    public List<Ticket>listByStatus(TicketStatusEnum status,PageRequest page){        
+        return ticketRepository.findByStatus(status,page);               
     }
 
 }

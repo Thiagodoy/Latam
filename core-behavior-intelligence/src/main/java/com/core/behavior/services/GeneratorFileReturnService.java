@@ -5,35 +5,39 @@
  */
 package com.core.behavior.services;
 
-import com.core.activiti.specifications.Comments;
-import com.core.behavior.dto.FileRecordError;
+import com.core.behavior.dto.LineErrorDTO;
 import com.core.behavior.model.Log;
+import com.core.behavior.repository.AgencyRepository;
+import com.core.behavior.repository.FileRepository;
 import com.core.behavior.repository.LogRepository;
 import com.core.behavior.util.Utils;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.core.behavior.repository.FileIntegrationRepository;
+import java.util.Comparator;
 
 /**
  *
@@ -42,150 +46,147 @@ import org.springframework.stereotype.Service;
 @Service
 public class GeneratorFileReturnService {
 
-//    @Autowired
-//    private LogRepository logRepository;
-//
-//    public File getFileReturn(Long id) throws IOException {
-//
-//       List<Log> logs = logRepository.findByFileId(id);
-//       
-//       List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
-//       
-//       String[]colunas = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"};
-//       
-//       int line = 1;
-//       
-//        LinkedHashMap<String,String> map = new LinkedHashMap<String,String>();
-//       
-//        for (Log log : logDistinct) {
-//            
-//            FileRecordError error = new FileRecordError();
-//            
-//            
-//            List<String>contentValues =  Arrays.asList(log.getRecordContent().split(";"));
-//            
-//            for (int i = 0; i < colunas.length; i++) {
-//                map.put(colunas[i] + line, contentValues.get(i));
-//            }
-//            
-//            error.setValues(map);
-//            
-//            
-//            
-//            for (Log l : logs) {
-//                long index = Utils.layoutMin.indexOf(l.getFieldName());
-//                
-//                Comments comment = new Comments();
-//                comment.setRow(line);
-//                comment.setString(new HSSFRichTextString(l.getMessageError()));
-//                comment.setVisible(true);
-//                comment.setAuthor("Behavior");
-//                comment.setAddress(colunas);
-//                
-//            }
-//            
-//            ++line;
-//        }    
-//        
-//        
-//        
-//        
-//        
-//        
-//        
-//       
-//       
-//       
-//
-//        File fileIn = null;
-//        File fileout = File.createTempFile("temp", ".xls");
-//        HSSFWorkbook workbook = null;
-//
-//        try {
-//
-//            //fileIn = createFile(url);
-//            workbook = new HSSFWorkbook();
-//            HSSFSheet sheet = workbook.createSheet("Erros");
-//            
-//
-//        } catch (Exception e) {
-//
-//        }
-//
-//        return null;
-//    }
-//
-//    @SuppressWarnings("unused")
-//    private static void populateCell2(HSSFSheet sheet, Map<String, Object> values, boolean isRecursive, boolean makeShift) {
-//
-//        //Sempre utilizar LinkedHashMap no values para garantir a ordem de inserção
-//        Set<String> keys = values.keySet();
-//        HSSFRow oldRow = null;
-//        String keyOld = null;      
-//
-//        // Insere linhas
-//        if (makeShift) {
-//            makeShift(values, sheet);
-//        }
-//
-//        for (String key : keys) {
-//            // Logger.info(key);
-//            CellReference cellReference = new CellReference(key);
-//            HSSFRow row = sheet.getRow(cellReference.getRow());
-//
-//            // Caso os dados são recursivo copia a linha anterior
-//            if (isRecursive && keyOld != null && !keyOld.equals(key.substring(1))) {
-//                if (row == null)
-//					;
-//                row = sheet.createRow(cellReference.getRow());
-//
-//                for (int i = 0; i < oldRow.getLastCellNum(); i++) {
-//                    HSSFCell cellOld = oldRow.getCell(i);
-//                    if (cellOld != null) {
-//                        HSSFCell cellNew = row.createCell(i);
-//                    }
-//                }
-//
-//                // Busca por linhas possui merge
-//                for (int i = 0; i < sheet.getNumMergedRegions(); i++) {
-//                    CellRangeAddress cellRangeAddress = sheet.getMergedRegion(i);
-//                    if (cellRangeAddress.getFirstRow() == oldRow.getRowNum()) {
-//                        CellRangeAddress newCellRangeAddress = new CellRangeAddress(row.getRowNum(), (row.getRowNum() + (cellRangeAddress.getLastRow() - cellRangeAddress.getFirstRow())), cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
-//                        try {
-//                            sheet.addMergedRegion(newCellRangeAddress);
-//                        } catch (Exception e) {
-//                            /* WORKROUND:NAO APLICA NA MESMA LINHA DE ORIGEM */
-//                        }
-//
-//                    }
-//                }
-//
-//            }
-//
-//            HSSFCell cell = row.getCell(cellReference.getCol());
-//            Object value = values.get(key);
-//           
-//            cell.setCellValue(String.valueOf(value));
-//            
-//            
-//            keyOld = key.substring(1);
-//            oldRow = row;
-//        }
-//    }
-//
-//    private static void makeShift(Map<String, Object> values, HSSFSheet sheet) {
-//
-//        String[] keys = values.keySet().toArray(new String[]{});
-//
-//        int indexInit = Integer.parseInt(keys[0].substring(1));
-//        int indexEnd = Integer.parseInt(keys[keys.length - 1].substring(1));
-//
-//        CellReference cellReference = new CellReference(keys[0]);
-//
-//        HSSFRow row = sheet.getRow(cellReference.getRow());
-//        int size = (indexEnd + 1) - indexInit;
-//        sheet.shiftRows(row.getRowNum() + 1, sheet.getLastRowNum(), size);
-//
-//    }
+    @Autowired
+    private LogRepository logRepository;
+    
+    @Autowired
+    private AgencyRepository agencyRepository;
+    
+
+    @Autowired
+    private FileRepository fileRepository;
+
+    public File generateFileReturnFriendly(Long id) throws IOException {
+
+        final List<Log> logs = logRepository.findByFileId(id);
+        final com.core.behavior.model.File file = fileRepository.findById(id).get();
+        final String fileName = file.getName();
+        
+        final long layout = agencyRepository.findById(file.getCompany()).get().getLayoutFile();
+       Comparator lineNumber = Comparator.comparingLong(Log::getLineNumber);
+        final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
+        logDistinct.sort(lineNumber);
+        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
+        LineErrorDTO.reset();
+
+        logDistinct.stream().forEach(l -> {
+
+            LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
+
+            logs.stream().filter(ll -> ll.getRecordContent().equals(l.getRecordContent())).forEach(lll -> {
+
+                final String column = Utils.getPositionExcelColumn(lll.fieldName);
+                error.put(column, lll.getMessageError());
+
+            });
+            e.add(error);
+        });
+        
+        return generateFile(e, layout);
+    }
+
+    private File generateFile(List<LineErrorDTO> errors, long layout) throws FileNotFoundException, IOException {
+
+        String sheetName = "Erros";
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        XSSFSheet sheet = wb.createSheet(sheetName);
+
+        CellStyle backgroundStyle = wb.createCellStyle();
+
+        CellStyle cellBold = wb.createCellStyle();
+
+        backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        CellStyle borderStyle = wb.createCellStyle();
+
+        XSSFFont font = wb.createFont();
+        font.setFontHeightInPoints((short) 10);
+        font.setFontName("Arial");
+        font.setColor(IndexedColors.BLACK.getIndex());
+        font.setBold(true);
+        font.setItalic(true);
+
+
+        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");;
+        XSSFRow rr = sheet.createRow(0);
+        cellBold.setFont(font);
+
+        for (int i = 0; i < header.length; i++) {
+            XSSFCell cell = rr.createCell(i);
+            cell.setCellValue(header[i]);
+        }
+
+        for (int r = 0; r < errors.size(); r++) {
+            XSSFRow row = sheet.createRow(r + 1);
+
+            //iterating c number of columns
+            String[] values = errors.get(r).getLineContent().split(";");
+            for (int c = 0; c < values.length; c++) {
+                XSSFCell cell = row.createCell(c);
+                cell.setCellValue(values[c]);
+
+            }
+        }
+
+        //Realiza append para comentarios da mesma Celula
+        Map<String, String> comments = new HashMap<String, String>();
+        errors.forEach(dto -> {
+            dto.getComments().forEach((key, message) -> {
+                if (comments.containsKey(key)) {
+                    String value = comments.get(key) + "\n" + message;
+                    comments.put(key, value);
+                } else {
+                    comments.put(key, message);
+                }
+            });
+        });
+
+        //Create a comments
+        comments.forEach((key, value) -> {            
+            CellReference cellReference = new CellReference(key);
+            XSSFRow row = sheet.getRow(cellReference.getRow());
+
+            XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
+
+            Comment com = createCellComment(sheet, "Behavior", value, cell);
+            cell.setCellComment(com);
+            com.setAddress(cell.getAddress());
+            cell.setCellStyle(borderStyle);
+            cell.setCellStyle(backgroundStyle);
+
+        });
+
+        File temp = File.createTempFile("temp", ".xlsx");
+        FileOutputStream fileOut = new FileOutputStream(temp);
+
+        //write this workbook to an Outputstream.
+        wb.write(fileOut);
+        fileOut.flush();
+        fileOut.close();
+        return temp;
+    }
+
+    private static Comment createCellComment(XSSFSheet sheet, String author, String comment, XSSFCell cell) {
+
+        // comments only supported for XLSX
+        CreationHelper factory = sheet.getWorkbook().getCreationHelper();
+        Drawing drawing = sheet.createDrawingPatriarch();
+
+        ClientAnchor anchor = factory.createClientAnchor();
+        anchor.setCol1(cell.getColumnIndex());
+        anchor.setCol2(cell.getColumnIndex() + 10);
+        anchor.setRow1(cell.getRowIndex());
+        anchor.setRow2(cell.getRowIndex() + 15);
+
+        Comment cmt = drawing.createCellComment(anchor);
+
+        RichTextString str = factory.createRichTextString(comment);
+        cmt.setString(str);
+        cmt.setAuthor(author);
+        return cmt;
+
+    }
 
 }

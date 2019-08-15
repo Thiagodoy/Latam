@@ -11,5 +11,6 @@ package com.core.behavior.util;
  */
 public enum TicketStatusEnum {
     APPROVED,
-    UNAPPROVED
+    UNAPPROVED,
+    WRITED
 }

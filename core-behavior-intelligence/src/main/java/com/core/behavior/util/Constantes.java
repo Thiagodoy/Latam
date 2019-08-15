@@ -7,7 +7,7 @@ package com.core.behavior.util;
 public class Constantes {
 
     
-    public static final String FILE_BEAN_HEADER_LAYOUT = "static/HEADER_LAYOUT.xml";
+    public static final String FILE_BEAN_HEADER_LAYOUT_FULL = "static/HEADER_LAYOUT.xml";
     public static final String FILE_BEAN_HEADER_LAYOUT_SHORT = "static/HEADER_LAYOUT_SHORT.xml";
     
     public static final String FILE_BEAN_TICKET = "static/TICKET.xml";
@@ -33,5 +33,8 @@ public class Constantes {
     public static final String IMAGE_LOGO_001 = "static/logo001.png";
     public static final String IMAGE_LOGO_002 = "static/logo002.png";
     
+    public static final String PATH_INTEGRATION = "latam/air-moviment";
     
+    public static final String DIR_UPLOAD = "upload";
+    public static final String DIR_UPLOADED = "uploaded";
 }

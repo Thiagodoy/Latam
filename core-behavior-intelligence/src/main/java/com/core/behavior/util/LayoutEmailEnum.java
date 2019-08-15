@@ -14,8 +14,8 @@ import java.util.Map;
  */
 public enum LayoutEmailEnum {
 
-    ATIVO_EXECUTIVO("static/ATIVO_EXECUTIVO.html", "Ativo","identifier5","identifier6","identifier1"),
-    ATIVO("static/ATIVO.html", "Ativo","identifier5","identifier6","identifier1"),
+    ATIVO_EXECUTIVO("static/ATIVO_EXECUTIVO.html", "Alerta preventivo | Upload LATAM","identifier5","identifier6","identifier1"),
+    ATIVO("static/ATIVO.html", "Alerta preventivo | Upload LATAM","identifier5","identifier6","identifier1"),
     CONGRATS("static/CONGRAT-EMAIL.html", "Acesso", "identifier1","identifier2","identifier3","identifier4","identifier5","identifier6"),
     FORGOT("static/FORGOT-ACESS.html", "Acesso", "identifier1","identifier2","identifier3","identifier4","identifier5","identifier6"),
     NOTIFICACAO_UPLOAD("static/UPLOAD_FILE_NOTIFICATION.html", "Upload","identifier1","identifier2","identifier3","identifier4","identifier5","identifier6");

@@ -2,6 +2,7 @@ package com.core.behavior;
 
 import com.core.behavior.properties.ActivitiProperties;
 import com.core.behavior.properties.ActivitiProxyProperties;
+import com.core.behavior.properties.AmazonIntegrationProperties;
 import com.core.behavior.properties.AmazonProperties;
 import com.core.behavior.properties.BehaviorProperties;
 import com.core.behavior.properties.ClientSftpProperties;
@@ -16,7 +17,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ClientSftpProperties.class, ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class, AmazonProperties.class, EmailServiceProperties.class})
+@EnableConfigurationProperties({ClientSftpProperties.class, ActivitiProxyProperties.class, BehaviorProperties.class, ActivitiProperties.class, AmazonProperties.class,AmazonIntegrationProperties.class, EmailServiceProperties.class})
 @EnableAutoConfiguration
 @ComponentScan()
 @EnableWebMvc

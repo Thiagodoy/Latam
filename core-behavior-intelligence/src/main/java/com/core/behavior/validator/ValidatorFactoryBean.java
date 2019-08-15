@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.util;
+package com.core.behavior.validator;
 
-import com.core.behavior.model.Ticket;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,24 +12,13 @@ import org.springframework.stereotype.Component;
  * @author thiag
  */
 @Component
-public class Validator {
+public class ValidatorFactoryBean implements ValidatorFactory {
+
     
-    
-    
-    
-    public void check(Ticket ticket){
-        
-        
-        
-        try{
-            
-        }catch(Exception e){
-            
-        }
-        
-        
+
+    @Override
+    public IValidator getBean() {
+        return  new Validator();              
     }
-    
-    
-    
+
 }

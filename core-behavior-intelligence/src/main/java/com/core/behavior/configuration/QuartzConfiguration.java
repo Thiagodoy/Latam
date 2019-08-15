@@ -2,6 +2,7 @@ package com.core.behavior.configuration;
 
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
+import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -24,9 +25,9 @@ public class QuartzConfiguration {
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
         Scheduler scheduler = bean.getScheduler();
-        
+
         scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), GroupMatcher.jobGroupEquals("fg_jobgroup_01"));
-        
+
         scheduler.start();
 
         JobDetail detail = JobBuilder.newJob(ConsumerEmailJob.class).withIdentity("ConsumerEmailJob", "consumer-email")
@@ -34,20 +35,30 @@ public class QuartzConfiguration {
                 .build();
         CronTrigger crontrigger = TriggerBuilder.newTrigger().withIdentity("ConsumerEmailJobTrigger", "consumer-email")
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
-                .withMisfireHandlingInstructionFireAndProceed())
+                        .withMisfireHandlingInstructionFireAndProceed())
                 .build();
         scheduler.scheduleJob(detail, crontrigger);
-        
-        
+
         JobDetail detail1 = JobBuilder.newJob(AgenciaFactoryJob.class).withIdentity("AgenciaFactoryJob", "agencia-factory-email")
                 .withDescription("Agendador de notificação de email")
                 .build();
         CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 00 12 1/1 * ? *")
-                .withMisfireHandlingInstructionFireAndProceed())
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 1/1 * ? *")
+                        .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
         scheduler.scheduleJob(detail1, crontrigger1);
+        
+        //:FIXME
+        JobDetail detail2= JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
+                .withDescription("Integrador")
+                .build();
+        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                        .withMisfireHandlingInstructionFireAndProceed())
+                .build();
+
+        scheduler.scheduleJob(detail2, crontrigger2);
     }
 
 }

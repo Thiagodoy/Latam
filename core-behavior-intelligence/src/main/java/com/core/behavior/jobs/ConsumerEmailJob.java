@@ -6,6 +6,7 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.model.Notificacao;
+import com.core.behavior.properties.EmailServiceProperties;
 import com.core.behavior.repository.NotificacaoRepository;
 import com.core.behavior.util.NotificacaoStatusEnum;
 import com.core.behavior.util.Utils;
@@ -40,6 +41,9 @@ public class ConsumerEmailJob extends QuartzJobBean {
 
     @Autowired
     private NotificacaoRepository notificacaoRepository;
+    
+    @Autowired
+    private EmailServiceProperties properties;
 
     @Autowired
     private JavaMailSender sender;
@@ -58,8 +62,9 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
                 Map<String, String> parameters = Utils.toMap(n.getParameters());
                 String content = this.getContentEmail(n.getLayout().getPath());
-
+               
                 helper.setSubject(n.getLayout().getSubject());
+                helper.setFrom(properties.getUsername());
 
                 if (parameters != null && parameters.size() > 0) {
                     for (String key : parameters.keySet()) {
@@ -69,6 +74,8 @@ public class ConsumerEmailJob extends QuartzJobBean {
                         }
                     }
                 }
+               
+                content = Utils.replaceAccentToEntityHtml(content);
                 
                 helper.setText(content, true); 
                 

@@ -15,7 +15,6 @@ import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
 import com.core.behavior.util.Utils;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,13 +23,14 @@ import java.util.Optional;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  *
  * @author thiag
  */
-public class AgenciaEmailJob extends QuartzJobBean {
+public class AgencyEmailJob extends QuartzJobBean {
 
     @Autowired
     private UserActivitiService userActivitiService;
@@ -49,7 +49,7 @@ public class AgenciaEmailJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-         System.out.println("hr ->" + LocalDateTime.now());
+         //System.out.println("hr ->" + LocalDateTime.now());
         Long id = jec.getJobDetail().getJobDataMap().getLong(JOB_KEY_AGENCIA);
         String[] profile = new String[]{"agência", "executivo de planejamento", "master agência"};
 
@@ -66,7 +66,8 @@ public class AgenciaEmailJob extends QuartzJobBean {
         List<UserActiviti> users = null;
 
         try {
-            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, null).getContent();    
+            PageRequest page =  PageRequest.of(0, 1000);
+            users = userActivitiService.listAllUser(null, null, null, profile, new String[]{id.toString()}, page).getContent();    
         } catch (Exception e) {
             e.printStackTrace();
             users = new ArrayList<>();
@@ -89,6 +90,8 @@ public class AgenciaEmailJob extends QuartzJobBean {
             } else {
                 parameter.put(":email", u.getEmail());
                 parameter.put(":nome", Utils.replaceAccentToEntityHtml(u.getFirstName()));
+                parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
+                notificacao.setParameters(Utils.mapToString(parameter));
                 notificacao.setLayout(LayoutEmailEnum.ATIVO);
             }
 

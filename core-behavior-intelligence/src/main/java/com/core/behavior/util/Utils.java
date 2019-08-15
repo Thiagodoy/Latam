@@ -49,10 +49,15 @@ public class Utils {
     private static List<Field> fields;
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
+    private static SimpleDateFormat formmatDate2;
     private static Tika tika;
     private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
-    
-    public static final List<String> layoutMin = Arrays.asList("dataEmissao","dataEmbarque","horaEmbarque","ciaBilhete","trecho","origem","destino","cupom","bilhete","tipo","cabine","ciaVoo","valorBrl","empresa","cnpj","iataAgencia","baseVenda","qtdPax","numVoo","consolidada");
+    private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
+
+    public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
+    public static final List<String> layoutFull = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada", "dataExtracao", "horaEmissao", "dataReserva", "horaReserva", "horaPouso", "baseTarifaria", "tktDesignator", "familiaTarifaria", "classeTarifa", "classeServico", "ondDirecional", "tourCode", "rtOw", "valorUs", "tarifaPublica", "tarifaPublicUs", "pnrAgencia", "pnrCiaArea", "selfBookingOffiline", "nomePax", "tipoPax", "cpfPax", "emailPax", "cellPax", "tierFidelidadePax", "tipoPagamento", "digitoVerificadorCC", "grupoEmpresa", "grupoConsolidada");
+    public static String headerMinLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA";
+    public static String headerFullLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA;DATA_EXTRACAO;HORA_EMISSAO;DATA_RESERVA;HORA_RESERVA;HORA_POUSO;BASE_TARIFARIA;TKT_DESIG;FAMILIA_TARIFARIA;CLASSE_TARIFA;CLASSE_SERVIÇO;OnD_DIRECIONAL;TOUR_CODE;RT_OW;VALOR_US$;TARIFA_PUBLICA_R$;TARIFA_PUBLICA_US$;PNR_AGENCIA;PNR_CIA_AEREA;SELFBOOKING_OFFLINE;NOME_PAX;TIPO_PAX;CPF_PAX;E-MAIL_PAX;CELULAR_PAX;TIER_FIDELIDADE_PAX;TIPO_PAGAMENTO;06_DIGITOS_CC;GRUPO_EMPRESA;GRUPO_CONSOLIDADA";
 
     public static enum TypeField {
         TICKET, LOG
@@ -62,6 +67,7 @@ public class Utils {
 
         dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
         formmatDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        formmatDate2 = new SimpleDateFormat("dd/MM/yyyy");
 
         fieldsTicket = Arrays.asList(Ticket.class.getDeclaredFields())
                 .stream()
@@ -123,9 +129,63 @@ public class Utils {
         entitiesHtml.put("Ë", "&#203;");
         entitiesHtml.put("Ï", "&#207;");
         entitiesHtml.put("Ö", "&#214;");
-        entitiesHtml.put("Ü", "&#220;");        
-        entitiesHtml.put("ç", "&#231;");        
+        entitiesHtml.put("Ü", "&#220;");
+        entitiesHtml.put("ç", "&#231;");
 
+        positionColumnByField.put("dataEmissao", "B");
+        positionColumnByField.put("dataEmbarque", "C");
+        positionColumnByField.put("horaEmbarque", "D");
+        positionColumnByField.put("ciaBilhete", "E");
+        positionColumnByField.put("trecho", "F");
+        positionColumnByField.put("origem", "G");
+        positionColumnByField.put("destino", "H");
+        positionColumnByField.put("cupom", "I");
+        positionColumnByField.put("bilhete", "J");
+        positionColumnByField.put("tipo", "K");
+        positionColumnByField.put("cabine", "L");
+        positionColumnByField.put("ciaVoo", "M");
+        positionColumnByField.put("valorBrl", "N");
+        positionColumnByField.put("empresa", "O");
+        positionColumnByField.put("cnpj", "P");
+        positionColumnByField.put("iataAgencia", "Q");
+        positionColumnByField.put("baseVenda", "R");
+        positionColumnByField.put("qtdPax", "S");
+        positionColumnByField.put("numVoo", "T");
+        positionColumnByField.put("consolidada", "U");
+        positionColumnByField.put("dataExtracao", "V");
+        positionColumnByField.put("horaEmissao", "W");
+        positionColumnByField.put("dataReserva", "X");
+        positionColumnByField.put("horaReserva", "Y");
+        positionColumnByField.put("horaPouso", "Z");
+        positionColumnByField.put("baseTarifaria", "AA");
+        positionColumnByField.put("tktDesignator", "AB");
+        positionColumnByField.put("familiaTarifaria", "AC");
+        positionColumnByField.put("classeTarifa", "AD");
+        positionColumnByField.put("classeServico", "AE");
+        positionColumnByField.put("ondDirecional", "AF");
+        positionColumnByField.put("tourCode", "AG");
+        positionColumnByField.put("rtOw", "AH");
+        positionColumnByField.put("valorUs", "AI");
+        positionColumnByField.put("tarifaPublica", "AJ");
+        positionColumnByField.put("tarifaPublicUs", "AK");
+        positionColumnByField.put("pnrAgencia", "AL");
+        positionColumnByField.put("pnrCiaArea", "AM");
+        positionColumnByField.put("selfBookingOffiline", "AN");
+        positionColumnByField.put("nomePax", "AO");
+        positionColumnByField.put("tipoPax", "AP");
+        positionColumnByField.put("cpfPax", "AQ");
+        positionColumnByField.put("emailPax", "AR");
+        positionColumnByField.put("cellPax", "AS");
+        positionColumnByField.put("tierFidelidadePax", "AT");
+        positionColumnByField.put("tipoPagamento", "AU");
+        positionColumnByField.put("digitoVerificadorCC", "AV");
+        positionColumnByField.put("grupoEmpresa", "AW");
+        positionColumnByField.put("grupoConsolidada", "AX");
+
+    }
+
+    public static String getPositionExcelColumn(String field) {
+        return positionColumnByField.get(field);
     }
 
     public static File convertToFile(MultipartFile file) throws FileNotFoundException, IOException {
@@ -195,7 +255,7 @@ public class Utils {
             parameters.put(index, "'" + value.toString() + "'");
         }
 
-    }   
+    }
 
     public static File loadLogo(String path)
             throws IOException {
@@ -241,31 +301,30 @@ public class Utils {
 
         for (int i = 0; i < value.length(); i++) {
             String letter = Character.toString(value.charAt(i));
-            
-            if(entitiesHtml.containsKey(letter)){
+
+            if (entitiesHtml.containsKey(letter)) {
                 value = value.replace(letter, entitiesHtml.get(letter));
             }
-        } 
+        }
         return value;
     }
-    
-    public static boolean isEmpty(File file){
-        
+
+    public static boolean isEmpty(File file) {
+
         long count = 0;
         FileReader reader = null;
         LineNumberReader readerLine = null;
         boolean isEmpty = true;
         try {
-             reader = new FileReader(file);
-             readerLine = new LineNumberReader(reader);
+            reader = new FileReader(file);
+            readerLine = new LineNumberReader(reader);
 
             while (readerLine.readLine() != null) {
                 count++;
-            }           
+            }
 
             --count;
             return count <= 0 ? isEmpty : !isEmpty;
-            
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
@@ -273,45 +332,48 @@ public class Utils {
         } catch (IOException ex) {
             Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
             return isEmpty;
-        }finally{
+        } finally {
             try {
                 readerLine.close();
                 reader.close();
             } catch (IOException ex) {
                 Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             }
-           
+
         }
     }
-    
-    public static boolean isLayoutMin(String atribute, long layout){       
-        
-        if(layout == 1){
-            return layoutMin.contains(atribute);            
+
+    public static boolean isLayoutMin(String atribute, long layout) {
+
+        if (layout == 1) {
+            return layoutMin.contains(atribute);
+        } else {
+            return layoutFull.contains(atribute);
         }
-         return true;
-        
+
     }
-    
-    
-    public static String mapToString(Map ma){
+
+    public static String mapToString(Map ma) {
         try {
-            return  new ObjectMapper().writeValueAsString(ma);
+            return new ObjectMapper().writeValueAsString(ma);
         } catch (JsonProcessingException ex) {
             Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
             return "";
         }
     }
-    
-    public static Map<String,String>toMap(String value) throws IOException{
-        return  new ObjectMapper().readValue(value, HashMap.class);
+
+    public static Map<String, String> toMap(String value) throws IOException {
+        return new ObjectMapper().readValue(value, HashMap.class);
     }
-    
-   public static LocalDateTime dateToLocalDateTime(Date date){
-       return Instant.ofEpochMilli(date.getTime())
-      .atZone(ZoneId.systemDefault())
-      .toLocalDateTime();    
-   }
-    
-    
+
+    public static LocalDateTime dateToLocalDateTime(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    public static String formatDate(Date date) {
+        return formmatDate2.format(date);
+    }
+
 }

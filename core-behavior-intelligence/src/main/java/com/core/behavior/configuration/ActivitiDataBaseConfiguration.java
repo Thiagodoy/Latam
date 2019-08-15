@@ -49,10 +49,8 @@ public class ActivitiDataBaseConfiguration implements EnvironmentAware {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto",
-                environment.getProperty("hibernate.hbm2ddl.auto"));
-        properties.put("hibernate.dialect",
-                environment.getProperty("hibernate.dialect"));
+        properties.put("hibernate.hbm2ddl.auto", environment.getProperty("hibernate.hbm2ddl.auto"));
+        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
         em.setJpaPropertyMap(properties);
 
         return em;

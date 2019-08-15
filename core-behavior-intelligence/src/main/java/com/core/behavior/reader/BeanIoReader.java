@@ -36,7 +36,7 @@ public class BeanIoReader {
     @Autowired
     private LogService logService;
 
-    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, String str, String xmlParser, String user) {
+    public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
         long end;
@@ -46,11 +46,11 @@ public class BeanIoReader {
         T record = null;
         try {
             StreamFactory factory = StreamFactory.newInstance();
-            InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
-            //factory.loadResource("resources/layoutMinimoMessages.properties");
-            factory.load(stream);
+            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
 
-            reader = factory.createReader(str, file);
+            factory.load(str);
+
+            reader = factory.createReader(stream.getStreamId(), file);
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -70,7 +70,6 @@ public class BeanIoReader {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.VALIDATION_ERROR);
             f = fileService.saveFile(f);
-            logService.logGeneric(f.getId(), ex.getLocalizedMessage());
         }
 
         reader.close();
@@ -110,10 +109,11 @@ public class BeanIoReader {
         return 0l;
     }
 
-    public boolean headerIsValid(File file, String stream, String xmlParser) {
+    public boolean headerIsValid(File file, com.core.behavior.util.Stream stream) {
 
         FileReader reader = null;
         LineNumberReader readerLine = null;
+        beanErrorHandler = new BeanErrorHandler();
 
         try {
             reader = new FileReader(file);
@@ -127,27 +127,28 @@ public class BeanIoReader {
             writer.close();
 
             StreamFactory factory = StreamFactory.newInstance();
-            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(xmlParser);
-            //factory.loadResource("resources/layoutMinimoMessages.properties");
+            InputStream str = factory.getClass().getClassLoader().getResourceAsStream(stream.getStreamFile());
+
             factory.load(str);
 
-            BeanReader beanReader = factory.createReader(stream, file);
-            HeaderDTO headerDto = (HeaderDTO) beanReader.read();
-            beanReader.close();
+            BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
             
+            HeaderDTO headerDto = (HeaderDTO) beanReader.read();
+            beanReader.close();          
+
             FileUtils.forceDelete(fileHeader);
 
             return Optional.ofNullable(headerDto).isPresent();
 
         } catch (Exception ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
-           return false;        
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE,ex.getMessage());
+            return false;
         } finally {
             try {
                 readerLine.close();
                 reader.close();
             } catch (IOException ex) {
-                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
         }

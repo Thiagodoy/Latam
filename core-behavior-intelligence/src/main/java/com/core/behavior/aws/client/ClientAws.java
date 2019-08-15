@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 public class ClientAws {
 
     private AmazonS3 amazonS3;
+    private static final String REGION = "sa-east-1";
 
     @Autowired
     private AmazonProperties amazonConfiguration;
@@ -41,7 +42,7 @@ public class ClientAws {
         AWSCredentials credentials = new BasicAWSCredentials(amazonConfiguration.getAccessKey(), amazonConfiguration.getSecretKey());
         this.amazonS3 = AmazonS3ClientBuilder
                 .standard()
-                .withRegion("sa-east-1") 
+                .withRegion(REGION) 
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
 
