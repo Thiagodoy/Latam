@@ -6,6 +6,7 @@
 package com.core.behavior.jobs;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.Tag;
 import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
@@ -72,15 +73,15 @@ public class IntegrationJob extends QuartzJobBean {
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
 
-        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
+        //List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
 
         if (!shortLayout.isEmpty()) {
             this.generateFile(shortLayout, uploadFolder, TicketLayoutEnum.SHORT, Stream.SHORT_LAYOUT_INTEGRATION);
         }
 
-        if (!fullLayout.isEmpty()) {
-           this.generateFile(shortLayout, uploadFolder, TicketLayoutEnum.FULL, Stream.FULL_LAYOUT_INTEGRATION);
-        }
+//        if (!fullLayout.isEmpty()) {
+//           this.generateFile(shortLayout, uploadFolder, TicketLayoutEnum.FULL, Stream.FULL_LAYOUT_INTEGRATION);
+//        }
 
     }
 
@@ -90,7 +91,7 @@ public class IntegrationJob extends QuartzJobBean {
         File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream);
 
         final String fileName = file.getName();
-        boolean isUploaded = this.uploadAndMoveFile(file);
+        boolean isUploaded = this.uploadAndMoveFile(file,generateTagFromLayout(layout));
 
         if (isUploaded) {            
             list.parallelStream().forEach(t->{            
@@ -103,11 +104,21 @@ public class IntegrationJob extends QuartzJobBean {
         }
 
     }
+    
+    private Tag generateTagFromLayout(TicketLayoutEnum layout){
+        
+        if(layout.equals(TicketLayoutEnum.SHORT)){
+            return new Tag("model", "20");
+        }else{
+            return new Tag("model", "50");
+        }
+        
+    }
 
-    private boolean uploadAndMoveFile(File f) {
+    private boolean uploadAndMoveFile(File f, Tag tag) {
 
         try {
-            String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION);
+            String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION, tag);
 
             if (Optional.ofNullable(hash).isPresent()) {
                 Files.move(f.toPath(), Paths.get(Constantes.DIR_UPLOADED).resolve(f.getName()), StandardCopyOption.REPLACE_EXISTING);
