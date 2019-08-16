@@ -250,6 +250,9 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(ticketDTO.getTrecho()).isPresent()) {
             countError++;
         }
+        
+        
+        
 
         String trecho = ticketDTO.getTrecho();
 
@@ -257,6 +260,18 @@ public class Validator implements IValidator {
 
         if (countError == 0 && !matcher.matches()) {
             countError++;
+        }
+        
+        if(matcher.matches()){
+            String [] s = ticketDTO.getTrecho().split("/");
+            
+            for (String string : s) {
+                
+                if(string.length() > 3){
+                    countError++;                            
+                }
+                
+            }
         }
 
         if (trecho != null && trecho.length() < 7) {
