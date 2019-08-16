@@ -135,7 +135,10 @@ public class ProcessFileJob extends QuartzJobBean {
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
                 fileService.setValidationTime(idFile, timeValidation);
-
+                 
+                f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
+                f = fileService.saveFile(f);
+                
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
                 
