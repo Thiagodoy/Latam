@@ -121,9 +121,9 @@ public class UserResource {
 
     }
 
-    @RequestMapping(value = "/userExists/{cpfCnpj}", method = RequestMethod.GET)
+    @RequestMapping(value = "/userExists", method = RequestMethod.GET)
     @ApiOperation(value = "Verify if a user exists on data base")
-    public ResponseEntity verifyCpfCnpj(@PathVariable("cpfCnpj") String cpfCnpj) {
+    public ResponseEntity verifyCpfCnpj(@RequestParam("cpfCnpj") String cpfCnpj) {
 
         try {
             return ResponseEntity.ok(infoService.checkCpfCnpj(cpfCnpj));

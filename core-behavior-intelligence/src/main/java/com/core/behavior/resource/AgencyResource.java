@@ -30,9 +30,6 @@ public class AgencyResource {
     @Autowired
     private AgencyService agencyService;
     
-    @Autowired
-    private UserInfoService infoService;
-
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(
             @RequestParam(name = "name", required = false) String name,
