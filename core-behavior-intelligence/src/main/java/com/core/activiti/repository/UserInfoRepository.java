@@ -20,4 +20,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
     List<UserInfo> findByUserId(String userId);
 
     void deleteByUserId(String id);
+    
+    void deleteByKeyAndValue(String key,String value);
 }

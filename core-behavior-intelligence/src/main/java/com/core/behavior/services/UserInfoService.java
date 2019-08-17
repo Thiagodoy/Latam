@@ -23,6 +23,10 @@ public class UserInfoService {
         List<UserInfo> info = infoRepository.findByKeyAndValue("cpf", value);
         return !info.isEmpty();
     }
+    
+    public void deleteByKeyAndValue(String key,String value){
+        infoRepository.deleteByKeyAndValue(key, value);
+    }
 
     public List<UserInfo> findByUser(String id) {
         return infoRepository.findByUserId(id);

@@ -15,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import com.core.behavior.repository.FileIntegrationRepository;
 
 /**
  *
@@ -29,6 +28,8 @@ public class AgencyService {
 
     @Autowired
     private UserInfoService userInfoService;
+    
+    
 
     @Autowired
     private UserActivitiService userActivitiService;
@@ -91,6 +92,7 @@ public class AgencyService {
 
     @Transactional
     public void delete(Long id) {
+        userInfoService.deleteByKeyAndValue("agencia", String.valueOf(id));
         agencyRepository.deleteById(id);
     }
 

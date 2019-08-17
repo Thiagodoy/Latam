@@ -75,7 +75,7 @@ public class ProcessFileJob extends QuartzJobBean {
         
         com.core.behavior.model.File f = fileService.findById(fileId);        
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
-        f.setStage(StageEnum.UPLOAD.getCode());
+        f.setStage(StageEnum.UPLOADED.getCode());
         
 
         f = fileService.saveFile(f);
