@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/asset")
 public class AssetResource {
     
-    @Value("${application.version}")
-    private String version;
+    
+    private String version = "v2.0.1";
 
     @GetMapping(value = "/download/image/{fileName}", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getFile(@PathVariable(name = "fileName") String fileName) throws IOException {
