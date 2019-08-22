@@ -904,20 +904,22 @@ public class Validator implements IValidator {
             String classeTarifaria = ticketDTO.getClasseTarifa();
 
             if (!Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() || ticketDTO.getBaseTarifaria().length() == 0) {
-                ticketDTO.setBaseTarifaria(" ");
-            }
+                ticket.setBaseTarifaria("");
+            } else {
 
-            if (!classeTarifaria.equals(ticketDTO.getBaseTarifaria().substring(0, 1))) {
-                countError++;
-            }
-
-            try {
-                Matcher m = p.matcher(ticketDTO.getBaseTarifaria());
-                if (!m.matches()) {
+                if (!classeTarifaria.equals(ticketDTO.getBaseTarifaria().substring(0, 1))) {
                     countError++;
                 }
-            } catch (Exception e) {
-                countError++;
+
+                try {
+                    Matcher m = p.matcher(ticketDTO.getBaseTarifaria());
+                    if (!m.matches()) {
+                        countError++;
+                    }
+                } catch (Exception e) {
+                    countError++;
+                }
+
             }
 
         }
@@ -969,18 +971,20 @@ public class Validator implements IValidator {
         int countError = 0;
 
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
-            ticketDTO.setClasseTarifa(" ");
+            ticket.setClasseTarifa("");
+        }else{
+            
         }
 
         if (countError == 0) {
-            String base = ticketDTO.getBaseTarifaria().substring(0, 1);
-            String classe = ticketDTO.getClasseTarifa().substring(0, 1);
+            String base = Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0 ? ticketDTO.getBaseTarifaria().substring(0, 1) : "";
+            String classe = Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() && ticketDTO.getClasseTarifa().length() > 0 ? ticketDTO.getClasseTarifa().substring(0, 1) : ""; //ticketDTO.getClasseTarifa().substring(0, 1);
 
-            if (!base.equals(classe) && ticketDTO.getClasseTarifa().length() > 0) {
+            if (!base.equals(classe) && classe.length() > 0) {
                 countError++;
             }
 
-            Matcher m = p.matcher(ticketDTO.getClasseTarifa());
+            Matcher m = p.matcher(classe);
             if (!m.matches()) {
                 countError++;
             }
@@ -1060,7 +1064,7 @@ public class Validator implements IValidator {
         Pattern p = Pattern.compile(REGEX_RT_OW);
 
         if (!Optional.ofNullable(ticketDTO.getRtOw()).isPresent()) {
-            ticketDTO.setRtOw("");
+            ticket.setRtOw("");
         }
 
         if (countError == 0) {
