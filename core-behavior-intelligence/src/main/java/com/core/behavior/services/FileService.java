@@ -164,10 +164,8 @@ public class FileService {
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
             long versao = 1L;
             if (!result.getContent().isEmpty()) {
-
                 File f = result.getContent().get(0);
-                versao = f.getVersion().longValue() + 1;
-                
+                versao = f.getVersion().longValue() + 1;                
             }
 
             

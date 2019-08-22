@@ -64,10 +64,9 @@ public class UserActivitiService {
 
     @Transactional
     public void deleteUser(String idUser) {
-
-        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();
-        userActiviti.setStatus(UserStatusEnum.DISABLED);
-        userActivitiRepository.save(userActiviti);
+        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();        
+        infoService.deleteAll(userActiviti.getInfo());        
+        userActivitiRepository.deleteById(idUser);        
     }
 
     @Transactional
