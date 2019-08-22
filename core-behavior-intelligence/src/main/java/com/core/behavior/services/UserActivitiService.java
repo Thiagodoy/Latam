@@ -54,22 +54,19 @@ public class UserActivitiService {
     private GroupActivitiRepository groupActivitiRepository;
 
     @Autowired
-    private EmailService emailService;
-
-    @Autowired
     private UserInfoService infoService;
 
     @Autowired
     private GroupMemberSevice groupMemberSevice;
-    
+
     @Autowired
     private NotificacaoService notificacaoService;
 
     @Transactional
-    public void deleteUser(String idUser) {       
-        
-        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();        
-        userActiviti.setStatus(UserStatusEnum.DISABLED);       
+    public void deleteUser(String idUser) {
+
+        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();
+        userActiviti.setStatus(UserStatusEnum.DISABLED);
         userActivitiRepository.save(userActiviti);
     }
 
@@ -115,13 +112,11 @@ public class UserActivitiService {
 
         UserActiviti user = userActivitiRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));       
-        
-        
-        if(user.getStatus().equals(UserStatusEnum.DISABLED)){
-              throw new ActivitiException(MessageCode.USER_DESATIVADO);
+                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+
+        if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
+            throw new ActivitiException(MessageCode.USER_DESATIVADO);
         }
-        
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
@@ -140,9 +135,8 @@ public class UserActivitiService {
 
             Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime dateLastAcess = LocalDateTime.parse(lastAccess.get().getValue(), formatter);           
-            
-            
+            LocalDateTime dateLastAcess = LocalDateTime.parse(lastAccess.get().getValue(), formatter);
+
             if (time.isAfter(dateLastAcess)) {
                 UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_PASSWORD, "true");
                 infoService.save(passwordExpiration);
@@ -164,8 +158,8 @@ public class UserActivitiService {
 
         if (!user.getPassword().equals(request.getPassword())) {
             throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
-        } 
-        
+        }
+
         List<GroupResponse> listGroupsResponse = new ArrayList();
         List<GroupActiviti> listGroups = groupActivitiRepository.findAll();
 
@@ -200,7 +194,7 @@ public class UserActivitiService {
         parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.CONGRATS);
         notificacao.setParameters(Utils.mapToString(parameter));
@@ -235,29 +229,29 @@ public class UserActivitiService {
             }
         }
 
-        UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();                 
-        primeiroAcesso.setValue("true");        
-         
+        UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();
+        primeiroAcesso.setValue("true");
+
         UserInfo lastAccess = Utils.valueFromUserInfo(userActiviti, Constantes.LAST_ACCESS).get();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         lastAccess.setValue(formatter.format(LocalDateTime.now()));
-        
+
         String password = Utils.generatePasswordRandom();
         userActiviti.setPassword(DigestUtils.md5Hex(password));
 
         userActivitiRepository.save(userActiviti);
-         DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", data.format(LocalDateTime.now()));
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.FORGOT);
         notificacao.setParameters(Utils.mapToString(parameter));
-        notificacaoService.save(notificacao);       
+        notificacaoService.save(notificacao);
 
     }
 
@@ -297,7 +291,7 @@ public class UserActivitiService {
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", formatter.format(LocalDateTime.now()));
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.FORGOT);
         notificacao.setParameters(Utils.mapToString(parameter));
@@ -331,8 +325,7 @@ public class UserActivitiService {
         }
 
         predicates.add(UserActivitiSpecification.status(UserStatusEnum.ACTIVE));
-        
-        
+
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);
@@ -388,17 +381,14 @@ public class UserActivitiService {
                 op.get().setValue("false");
             }
         }
-        
-        
+
         // Altera o contador  da mudanca de senha
-        Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();        
-        if(op.isPresent()){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");                
+        Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();
+        if (op.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             op.get().setValue(formatter.format(LocalDateTime.now()));
         }
-        
-        
-        
+
         userActivitiRepository.save(user);
 
     }

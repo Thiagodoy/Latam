@@ -2,9 +2,7 @@
 package com.core.behavior.dto;
 
 import com.core.behavior.util.TicketLayoutEnum;
-import com.core.behavior.util.Utils;
 import java.text.MessageFormat;
-import java.util.Optional;
 import lombok.Data;
 
 /**
@@ -70,6 +68,7 @@ public class TicketDTO {
     public String cellPax;    
     public String grupoEmpresa;    
     public String grupoConsolidada;
+    public String codigoAgencia;
     
     public String toString(){
         

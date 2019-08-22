@@ -5,6 +5,7 @@ import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
@@ -44,6 +45,9 @@ public class ProcessFileJob extends QuartzJobBean {
     private LogService logService;
 
     @Autowired
+    private AgencyService agencyService;
+    
+    @Autowired
     private FileService fileService;
 
     @Autowired
@@ -77,6 +81,8 @@ public class ProcessFileJob extends QuartzJobBean {
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
         f.setStage(StageEnum.UPLOADED.getCode());
         
+        final String codigoAgencia = agencyService.findById(f.getCompany()).getAgencyCode();
+        
 
         f = fileService.saveFile(f);
         final long idFile = f.getId();
@@ -94,6 +100,7 @@ public class ProcessFileJob extends QuartzJobBean {
                 dto.getTicket().parallelStream().forEach((t) -> {
                     t.setFileId(String.valueOf(idFile));
                     t.setLayout(ticketLayout.toString());
+                    t.setCodigoAgencia(codigoAgencia);
                 });
 
                 long count = 2;

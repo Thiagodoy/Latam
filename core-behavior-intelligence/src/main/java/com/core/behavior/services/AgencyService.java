@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,17 +28,17 @@ public class AgencyService {
     private AgencyRepository agencyRepository;
 
     @Autowired
-    private UserInfoService userInfoService;
+    private UserInfoService userInfoService;   
     
-    
-
     @Autowired
     private UserActivitiService userActivitiService;
+    
     
     
     public List<Agency>listAll(){
         return agencyRepository.findAll();
     }
+    
     public Page<Agency> list(String name, String code, Pageable page) {
         List<Specification<Agency>> predicates = new ArrayList<>();
 

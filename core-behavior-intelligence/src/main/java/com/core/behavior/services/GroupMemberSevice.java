@@ -2,6 +2,7 @@ package com.core.behavior.services;
 
 import com.core.activiti.model.GroupMemberActiviti;
 import com.core.activiti.repository.GroupMemberAcitvitiRepository;
+import com.core.activiti.specifications.GroupMemberSpecification;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,10 @@ public class GroupMemberSevice {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteByUserId(String userId){
         repository.deleteByUserId(userId);
+    }
+    
+    public List<GroupMemberActiviti>findById(List<String>ids){
+        return repository.findAll(GroupMemberSpecification.ids(ids));
     }
     
     

@@ -81,6 +81,9 @@ public class FileService {
 
     @Autowired
     private FileProcessStatusService fileProcessStatusService;
+    
+    @Autowired
+    private GroupMemberSevice groupMemberSevice;
 
     @Autowired
     private LogService logService;
@@ -187,24 +190,40 @@ public class FileService {
 
     }
 
-    private void criaNotificacaoDeUpload(Agency agency){
-         Map<String, String> parameter = new HashMap<String, String>();
-            parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
-            List<String> emails = new ArrayList<>();
-            //Notifica os usuários que estão na mesma agenica
-            userInfoRepository.findByKeyAndValue("agencia", String.valueOf(agency.getId())).forEach(info -> {
-                Optional<UserActiviti> u = userActivitiRepository.findById(info.getUserId());
+    private void criaNotificacaoDeUpload(Agency agency){         
+           
+        
+            List<String> ids = userInfoRepository
+                    .findByKeyAndValue("agencia", String.valueOf(agency.getId()))
+                    .stream()
+                    .map(u-> u.getUserId())
+                    .collect(Collectors.toList());
+            
+            
+            //Remove usuarios suporte behavior
+            List<String> emails = groupMemberSevice.findById(ids)
+                    .stream().filter(g-> !g.getGroupId().equals("suporte behavior"))
+                    .map(gg->gg.getUserId())
+                    .collect(Collectors.toList());
+            
+            
+
+            //Notifica os usuários que estão na mesma agência
+            emails.forEach(email -> {
+                Optional<UserActiviti> u = userActivitiRepository.findById(email);
                 if (u.isPresent()) {
-                    emails.add(u.get().getEmail());
+                    
+                    Map<String, String> parameter = new HashMap<String, String>();
+                    parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
+                    parameter.put(":email", u.get().getEmail());                    
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
+                    notificacao.setParameters(Utils.mapToString(parameter));
+                    notificacaoService.save(notificacao);                    
+                    
                 }
             });
-            
-            parameter.put(":email", emails.stream().collect(Collectors.joining(";")));
-            
-            Notificacao notificacao = new Notificacao();
-            notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
-            notificacao.setParameters(Utils.mapToString(parameter));
-            notificacaoService.save(notificacao);
+          
     }
     private void uploadFile(boolean uploadAws, boolean uploadFtp, String folder, java.io.File file) throws IOException {
 

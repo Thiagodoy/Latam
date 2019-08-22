@@ -92,9 +92,7 @@
                 <field type="string" name="horaEmissao" trim="true" />
                 <field type="string" name="dataReserva" trim="true"/>
                 <field type="string" name="horaReserva" trim="true" />
-                <field type="string" name="horaPouso" trim="true"  />
                 <field type="string" name="baseTarifaria" trim="true"/>
-                <field type="string" name="tktDesignator" trim="true"/>                   
                 <field type="string" name="familiaTarifaria" trim="true"/>
                 <field type="string" name="classeTarifa" trim="true"/>
                 <field type="string" name="classeServico" trim="true"/>
@@ -110,13 +108,34 @@
                 <field type="string" name="nomePax" trim="true"/>
                 <field type="string" name="tipoPax" trim="true"/>
                 <field type="string" name="cpfPax" trim="true"/>
+                <field type="string" name="tierFidelidadePax" trim="true"/>
+                <field type="string" name="tipoPagamento" trim="true"/> 
+                <field type="string" name="digitoVerificadorCC" trim="true"/>
+                <field type="string" name="nomeCliente" trim="true"/>
+                <field type="string" name="tktDesignator" trim="true"/>                   
                 <field type="string" name="emailPax" trim="true"/>
                 <field type="string" name="cellPax" trim="true"/>
-                <field type="string" name="tierFidelidadePax" trim="true"/>
-                <field type="string" name="tipoPagamento" trim="true"/>
-                <field type="string" name="digitoVerificadorCC" trim="true"/>
+                <field type="string" name="horaPouso" trim="true"  />
                 <field type="string" name="grupoEmpresa" trim="true"/>
-                <field type="string" name="nomeCliente" trim="true"/>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+               
+                
+                
+                
             </record>
         </group>
     </stream>  

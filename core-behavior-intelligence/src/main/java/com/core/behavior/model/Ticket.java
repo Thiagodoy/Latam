@@ -293,6 +293,10 @@ public class Ticket {
     @Column(name = "FILE_INTEGRATION")
     public String fileIntegration;
     
+    @PositionParameter(value = 57)
+    @Column(name = "CODE_AGENCY")
+    public String codeAgencia;
+    
     
     @Transient
     private List<Log>errors;
@@ -367,7 +371,7 @@ public class Ticket {
                     this.tipoPagamento,
                     this.digitoVerificadorCC,
                     this.grupoEmpresa,
-                    this.nomeCliente);
+                    this.grupoConsolidada);
         }
 
         return reg;

@@ -21,6 +21,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAutoConfiguration
 @ComponentScan()
 @EnableWebMvc
+
 public class BehaviorApplication {
 
     public static void main(String[] args) {

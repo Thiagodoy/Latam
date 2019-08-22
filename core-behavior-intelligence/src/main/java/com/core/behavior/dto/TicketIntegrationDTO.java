@@ -70,6 +70,7 @@ public class TicketIntegrationDTO {
     private String digitoVerificadorCC;
     private String grupoEmpresa;
     private String nomeCliente;
+    private String grupoConsolidada;
 
     private static final SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yyyy");
     private static final NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
@@ -128,8 +129,9 @@ public class TicketIntegrationDTO {
             this.tierFidelidadePax = Optional.ofNullable(ticket.getTierFidelidadePax()).isPresent() ? ticket.getTierFidelidadePax(): "";
             this.tipoPagamento = Optional.ofNullable(ticket.getTipoPagamento()).isPresent() ? ticket.getTipoPagamento(): "";
             this.digitoVerificadorCC = Optional.ofNullable(ticket.getDigitoVerificadorCC()).isPresent() ? String.valueOf(ticket.getDigitoVerificadorCC()): "";
-            this.grupoEmpresa = Optional.ofNullable(ticket.getGrupoEmpresa()).isPresent() ? ticket.getEmpresa(): "";
+            this.grupoEmpresa = Optional.ofNullable(ticket.getGrupoEmpresa()).isPresent() ? ticket.getGrupoEmpresa(): "";
             this.nomeCliente = "";
+            this.grupoConsolidada = Optional.ofNullable(ticket.getGrupoConsolidada()).isPresent() ? ticket.getGrupoConsolidada(): "";;
 
         }
 
