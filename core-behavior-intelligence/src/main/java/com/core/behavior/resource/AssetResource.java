@@ -8,7 +8,6 @@ package com.core.behavior.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AssetResource {
     
     
-    private String version = "v2.1.9";
+    private String version = "v2.1.10";
 
     @GetMapping(value = "/download/image/{fileName}", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getFile(@PathVariable(name = "fileName") String fileName) throws IOException {
