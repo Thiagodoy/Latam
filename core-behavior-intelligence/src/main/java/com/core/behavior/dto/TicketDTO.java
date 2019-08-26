@@ -72,7 +72,7 @@ public class TicketDTO {
     
     public String toString(){
         
-        String reg = MessageFormat.format("{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20}",
+        String reg = MessageFormat.format("{0}[col]{1}[col]{2}[col]{3}[col]{4}[col]{5}[col]{6}[col]{7}[col]{8}[col]{9}[col]{10}[col]{11}[col]{12}[col]{13}[col]{14}[col]{15}[col]{16}[col]{17}[col]{18}[col]{19}[col]{20}",
                 this.lineFile,
                 this.dataEmissao,
                 this.dataEmbarque,
@@ -96,7 +96,7 @@ public class TicketDTO {
                 this.consolidada);
 
         if (this.layout.equals(TicketLayoutEnum.FULL.toString())) {
-            reg += MessageFormat.format(";{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26};{27};{28}", 
+            reg += MessageFormat.format("[col]{0}[col]{1}[col]{2}[col]{3}[col]{4}[col]{5}[col]{6}[col]{7}[col]{8}[col]{9}[col]{10}[col]{11}[col]{12}[col]{13}[col]{14}[col]{15}[col]{16}[col]{17}[col]{18}[col]{19}[col]{20}[col]{21}[col]{22}[col]{23}[col]{24}[col]{25}[col]{26}[col]{27}[col]{28}", 
                     this.dataExtracao,
                     this.horaEmissao,
                     this.dataReserva,

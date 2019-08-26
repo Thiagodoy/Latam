@@ -121,7 +121,7 @@ public class GeneratorFileReturnService {
             XSSFRow row = sheet.createRow(r + 1);
 
             //iterating c number of columns
-            String[] values = errors.get(r).getLineContent().split(";");
+            String[] values = errors.get(r).getLineContent().split("\\[col\\]");
             for (int c = 0; c < values.length; c++) {
                 XSSFCell cell = row.createCell(c);
                 cell.setCellValue(values[c]);

@@ -66,6 +66,8 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
+    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_NOME_PAX = "[A-Z\\s]*";
     private static Properties props = new Properties();
 
     static {
@@ -971,10 +973,8 @@ public class Validator implements IValidator {
         int countError = 0;
 
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
-            ticket.setClasseTarifa("");
-        }else{
-            
-        }
+            ++countError;//ticket.setClasseTarifa("");
+        } 
 
         if (countError == 0) {
             String base = Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0 ? ticketDTO.getBaseTarifaria().substring(0, 1) : "";
@@ -1001,11 +1001,20 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkClasseServico() {
+        
 
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent()) {
             this.ticket.setClasseServico("");
         } else {
-            this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
+
+            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO);
+            Matcher m = p.matcher(this.ticketDTO.getClasseServico());
+            if (!m.matches()) {
+                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
+            } else {
+                this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
+            }           
+
         }
         return this;
     }
@@ -1268,11 +1277,20 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkNomePax() {
-
+        
+        Pattern p = Pattern.compile(REGEX_NOME_PAX, Pattern.CASE_INSENSITIVE);
+        
         if (!Optional.ofNullable(ticketDTO.getNomePax()).isPresent()) {
             ticket.setNomePax("");
         } else {
-            ticket.setNomePax(ticketDTO.getNomePax());
+            
+            Matcher m = p.matcher(ticketDTO.getNomePax());
+            
+            if(m.matches()){
+                ticket.setNomePax(ticketDTO.getNomePax());
+            }else{
+                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
+            }
         }
 
         return this;
@@ -1283,7 +1301,7 @@ public class Validator implements IValidator {
 
         String tipoPax = ticketDTO.getTipoPax();
         if (!Optional.ofNullable(tipoPax).isPresent()) {
-            ticket.setTipoPax("");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tipoPax.type"), "tipoPax");
         } else {
 
             Pattern p = Pattern.compile(REGEX_TIPO_PAX);
