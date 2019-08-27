@@ -66,8 +66,8 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
-    private final static String REGEX_NOME_PAX = "[A-Z\\s]*";
+    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Comfort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_NOME_PAX = "[A-Z\\s/]*";
     private static Properties props = new Properties();
 
     static {
@@ -1002,12 +1002,12 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkClasseServico() {
         
-
+//Econ?mica
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent()) {
             this.ticket.setClasseServico("");
         } else {
 
-            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO);
+            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO, Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(this.ticketDTO.getClasseServico());
             if (!m.matches()) {
                 this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
@@ -1262,7 +1262,7 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(selfBookingOffiline).isPresent()) {
             ticket.setPnrAgencia("");
         } else {
-            Pattern p = Pattern.compile(REGEX_SELFBOOKING);
+            Pattern p = Pattern.compile(REGEX_SELFBOOKING, Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(selfBookingOffiline);
 
             if (!m.matches()) {
@@ -1321,7 +1321,7 @@ public class Validator implements IValidator {
     public IValidator checkCpfPax() {
 
         String cpfPax = ticketDTO.getCpfPax();
-        if (!Optional.ofNullable(cpfPax).isPresent()) {
+        if (!Optional.ofNullable(cpfPax).isPresent() || cpfPax.length() == 0) {
             ticket.setCpfPax("");
         } else {
 
@@ -1380,7 +1380,7 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(tipoPagamento).isPresent()) {
             countError++;
         } else {
-            Pattern p = Pattern.compile(REGEX_TIPO_PAGAMENTO);
+            Pattern p = Pattern.compile(REGEX_TIPO_PAGAMENTO, Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(tipoPagamento);
 
             if (!m.matches()) {

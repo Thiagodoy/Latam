@@ -2,7 +2,6 @@ package com.core.behavior.services;
 
 import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.model.Log;
-import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.LogRepository;
 import com.core.behavior.util.Utils;
 import java.sql.Connection;

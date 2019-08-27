@@ -37,6 +37,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Comparator;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  *
@@ -89,6 +90,7 @@ public class GeneratorFileReturnService {
         String sheetName = "Erros";
 
         XSSFWorkbook wb = new XSSFWorkbook();
+        
         XSSFSheet sheet = wb.createSheet(sheetName);
 
         CellStyle backgroundStyle = wb.createCellStyle();
@@ -117,6 +119,12 @@ public class GeneratorFileReturnService {
             cell.setCellValue(header[i]);
         }
 
+        
+         XSSFFont fontRecord = wb.createFont();
+         fontRecord.setCharSet(XSSFFont.ANSI_CHARSET);
+        
+        XSSFCellStyle style =  wb.createCellStyle();
+        style.setFont(fontRecord);
         for (int r = 0; r < errors.size(); r++) {
             XSSFRow row = sheet.createRow(r + 1);
 
@@ -124,7 +132,9 @@ public class GeneratorFileReturnService {
             String[] values = errors.get(r).getLineContent().split("\\[col\\]");
             for (int c = 0; c < values.length; c++) {
                 XSSFCell cell = row.createCell(c);
+                cell.setCellStyle(style);
                 cell.setCellValue(values[c]);
+                
 
             }
         }
