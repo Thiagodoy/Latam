@@ -6,15 +6,12 @@ import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.io.Reader;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,9 +50,7 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            Reader r = new InputStreamReader(new FileInputStream(file), "UTF-8");
-            
-            reader = factory.createReader(stream.getStreamId(), r);
+            reader = factory.createReader(stream.getStreamId(), file);
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);

@@ -132,7 +132,7 @@ public class GeneratorFileReturnService {
             String[] values = errors.get(r).getLineContent().split("\\[col\\]");
             for (int c = 0; c < values.length; c++) {
                 XSSFCell cell = row.createCell(c);
-                cell.setCellStyle(style);
+                //cell.setCellStyle(style);
                 cell.setCellValue(values[c]);
                 
 

@@ -1003,7 +1003,7 @@ public class Validator implements IValidator {
     public IValidator checkClasseServico() {
         
 //Econ?mica
-        if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent()) {
+        if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent()  || this.ticketDTO.getClasseServico().length() == 0) {
             this.ticket.setClasseServico("");
         } else {
 
