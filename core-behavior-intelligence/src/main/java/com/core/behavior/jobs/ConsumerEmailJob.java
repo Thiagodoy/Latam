@@ -55,6 +55,8 @@ public class ConsumerEmailJob extends QuartzJobBean {
         PageRequest page = PageRequest.of(0, 5);
         List<Notificacao> notificacaos = notificacaoRepository.findByStatus(NotificacaoStatusEnum.READY, page);
 
+        Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.INFO, "Iniciando o envio de emails");
+        
         notificacaos.forEach(n -> {
 
             MimeMessage message = sender.createMimeMessage();
@@ -95,7 +97,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 notificacaoRepository.save(n);
 
             } catch (Exception ex) {
-                Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.SEVERE, ex.getMessage());
 
                 long retry = n.getRetry();
                 ++retry;
@@ -106,7 +108,6 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 }
                 notificacaoRepository.save(n);
             }
-
         });
 
     }

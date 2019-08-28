@@ -54,7 +54,7 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            Reader rr = new InputStreamReader(new FileInputStream(file), "UTF-8" );
+            Reader rr = new InputStreamReader(new FileInputStream(file), "UTF8" );
             reader = factory.createReader(stream.getStreamId(), rr);
 
             long totalLines = this.countLineNumber(file);

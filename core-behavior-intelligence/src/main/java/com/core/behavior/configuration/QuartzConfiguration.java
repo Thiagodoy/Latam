@@ -34,7 +34,7 @@ public class QuartzConfiguration {
                 .withDescription("Sender email")
                 .build();
         CronTrigger crontrigger = TriggerBuilder.newTrigger().withIdentity("ConsumerEmailJobTrigger", "consumer-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
         scheduler.scheduleJob(detail, crontrigger);
@@ -43,7 +43,7 @@ public class QuartzConfiguration {
                 .withDescription("Agendador de notificação de email")
                 .build();
         CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
