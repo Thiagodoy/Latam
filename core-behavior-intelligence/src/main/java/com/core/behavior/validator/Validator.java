@@ -1002,7 +1002,9 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkClasseServico() {
         
-//Econ?mica
+
+        Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.INFO,this.ticketDTO.getClasseServico());
+        
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent()  || this.ticketDTO.getClasseServico().length() == 0) {
             this.ticket.setClasseServico("");
         } else {
@@ -1375,6 +1377,8 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkTipoPagamento() {
 
+        Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.INFO,ticketDTO.getTipoPagamento());
+        
         String tipoPagamento = ticketDTO.getTipoPagamento();
         int countError = 0;
         if (!Optional.ofNullable(tipoPagamento).isPresent()) {
