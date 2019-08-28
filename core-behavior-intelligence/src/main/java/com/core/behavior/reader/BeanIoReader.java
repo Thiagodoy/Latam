@@ -46,6 +46,7 @@ public class BeanIoReader {
         long end;
 
         Logger.getLogger(BeanIoReader.class.getName()).log(Level.INFO, "ENCODE -> " + System.getProperty("file.encoding"));
+        System.out.println("charsets -> " + Charset.availableCharsets().toString());
 
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
@@ -56,8 +57,10 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            Reader rr = new InputStreamReader(new FileInputStream(file), "UTF8");
+            Reader rr = new InputStreamReader(new FileInputStream(file), "ISO-8859-1");
             reader = factory.createReader(stream.getStreamId(), rr);
+            
+            
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
