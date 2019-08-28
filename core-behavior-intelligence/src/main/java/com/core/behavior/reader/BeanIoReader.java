@@ -45,6 +45,8 @@ public class BeanIoReader {
         long start = System.currentTimeMillis();
         long end;
 
+        Logger.getLogger(BeanIoReader.class.getName()).log(Level.INFO, "ENCODE -> " + System.getProperty("file.encoding"));
+
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
         T record = null;
@@ -54,7 +56,7 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            Reader rr = new InputStreamReader(new FileInputStream(file), "UTF8" );
+            Reader rr = new InputStreamReader(new FileInputStream(file), "UTF8");
             reader = factory.createReader(stream.getStreamId(), rr);
 
             long totalLines = this.countLineNumber(file);
@@ -137,16 +139,16 @@ public class BeanIoReader {
             factory.load(str);
 
             BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
-            
+
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
-            beanReader.close();          
+            beanReader.close();
 
             FileUtils.forceDelete(fileHeader);
 
             return Optional.ofNullable(headerDto).isPresent();
 
         } catch (Exception ex) {
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE,ex.getMessage());
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             return false;
         } finally {
             try {

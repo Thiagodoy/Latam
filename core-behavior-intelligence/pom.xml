@@ -165,6 +165,7 @@
                                 <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
                             </processors>
                             <outputDirectory>${project.basedir}/generated</outputDirectory>
+                            <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>
                 </executions>
