@@ -45,8 +45,8 @@ public class BeanIoReader {
         long start = System.currentTimeMillis();
         long end;
 
-        Logger.getLogger(BeanIoReader.class.getName()).log(Level.INFO, "ENCODE -> " + System.getProperty("file.encoding"));
-        System.out.println("charsets -> " + Charset.availableCharsets().toString());
+//        Logger.getLogger(BeanIoReader.class.getName()).log(Level.INFO, "ENCODE -> " + System.getProperty("file.encoding"));
+//        System.out.println("charsets -> " + Charset.availableCharsets().toString());
 
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
