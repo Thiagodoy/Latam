@@ -12,7 +12,7 @@ import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 import com.core.behavior.model.Notificacao;
-import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;

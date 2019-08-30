@@ -4,7 +4,7 @@ import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
-import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;

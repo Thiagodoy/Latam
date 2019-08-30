@@ -5,7 +5,7 @@ import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
-import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.io.BeanIoReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.core.behavior.reader;
+package com.core.behavior.io;
 
 import com.core.behavior.dto.HeaderDTO;
 import com.core.behavior.jobs.ProcessFileJob;
@@ -39,14 +39,13 @@ public class BeanIoReader {
 
     @Autowired
     private LogService logService;
+    
+    private final String ENCODING = "ISO-8859-1"; 
 
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
         long end;
-
-//        Logger.getLogger(BeanIoReader.class.getName()).log(Level.INFO, "ENCODE -> " + System.getProperty("file.encoding"));
-//        System.out.println("charsets -> " + Charset.availableCharsets().toString());
 
         beanErrorHandler = new BeanErrorHandler();
         BeanReader reader = null;
@@ -57,10 +56,8 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            Reader rr = new InputStreamReader(new FileInputStream(file), "ISO-8859-1");
+            Reader rr = new InputStreamReader(new FileInputStream(file), ENCODING);
             reader = factory.createReader(stream.getStreamId(), rr);
-            
-            
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -141,7 +138,8 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
+            Reader rr = new InputStreamReader(new FileInputStream(file), ENCODING);
+            BeanReader beanReader = factory.createReader(stream.getStreamId(), rr);
 
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
             beanReader.close();

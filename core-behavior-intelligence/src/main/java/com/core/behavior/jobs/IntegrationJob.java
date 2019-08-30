@@ -18,7 +18,7 @@ import com.core.behavior.util.Constantes;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.writer.BeanIoWriter;
+import com.core.behavior.io.BeanIoWriter;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;

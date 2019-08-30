@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.writer;
+package com.core.behavior.io;
 
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.util.Stream;
