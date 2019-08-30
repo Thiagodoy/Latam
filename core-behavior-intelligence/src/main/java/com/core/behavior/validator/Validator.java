@@ -66,7 +66,7 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Comfort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Confort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]*";
     private static Properties props = new Properties();
 
