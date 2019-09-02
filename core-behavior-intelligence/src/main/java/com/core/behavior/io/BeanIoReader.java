@@ -16,11 +16,15 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
+import org.beanio.InvalidRecordException;
+import org.beanio.RecordContext;
 import org.beanio.StreamFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,8 +43,8 @@ public class BeanIoReader {
 
     @Autowired
     private LogService logService;
-    
-    private final String ENCODING = "ISO-8859-1"; 
+
+    private final String ENCODING = "ISO-8859-1";
 
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
@@ -148,6 +152,23 @@ public class BeanIoReader {
 
             return Optional.ofNullable(headerDto).isPresent();
 
+        } catch (InvalidRecordException ex) {
+            int count = ex.getRecordCount();
+
+            for (int i = 0; i < count; i++) {
+                RecordContext context = ex.getRecordContext(i);
+
+                Map<String, Collection<String>> map = context.getFieldErrors();
+
+                for (String key : context.getFieldErrors().keySet()) {
+                    for (String object : context.getFieldErrors(key)) {
+                        Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, object);
+                    }
+                }
+
+            }
+
+            return false;
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             return false;

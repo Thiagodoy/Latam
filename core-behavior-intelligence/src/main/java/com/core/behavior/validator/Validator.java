@@ -60,14 +60,14 @@ public class Validator implements IValidator {
     private final static String REGEX_BASE_TARIFARIA = "[A-Z0-9]{4,}";
     private final static String REGEX_CLASSE_TARIFARIA = "[A-Z]{0,1}";
     private final static String REGEX_TKT_DESIGNATOR = "[^A-Z0-9]*";
-    private final static String REGEX_OND_DIRECIONAL = "[A-Z]{6}";
+    private final static String REGEX_OND_DIRECIONAL = "[A-Z]{0,6}";
     private final static String REGEX_RT_OW = "(RT|OW){0,2}";
     private final static String REGEX_PNR_CIA_AGENCIA = "^([0-9]){1,}$";
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Confort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
-    private final static String REGEX_NOME_PAX = "[A-Z\\s/]*";
+    private final static String REGEX_CLASSE_SERVICO = "(Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Confort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
     private static Properties props = new Properties();
 
     static {
@@ -1015,9 +1015,9 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkClasseServico() {
 
-        // Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.INFO, this.ticketDTO.getClasseServico());
+        
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent() || this.ticketDTO.getClasseServico().length() == 0) {
-            this.ticket.setClasseServico("");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
         } else {
 
             Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO, Pattern.CASE_INSENSITIVE);
@@ -1294,7 +1294,7 @@ public class Validator implements IValidator {
         Pattern p = Pattern.compile(REGEX_NOME_PAX, Pattern.CASE_INSENSITIVE);
 
         if (!Optional.ofNullable(ticketDTO.getNomePax()).isPresent()) {
-            ticket.setNomePax("");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
         } else {
 
             Matcher m = p.matcher(ticketDTO.getNomePax());
