@@ -46,7 +46,7 @@ public class Validator implements IValidator {
     private final static String REGEX_TRECHO = "([A-Z]{3}[/]*)+";
     private final static String REGEX_ORIGEM_DESTINO = "([A-Z]){3}";
     private final static String REGEX_CUPOM = "((^0*[1-9]$)|(^[1-9][0-9]$))";
-    private final static String REGEX_BILHETE = "[A-Z0-9]{3,11}";
+    private final static String REGEX_BILHETE = "[A-Z0-9]{3,18}";
     private final static String REGEX_TIPO = "(I|N){0,1}";
     private final static String REGEX_CABINE = "[A-Z]{0,1}";
     private final static String REGEX_CIA_VOO = "([A-Z]{1}[0-9]{1})|([A-Z]{1}[A-Z]{1})|([0-9]{1}[A-Z]{1})";
