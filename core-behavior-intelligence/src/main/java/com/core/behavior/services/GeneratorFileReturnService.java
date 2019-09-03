@@ -110,7 +110,7 @@ public class GeneratorFileReturnService {
         font.setItalic(true);
 
 
-        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");;
+        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");
         XSSFRow rr = sheet.createRow(0);
         cellBold.setFont(font);
 

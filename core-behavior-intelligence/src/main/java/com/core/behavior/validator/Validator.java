@@ -58,9 +58,9 @@ public class Validator implements IValidator {
     private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";
     private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z\\(]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
     private final static String REGEX_BASE_TARIFARIA = "[A-Z0-9]{4,}";
-    private final static String REGEX_CLASSE_TARIFARIA = "[A-Z]{0,1}";
+    private final static String REGEX_CLASSE_TARIFARIA = "[A-Z]{1}";
     private final static String REGEX_TKT_DESIGNATOR = "[^A-Z0-9]*";
-    private final static String REGEX_OND_DIRECIONAL = "[A-Z]{0,6}";
+    private final static String REGEX_OND_DIRECIONAL = "[A-Z]{6}";
     private final static String REGEX_RT_OW = "(RT|OW){0,2}";
     private final static String REGEX_PNR_CIA_AGENCIA = "^([0-9]){1,}$";
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
@@ -984,7 +984,7 @@ public class Validator implements IValidator {
         int countError = 0;
 
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
-            ++countError;//ticket.setClasseTarifa("");
+            ++countError;
         }
 
         if (countError == 0) {
@@ -1035,7 +1035,7 @@ public class Validator implements IValidator {
         String ondDirecional = ticketDTO.getOndDirecional();
         int countError = 0;
 
-        if (!Optional.ofNullable(ondDirecional).isPresent()) {
+        if (!Optional.ofNullable(ondDirecional).isPresent() || ondDirecional.length() == 0 ) {
             ticket.setOndDirecional("");
         } else {
 
@@ -1532,6 +1532,14 @@ public class Validator implements IValidator {
 
             this.ticket.setFileId(Long.valueOf(ticketDTO.getFileId()));
             this.ticket.setLayout(TicketLayoutEnum.valueOf(ticketDTO.getLayout()));
+            
+            
+            //Geração das chaves
+            if(ticket.getErrors().isEmpty()){
+                
+            }
+            
+            
 
             return Optional.of(this.ticket);
 
