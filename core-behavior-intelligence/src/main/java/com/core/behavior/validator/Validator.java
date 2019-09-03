@@ -56,7 +56,7 @@ public class Validator implements IValidator {
     private final static String REGEX_IATA_AGENCIA = "([0-9]{7,8})*";
     private final static String REGEX_BASE_VENDA = "[A-Z]{3}";
     private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";
-    private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
+    private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z\\(]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
     private final static String REGEX_BASE_TARIFARIA = "[A-Z0-9]{4,}";
     private final static String REGEX_CLASSE_TARIFARIA = "[A-Z]{0,1}";
     private final static String REGEX_TKT_DESIGNATOR = "[^A-Z0-9]*";
@@ -92,7 +92,7 @@ public class Validator implements IValidator {
         log.setFieldName(field);
         log.setMessageError(message);
         log.setLineNumber(Long.parseLong(t.getLineFile()));
-        log.setRecordContent(ticketDTO.toString());
+        log.setRecordContent(t.toString());
         log.setType(TypeErrorEnum.RECORD);
         ticket.getErrors().add(log);
     }
@@ -748,7 +748,7 @@ public class Validator implements IValidator {
             }
         }
 
-        if (dataExtracao != null && dataReserva != null) {            
+        if (dataExtracao != null && dataReserva != null) {
             LocalDateTime extracao = this.dateToLocalDateTime(dataExtracao);
             LocalDateTime reserva = this.dateToLocalDateTime(dataReserva);
 
@@ -756,8 +756,6 @@ public class Validator implements IValidator {
                 countError++;
             }
         }
-
-        
 
         if (countError > 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataExtracao.type"), "dataExtracao");
@@ -954,7 +952,7 @@ public class Validator implements IValidator {
         Pattern p = Pattern.compile(REGEX_TKT_DESIGNATOR);
         int countError = 0;
 
-        if (!Optional.ofNullable(ticketDTO.getTktDesignator()).isPresent()) {
+        if (!Optional.ofNullable(ticketDTO.getTktDesignator()).isPresent() || ticketDTO.getTktDesignator().length() == 0  ) {
             ticket.setTktDesignator("");
         } else {
 
@@ -1015,7 +1013,6 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkClasseServico() {
 
-        
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent() || this.ticketDTO.getClasseServico().length() == 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
         } else {
@@ -1050,18 +1047,24 @@ public class Validator implements IValidator {
             }
 
             if (countError == 0) {
-                String origem = ondDirecional.substring(0, 4);
-                String destino = ondDirecional.substring(3);
 
-                if (origem.equals(destino)) {
+                try {
+                    String origem = ondDirecional.substring(0, 4);
+                    String destino = ondDirecional.substring(3);
+
+                    if (origem.equals(destino)) {
+                        countError++;
+                    }
+                } catch (Exception e) {
                     countError++;
                 }
+
             }
 
             if (countError > 0) {
                 this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.ondDirecional.type"), "ondDirecional");
             } else {
-                ticket.setOndDirecional("");
+                ticket.setOndDirecional(ondDirecional);
             }
 
         }
@@ -1534,7 +1537,7 @@ public class Validator implements IValidator {
 
         } catch (Exception e) {
             Logger.getLogger(com.core.behavior.validator.Validator.class
-                    .getName()).log(Level.SEVERE, null, e);
+                    .getName()).log(Level.SEVERE, "", e);
             return Optional.empty();
         }
     }
