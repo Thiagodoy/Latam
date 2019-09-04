@@ -46,7 +46,7 @@ public class Validator implements IValidator {
     private final static String REGEX_TRECHO = "([A-Z]{3}[/]*)+";
     private final static String REGEX_ORIGEM_DESTINO = "([A-Z]){3}";
     private final static String REGEX_CUPOM = "((^0*[1-9]$)|(^[1-9][0-9]$))";
-    private final static String REGEX_BILHETE = "[A-Z0-9]{3,18}";
+    private final static String REGEX_BILHETE = "[A-Z0-9]{2,18}";
     private final static String REGEX_TIPO = "(I|N){0,1}";
     private final static String REGEX_CABINE = "[A-Z]{0,1}";
     private final static String REGEX_CIA_VOO = "([A-Z]{1}[0-9]{1})|([A-Z]{1}[A-Z]{1})|([0-9]{1}[A-Z]{1})";
@@ -284,6 +284,13 @@ public class Validator implements IValidator {
 
         if (trecho != null && trecho.length() < 7) {
             countError++;
+        }
+
+        if (trecho != null && trecho.length() > 0) {
+            int index = trecho.length() - 1;
+            if (trecho.substring(index).equals("/")) {
+                countError++;
+            }
         }
 
         if (countError > 0) {
@@ -982,8 +989,7 @@ public class Validator implements IValidator {
 
         Pattern p = Pattern.compile(REGEX_CLASSE_TARIFARIA);
         int countError = 0;
-         
-        
+
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
             ++countError;
         } else {
