@@ -982,7 +982,8 @@ public class Validator implements IValidator {
 
         Pattern p = Pattern.compile(REGEX_CLASSE_TARIFARIA);
         int countError = 0;
-
+         
+        
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
             ++countError;
         } else {
@@ -993,7 +994,7 @@ public class Validator implements IValidator {
                 countError++;
             }
 
-            Matcher m = p.matcher(classe);
+            Matcher m = p.matcher(ticketDTO.getClasseTarifa());
             if (!m.matches()) {
                 countError++;
             }
