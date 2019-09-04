@@ -952,7 +952,7 @@ public class Validator implements IValidator {
         Pattern p = Pattern.compile(REGEX_TKT_DESIGNATOR);
         int countError = 0;
 
-        if (!Optional.ofNullable(ticketDTO.getTktDesignator()).isPresent() || ticketDTO.getTktDesignator().length() == 0  ) {
+        if (!Optional.ofNullable(ticketDTO.getTktDesignator()).isPresent() || ticketDTO.getTktDesignator().length() == 0) {
             ticket.setTktDesignator("");
         } else {
 
@@ -985,13 +985,11 @@ public class Validator implements IValidator {
 
         if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
             ++countError;
-        }
-
-        if (countError == 0) {
+        } else {
             String base = Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0 ? ticketDTO.getBaseTarifaria().substring(0, 1) : "";
             String classe = Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() && ticketDTO.getClasseTarifa().length() > 0 ? ticketDTO.getClasseTarifa().substring(0, 1) : ""; //ticketDTO.getClasseTarifa().substring(0, 1);
 
-            if (!base.equals(classe) && classe.length() > 0) {
+            if (!base.equals(classe)) {
                 countError++;
             }
 
@@ -1035,7 +1033,7 @@ public class Validator implements IValidator {
         String ondDirecional = ticketDTO.getOndDirecional();
         int countError = 0;
 
-        if (!Optional.ofNullable(ondDirecional).isPresent() || ondDirecional.length() == 0 ) {
+        if (!Optional.ofNullable(ondDirecional).isPresent() || ondDirecional.length() == 0) {
             ticket.setOndDirecional("");
         } else {
 
@@ -1532,14 +1530,11 @@ public class Validator implements IValidator {
 
             this.ticket.setFileId(Long.valueOf(ticketDTO.getFileId()));
             this.ticket.setLayout(TicketLayoutEnum.valueOf(ticketDTO.getLayout()));
-            
-            
+
             //Geração das chaves
-            if(ticket.getErrors().isEmpty()){
-                
+            if (ticket.getErrors().isEmpty()) {
+
             }
-            
-            
 
             return Optional.of(this.ticket);
 
