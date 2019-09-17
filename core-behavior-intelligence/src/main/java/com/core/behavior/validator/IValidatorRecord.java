@@ -3,16 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.util;
+package com.core.behavior.validator;
 
 /**
  *
  * @author thiag
  */
-public enum TicketStatusEnum {
-    APPROVED,
-    UNAPPROVED,
-    WRITED,
-    BACKOFFICE,
-    BACKOFFICE_CUPOM
+public interface IValidatorRecord {
+    
 }

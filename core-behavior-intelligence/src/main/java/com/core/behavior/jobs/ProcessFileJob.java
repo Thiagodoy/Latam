@@ -2,6 +2,7 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
+import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
@@ -15,15 +16,19 @@ import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -46,7 +51,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
     @Autowired
     private AgencyService agencyService;
-    
+
     @Autowired
     private FileService fileService;
 
@@ -66,23 +71,23 @@ public class ProcessFileJob extends QuartzJobBean {
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
+    
+    private static final int DIAS = 90;
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         long start = System.currentTimeMillis();
 
-        File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);        
+        File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
         Long layout = jec.getJobDetail().getJobDataMap().getLong(DATA_LAYOUT_FILE);
         Long fileId = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
 
-        
-        com.core.behavior.model.File f = fileService.findById(fileId);        
+        com.core.behavior.model.File f = fileService.findById(fileId);
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
         f.setStage(StageEnum.UPLOADED.getCode());
-        
+
         final String codigoAgencia = agencyService.findById(f.getCompany()).getAgencyCode();
-        
 
         f = fileService.saveFile(f);
         final long idFile = f.getId();
@@ -112,43 +117,66 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 long startValidation = System.currentTimeMillis();
 
-                List<Ticket> out = Collections.synchronizedList(new ArrayList<Ticket>());
+                List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
                 List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
 
                 dto.getTicket().parallelStream().forEach(t -> {
                     Optional<Ticket> op = factoryBean.getBean().validate(t);
 
-                    synchronized (out) {
+                    synchronized (success) {
 
                         if (op.isPresent() && op.get().getErrors().isEmpty()) {
-                            out.add(op.get());
-                        } else if(op.isPresent()) {                            
+                            success.add(op.get());
+                        } else if (op.isPresent()) {
                             error.addAll(op.get().getErrors());
                         }
                     }
 
                 });
-
-                if(!error.isEmpty()){
-                    logService.saveBatch(error);
-                }
                 
-                out.parallelStream().forEach(t -> {                    
-                    t.setStatus(TicketStatusEnum.APPROVED);                     
+                success.parallelStream().forEach(t -> {
+                    t.setStatus(TicketStatusEnum.APPROVED);
                 });
 
-                ticketService.saveBatch(out);
+                if (!success.isEmpty()) {
+
+                    success.sort((Ticket a, Ticket b) -> {
+                        return a.getDataEmissao().getTime() > b.getDataEmissao().getTime() ? -1 : 1;
+                    });
+                    
+                    Ticket ticket = success.get(0);
+                    
+                    LocalDate s = Utils.dateToLocalDate(ticket.getDataEmissao()).minusDays(DIAS);
+                    LocalDate e = Utils.dateToLocalDate(new Date());
+                    
+                    final List<TicketDuplicityDTO> listDuplicity = ticketService.listDuplicityByDateEmission(s, e);
+                    
+                    success.forEach(t->{                    
+                        factoryBean.getBean().validate(listDuplicity,t);                        
+                    });                   
+
+                }                
+
+                if (!error.isEmpty()) {
+                    logService.saveBatch(error);
+                }
+
+                
+                List<Ticket> insert = success.stream().filter(t->t.getStatus().equals(TicketStatusEnum.APPROVED)).collect(Collectors.toList());
+                
+                
+                ticketService.saveBatch(insert);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
                 fileService.setValidationTime(idFile, timeValidation);
-                 
+
                 f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
                 f = fileService.saveFile(f);
-                
+
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
-                
+
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }

@@ -12,7 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketDuplicityDTO {
-    
-    private Long bilhete;
-    
+
+    private String agrupamentoA;
+    private String agrupamentoB;
+    private String agrupamentoC;
+    private String bilheteBehavior;
+    private Long cupom;
+
 }

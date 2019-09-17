@@ -8,9 +8,9 @@ package com.core.behavior.repository;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
+import java.time.LocalDate;
 import java.util.List;
 import javax.transaction.Transactional;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
-    List<TicketDuplicityDTO>listDuplicityByFileId(Long fileId);
+    List<TicketDuplicityDTO>listDuplicityByDateEmission(@Param("start")LocalDate start, @Param("end") LocalDate end);
     
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket>findByFileId(@Param("fileId")Long fileId);

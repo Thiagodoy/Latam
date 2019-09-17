@@ -4,6 +4,7 @@ import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -34,26 +35,15 @@ import lombok.Data;
         classes = @ConstructorResult(
                 targetClass = TicketDuplicityDTO.class,
                 columns = {
-                    @ColumnResult(name = "field_name", type = String.class)
-                    ,                    
-                    @ColumnResult(name = "qtd_erro", type = Long.class)
-                    ,
-                    @ColumnResult(name = "percentual_erro", type = Double.class)
-                    ,                    
-                    @ColumnResult(name = "percentual_acerto", type = Double.class)
-                    ,                    
-                    @ColumnResult(name = "qtd_total_lines", type = Long.class),}))
+                        @ColumnResult(name = "agrupamento_a", type = String.class),
+                        @ColumnResult(name = "agrupamento_b", type = String.class),
+                        @ColumnResult(name = "agrupamento_c", type = String.class),
+                        @ColumnResult(name = "bilhete_behavior", type = String.class),
+                        @ColumnResult(name = "cupom", type = Long.class)
+                    }))
 
-@NamedNativeQuery(name = "Ticket.listDuplicityByFileId", resultSetMapping = "TicketDuplicity",
-        query = "select field_name,\n"
-        + " count(1) as qtd_erro,\n"
-        + " (truncate((count(1)/b.qtd_total_lines)*100,2)) as percentual_erro,\n"
-        + " (100 - (truncate((count(1)/b.qtd_total_lines)*100,2))) as percentual_acerto, \n"
-        + " b.qtd_total_lines \n"
-        + " from behavior.log a \n"
-        + " left join behavior.file b on a.file_id = b.id   \n"
-        + " where file_id = :fileId \n"
-        + " group by field_name, b.qtd_total_lines")
+@NamedNativeQuery(name = "Ticket.listDuplicityByDateEmission", resultSetMapping = "TicketDuplicity",
+        query = "select agrupamento_a, agrupamento_b, agrupamento_c, bilhete_behavior, cupom from behavior.ticket where  data_emissao between :start and :end")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
@@ -297,6 +287,27 @@ public class Ticket {
     @Column(name = "CODE_AGENCY")
     public String codeAgencia;
     
+    @PositionParameter(value = 58)
+    @Column(name = "AGRUPAMENTO_A")
+    public String agrupamentoA;
+    
+    @PositionParameter(value = 59)
+    @Column(name = "AGRUPAMENTO_B")
+    public String agrupamentoB;
+    
+    @PositionParameter(value = 60)
+    @Column(name = "AGRUPAMENTO_C")
+    public String agrupamentoC;
+    
+    @PositionParameter(value = 61)
+    @Column(name = "BILHETE_BEHAVIOR")
+    public String bilheteBehavior;
+    
+    @PositionParameter(value = 62)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE")
+    public TicketTypeEnum type;
+    
     
     @Transient
     private List<Log>errors;
@@ -328,7 +339,7 @@ public class Ticket {
                 this.origem,
                 this.destino,
                 this.cupom,
-                this.bilhete,
+                this.bilheteBehavior,
                 this.tipo,
                 this.cabine,
                 this.ciaVoo,

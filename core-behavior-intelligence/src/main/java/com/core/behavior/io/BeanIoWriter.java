@@ -8,6 +8,7 @@ package com.core.behavior.io;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,12 +36,12 @@ public class BeanIoWriter {
     private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_hh_mm_ss");
     
     
-    public static <T> File writer(File directory,TicketLayoutEnum layout, T object,  Stream stream) {
+    public static <T> File writer(File directory,TicketLayoutEnum layout, T object,  Stream stream, TicketTypeEnum type) {
 
         BeanWriter writer = null;
         Writer out = null;
         String dateNow = dateTimeFormatter.format(LocalDateTime.now());
-        String nameFile = MessageFormat.format("integration_{0}_{1}.csv",dateNow, layout.toString());
+        String nameFile = MessageFormat.format("integration_{0}_{1}_{2}.csv",dateNow, layout.toString(), type);
         File file = new File(directory,nameFile);
 
         try {

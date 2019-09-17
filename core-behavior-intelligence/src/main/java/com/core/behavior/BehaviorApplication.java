@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -21,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAutoConfiguration
 @ComponentScan()
 @EnableWebMvc
-
+@EnableCaching
 public class BehaviorApplication {
 
     public static void main(String[] args) {

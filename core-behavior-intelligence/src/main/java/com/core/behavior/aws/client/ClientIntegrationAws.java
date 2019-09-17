@@ -22,6 +22,7 @@ import com.core.behavior.properties.AmazonProperties;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,9 @@ public class ClientIntegrationAws {
 
     }
 
-    public String uploadFile(File file, String folder, Tag tag) throws IOException {
+    public String uploadFile(File file, String folder, List<Tag> tags) throws IOException {
         PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" + file.getName(), file);        
-        ObjectTagging otag = new ObjectTagging(Arrays.asList(tag));
+        ObjectTagging otag = new ObjectTagging(tags);
         request.setTagging(otag);
         PutObjectResult result = this.amazonS3.putObject(request);
         return result.getETag();        

@@ -18,6 +18,7 @@ import java.io.LineNumberReader;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -370,6 +371,12 @@ public class Utils {
         return Instant.ofEpochMilli(date.getTime())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
+    }
+    
+    public static LocalDate dateToLocalDate(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     public static String formatDate(Date date) {

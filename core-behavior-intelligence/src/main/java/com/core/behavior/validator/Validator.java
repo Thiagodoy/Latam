@@ -1,10 +1,13 @@
 package com.core.behavior.validator;
 
 import com.core.behavior.dto.TicketDTO;
+import com.core.behavior.dto.TicketDuplicityDTO;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketLayoutEnum;
+import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 import org.beanio.StreamFactory;
 
 /**
@@ -40,6 +45,8 @@ public class Validator implements IValidator {
     private final Ticket ticket = new Ticket();
 
     private final SimpleDateFormat formatter4 = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"));
+    private final SimpleDateFormat formatter5 = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
+    private final SimpleDateFormat formatter6 = new SimpleDateFormat("y", new Locale("pt", "BR"));
 
     private final static int DATA_VOO_LIMITE_DIAS = 365;
     private final static String REGEX_HORA_VOO = "([01]?[0-9]|2[0-3]):([0-5][0-9]):?([0-5][0-9])?";
@@ -1280,7 +1287,15 @@ public class Validator implements IValidator {
 
         String selfBookingOffiline = ticketDTO.getSelfBookingOffiline();
 
-        if (!Optional.ofNullable(selfBookingOffiline).isPresent() || selfBookingOffiline.length() == 0) {
+        
+        if( Optional.ofNullable(selfBookingOffiline).isPresent() && selfBookingOffiline.length() == 0){
+            ticket.setSelfBookingOffiline("");
+           return this;
+        }
+    
+    
+        
+        if (!Optional.ofNullable(selfBookingOffiline).isPresent()) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
         } else {
             Pattern p = Pattern.compile(REGEX_SELFBOOKING, Pattern.CASE_INSENSITIVE);
@@ -1474,6 +1489,123 @@ public class Validator implements IValidator {
 
     }
 
+    private void generateAgrupamentoA() {
+
+        String codigoAgencia = this.ticket.getCodeAgencia().replaceAll("AG", "");
+        String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
+        String nomePassageiro = "";
+
+        if (this.ticket.getNomePax().length() >= 17) {
+            nomePassageiro = ticket.getNomePax().substring(0, 16);
+        } else if (this.ticket.getNomePax().length() < 17 && this.ticket.getNomePax().length() > 0) {
+            nomePassageiro = ticket.getNomePax().substring(0, this.ticket.getNomePax().length() - 1);
+        }
+
+        String agrupamento = MessageFormat.format("{0}{1}{2}{3}", codigoAgencia, this.ticket.getPnrAgencia(), dataEmissao, nomePassageiro);
+        ticket.setAgrupamentoA(agrupamento);
+    }
+
+    private void generateAgrupamentoB() {
+
+        String codigoAgencia = this.ticket.getCodeAgencia().replaceAll("AG", "");
+        String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
+
+        String agrupamento = MessageFormat.format("{0}{1}{2}", codigoAgencia, this.ticket.getPnrAgencia(), dataEmissao);
+        ticket.setAgrupamentoB(agrupamento);
+    }
+
+    private void generateAgrupamentoC() {
+
+        String codigoAgencia = this.ticket.getCodeAgencia().replaceAll("AG", "");
+        String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
+        String bilhete = this.ticket.getBilhete() != null ? this.ticket.getBilhete().substring(0, 5) : this.generateMockBilhete();
+
+        String bi = StringUtils.leftPad(bilhete, 5, "0");
+
+        String agrupamento = MessageFormat.format("{0}1{1}{2}", codigoAgencia, bi, dataEmissao);
+
+        ticket.setAgrupamentoC(agrupamento);
+    }
+
+    private String generateMockBilhete() {
+        long value = (long) ((Math.random() * 99999) + 1);
+
+        return String.valueOf(value);
+    }
+
+    private void generateBilheteBehavior() {
+        String bilheteBehavior = "";
+
+        try {
+            String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
+            String ano = dataEmissao.substring(dataEmissao.length() - 2);
+            String mes = dataEmissao.substring(2, 4);
+            String sequencial = ticket.getBilhete().substring(0, 7);
+
+            bilheteBehavior = this.ticket.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
+
+        } catch (Exception e) {
+            Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.SEVERE, "[generateBilheteBehavior]", e);
+        }
+
+        ticket.setBilheteBehavior(bilheteBehavior);
+    }
+
+    @Override
+    public void validate(List<TicketDuplicityDTO> list, Ticket ticket) {
+
+        switch (ticket.getLayout()) {
+            case FULL:
+                
+                 
+
+                Optional<TicketDuplicityDTO> update = list.parallelStream().filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
+                Optional<TicketDuplicityDTO> insert = list.parallelStream().filter(t -> !t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) ).findFirst();
+                Optional<TicketDuplicityDTO> backOffice = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) ).findFirst();
+
+                if (update.isPresent()) {
+                    ticket.setType(TicketTypeEnum.UPDATE);
+                } else if (!insert.isPresent()) {
+                    ticket.setType(TicketTypeEnum.INSERT);
+                    verificaCupom(list, ticket);
+                    this.insert(list, new TicketDuplicityDTO(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), "",ticket.getBilheteBehavior(), ticket.getCupom()));
+                } else if (backOffice.isPresent()) {
+                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
+                }
+
+                break;
+            case SHORT:
+
+                Optional<TicketDuplicityDTO> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
+
+                if (optChaveC.isPresent()) {
+                    ticket.setType(TicketTypeEnum.UPDATE);                    
+                } else {
+                    ticket.setType(TicketTypeEnum.INSERT);
+                    verificaCupom(list, ticket);
+                    this.insert(list, new TicketDuplicityDTO("", "", ticket.getAgrupamentoC(),ticket.getBilheteBehavior(), ticket.getCupom()));
+                }
+
+                break;
+        }
+
+    }
+    
+    private void verificaCupom(List<TicketDuplicityDTO> list, Ticket ticket){        
+               
+        final long count = list.stream().filter(f-> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).count();
+        Optional<TicketDuplicityDTO> opt = list.stream().filter(f-> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).max(Comparator.comparing(TicketDuplicityDTO::getCupom));        
+        
+        if(opt.isPresent() && !opt.get().getCupom().equals(count)){
+         ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
+        }
+        
+    }
+
+    private synchronized void insert(List<TicketDuplicityDTO> list, TicketDuplicityDTO dTO) {
+        list.add(dTO);
+    }
+
     @Override
     public Optional<Ticket> validate(TicketDTO ticketDTO) {
         this.ticketDTO = ticketDTO;
@@ -1540,6 +1672,16 @@ public class Validator implements IValidator {
 
             //Geração das chaves
             if (ticket.getErrors().isEmpty()) {
+                //Gera os agrupamentos
+                if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
+                    this.generateAgrupamentoA();
+                    this.generateAgrupamentoB();
+                } else {
+                    this.generateAgrupamentoC();
+                }
+
+                // gerar o bilhete behavior
+                this.generateBilheteBehavior();
 
             }
 

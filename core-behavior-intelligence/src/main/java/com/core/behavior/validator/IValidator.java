@@ -6,7 +6,9 @@
 package com.core.behavior.validator;
 
 import com.core.behavior.dto.TicketDTO;
+import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -64,9 +66,10 @@ public interface IValidator {
     IValidator checkTipoPagamento();
     IValidator checkDigitoVerificador();
     IValidator checkGrupoEmpresa();
-    IValidator checkGrupoConsolida();    
-    
-    
+    IValidator checkGrupoConsolida(); 
     
     Optional<Ticket> validate(TicketDTO ticketDto);
+    void validate(List<TicketDuplicityDTO> list, Ticket ticket);
+    
+    
 }

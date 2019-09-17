@@ -1,5 +1,6 @@
 package com.core.behavior.services;
 
+import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.TicketStatusEnum;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
+import java.time.LocalDate;
 import org.springframework.data.domain.PageRequest;
 
 
@@ -114,6 +116,10 @@ public class TicketService {
     
     public List<Ticket>listByStatus(TicketStatusEnum status,PageRequest page){        
         return ticketRepository.findByStatus(status,page);               
+    }
+    
+    public List<TicketDuplicityDTO> listDuplicityByDateEmission(LocalDate start, LocalDate end){
+        return ticketRepository.listDuplicityByDateEmission(start, end);
     }
 
 }

@@ -5,7 +5,6 @@
  */
 package com.core.behavior.repository;
 
-import com.core.behavior.model.Agency;
 import com.core.behavior.model.FileIntegration;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

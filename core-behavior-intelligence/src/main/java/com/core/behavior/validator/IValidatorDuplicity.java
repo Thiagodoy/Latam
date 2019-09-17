@@ -5,14 +5,17 @@
  */
 package com.core.behavior.validator;
 
-import com.core.behavior.util.ValidatorEnum;
+import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.model.Ticket;
+import java.util.List;
+
 
 /**
  *
  * @author thiag
  */
-public interface ValidatorFactory{
+public interface IValidatorDuplicity {
 
-    IValidator getBean();
-    
+    void validate(List<TicketDuplicityDTO> list, Ticket ticket);
+
 }

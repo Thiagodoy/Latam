@@ -9,10 +9,7 @@ package com.core.behavior.util;
  *
  * @author thiag
  */
-public enum TicketStatusEnum {
-    APPROVED,
-    UNAPPROVED,
-    WRITED,
-    BACKOFFICE,
-    BACKOFFICE_CUPOM
+public enum ValidatorEnum {
+    DATA_VALIDATOR,
+    DATA_DUPLICITY_VALIDATOR;
 }

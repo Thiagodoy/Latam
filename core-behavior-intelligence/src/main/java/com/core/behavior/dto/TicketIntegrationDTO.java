@@ -87,7 +87,7 @@ public class TicketIntegrationDTO {
         this.origem = Optional.ofNullable(ticket.getOrigem()).isPresent() ? ticket.getOrigem() : "";
         this.destino = Optional.ofNullable(ticket.getDestino()).isPresent() ? ticket.getDestino() : "";
         this.cupom = Optional.ofNullable(ticket.getCupom()).isPresent() ? String.valueOf(ticket.getCupom()) : "";
-        this.bilhete = Optional.ofNullable(ticket.getBilhete()).isPresent() ? ticket.getBilhete() : "";
+        this.bilhete = Optional.ofNullable(ticket.getBilheteBehavior()).isPresent() ? ticket.getBilheteBehavior(): "";
         this.tipo = Optional.ofNullable(ticket.getTipo()).isPresent() ? ticket.getTipo() : "";
         this.cabine = Optional.ofNullable(ticket.getCabine()).isPresent() ? ticket.getCabine() : "";
         this.ciaVoo = Optional.ofNullable(ticket.getCiaVoo()).isPresent() ? ticket.getCiaVoo() : "";
@@ -100,17 +100,16 @@ public class TicketIntegrationDTO {
         this.numVoo = Optional.ofNullable(ticket.getNumVoo()).isPresent() ? String.valueOf(ticket.getNumVoo()) : "";
         this.consolidada = Optional.ofNullable(ticket.getConsolidada()).isPresent() ? ticket.getConsolidada() : "";
 
-        if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
-
+        if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {             
             this.dataExtracao = Optional.ofNullable(ticket.getDataExtracao()).isPresent() ? this.formater.format(ticket.getDataExtracao()) : "";
             this.horaEmissao = Optional.ofNullable(ticket.getHoraEmissao()).isPresent() ? ticket.getHoraEmissao() : "";
-            this.dataReserva = Optional.ofNullable(ticket.getHoraReserva()).isPresent() ? this.formater.format(ticket.getHoraReserva()) : "";
+            this.dataReserva = Optional.ofNullable(ticket.getDataReserva()).isPresent() ? this.formater.format(ticket.getDataReserva()) : "";
             this.horaReserva = Optional.ofNullable(ticket.getHoraReserva()).isPresent() ? ticket.getHoraReserva() : "";
             this.horaPouso = Optional.ofNullable(ticket.getHoraPouso()).isPresent() ? ticket.getHoraPouso() : "";
             this.baseTarifaria = Optional.ofNullable(ticket.getBaseTarifaria()).isPresent() ? ticket.getBaseTarifaria() : "";
             this.tktDesignator = Optional.ofNullable(ticket.getTktDesignator()).isPresent() ? ticket.getTktDesignator(): "";
             this.familiaTarifaria = Optional.ofNullable(ticket.getFamiliaTarifaria()).isPresent() ? ticket.getFamiliaTarifaria(): "";
-            this.classeTarifa = Optional.ofNullable(ticket.getClasseTarifa()).isPresent() ? ticket.getClasseTarifa(): "";;
+            this.classeTarifa = Optional.ofNullable(ticket.getClasseTarifa()).isPresent() ? ticket.getClasseTarifa(): "";
             this.classeServico = Optional.ofNullable(ticket.getClasseServico()).isPresent() ? ticket.getClasseServico(): "";
             this.ondDirecional = Optional.ofNullable(ticket.getOndDirecional()).isPresent() ? ticket.getOndDirecional(): "";
             this.tourCode = Optional.ofNullable(ticket.getTourCode()).isPresent() ? ticket.getTourCode(): "";
