@@ -4,6 +4,13 @@ server:
     
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
+    
+    
+spring:
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1    
 
 
       
