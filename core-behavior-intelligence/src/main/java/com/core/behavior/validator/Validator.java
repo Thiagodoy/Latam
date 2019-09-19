@@ -1538,10 +1538,18 @@ public class Validator implements IValidator {
 
         try {
             String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
-            String ano = dataEmissao.substring(dataEmissao.length() - 2);
+            String ano = dataEmissao.substring(dataEmissao.length() - 1);
             String mes = dataEmissao.substring(2, 4);
-            String sequencial = ticket.getBilhete().substring(0, 7);
-
+            
+            String sequencial =  "";
+            
+            if(ticket.getBilhete().length() < 7){                
+                int sizeLeftPad = 7 - ticket.getBilhete().length();                
+                sequencial = StringUtils.leftPad(ticket.getBilhete(), sizeLeftPad, "0");                
+            }else{
+                sequencial = ticket.getBilhete().substring(0, 7);
+            }
+            
             bilheteBehavior = this.ticket.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
 
         } catch (Exception e) {
@@ -1552,8 +1560,10 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public void validate(List<TicketDuplicityDTO> list, Ticket ticket) {
+    public Optional<TicketDuplicityDTO> validate(List<TicketDuplicityDTO> list, Ticket ticket) {
 
+        Optional<TicketDuplicityDTO> result = Optional.empty();
+        
         switch (ticket.getLayout()) {
             case FULL:
                 
@@ -1564,13 +1574,13 @@ public class Validator implements IValidator {
                 Optional<TicketDuplicityDTO> backOffice = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) ).findFirst();
 
                 if (update.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);
+                    ticket.setType(TicketTypeEnum.UPDATE);                    
                 } else if (!insert.isPresent()) {
                     ticket.setType(TicketTypeEnum.INSERT);
                     verificaCupom(list, ticket);
-                    this.insert(list, new TicketDuplicityDTO(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), "",ticket.getBilheteBehavior(), ticket.getCupom()));
+                    result =  Optional.of(new TicketDuplicityDTO(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), "",ticket.getBilheteBehavior(), ticket.getCupom()));
                 } else if (backOffice.isPresent()) {
-                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
+                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);                    
                 }
 
                 break;
@@ -1579,15 +1589,18 @@ public class Validator implements IValidator {
                 Optional<TicketDuplicityDTO> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
 
                 if (optChaveC.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);                    
+                    ticket.setType(TicketTypeEnum.UPDATE);
+                    
                 } else {
                     ticket.setType(TicketTypeEnum.INSERT);
                     verificaCupom(list, ticket);
-                    this.insert(list, new TicketDuplicityDTO("", "", ticket.getAgrupamentoC(),ticket.getBilheteBehavior(), ticket.getCupom()));
+                    result =  Optional.of(new TicketDuplicityDTO("", "", ticket.getAgrupamentoC(),ticket.getBilheteBehavior(), ticket.getCupom()));
                 }
 
-                break;
+               
         }
+        
+        return result;
 
     }
     

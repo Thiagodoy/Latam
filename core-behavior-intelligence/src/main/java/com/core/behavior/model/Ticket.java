@@ -43,7 +43,7 @@ import lombok.Data;
                     }))
 
 @NamedNativeQuery(name = "Ticket.listDuplicityByDateEmission", resultSetMapping = "TicketDuplicity",
-        query = "select agrupamento_a, agrupamento_b, agrupamento_c, bilhete_behavior, cupom from behavior.ticket where  data_emissao between :start and :end")
+        query = "select agrupamento_a, agrupamento_b, agrupamento_c, bilhete_behavior, cupom from behavior.ticket where status = 'APPROVED' and  data_emissao between :start and :end")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")

@@ -19,16 +19,21 @@ import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -71,7 +76,7 @@ public class ProcessFileJob extends QuartzJobBean {
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
-    
+
     private static final int DIAS = 90;
 
     @Override
@@ -94,7 +99,10 @@ public class ProcessFileJob extends QuartzJobBean {
         try {
 
             Stream stream = layout == 1L ? Stream.SHORT_LAYOUT_PARSER : Stream.FULL_LAYOUT_PARSER;
+
+            start = System.currentTimeMillis();
             Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, stream);
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PARSER ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
             fileService.setStage(idFile, StageEnum.VALIDATION_LAYOUT.getCode());
 
@@ -120,6 +128,8 @@ public class ProcessFileJob extends QuartzJobBean {
                 List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
                 List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
 
+                start = System.currentTimeMillis();
+
                 dto.getTicket().parallelStream().forEach(t -> {
                     Optional<Ticket> op = factoryBean.getBean().validate(t);
 
@@ -133,39 +143,53 @@ public class ProcessFileJob extends QuartzJobBean {
                     }
 
                 });
-                
+
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.APPROVED);
                 });
 
                 if (!success.isEmpty()) {
 
-                    success.sort((Ticket a, Ticket b) -> {
-                        return a.getDataEmissao().getTime() > b.getDataEmissao().getTime() ? -1 : 1;
-                    });
-                    
-                    Ticket ticket = success.get(0);
-                    
-                    LocalDate s = Utils.dateToLocalDate(ticket.getDataEmissao()).minusDays(DIAS);
+//                    success.sort((Ticket a, Ticket b) -> {
+//                        return a.getDataEmissao().getTime() > b.getDataEmissao().getTime() ? -1 : 1;
+//                    });
+//                    
+//                    Ticket ticket = success.get(0);
+                    LocalDate s = Utils.dateToLocalDate(new Date()).minusDays(DIAS);
                     LocalDate e = Utils.dateToLocalDate(new Date());
-                    
+
                     final List<TicketDuplicityDTO> listDuplicity = ticketService.listDuplicityByDateEmission(s, e);
-                    
-                    success.forEach(t->{                    
-                        factoryBean.getBean().validate(listDuplicity,t);                        
-                    });                   
 
-                }                
+                    start = System.currentTimeMillis();
 
-                if (!error.isEmpty()) {
-                    logService.saveBatch(error);
+                    success.forEach(t -> {
+                        Optional<TicketDuplicityDTO> opt = factoryBean.getBean().validate(listDuplicity, t);
+
+                        if (opt.isPresent()) {
+
+                            listDuplicity.add(opt.get());
+
+                        }
+
+                    });
+
+                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
                 }
 
-                
-                List<Ticket> insert = success.stream().filter(t->t.getStatus().equals(TicketStatusEnum.APPROVED)).collect(Collectors.toList());
-                
-                
+                if (!error.isEmpty()) {
+                    start = System.currentTimeMillis();
+                    logService.saveBatch(error);
+                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+                }
+
+                List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.APPROVED)).collect(Collectors.toList());
+
+                start = System.currentTimeMillis();
                 ticketService.saveBatch(insert);
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST TICKET ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -199,6 +223,74 @@ public class ProcessFileJob extends QuartzJobBean {
             fileService.setExecutionTime(idFile, time);
 
         }
+    }
+
+    private void createLoteFile(File file) throws Exception {
+
+        long count = BeanIoReader.countLineNumber(file);
+
+        if (count == 0) {
+            throw new Exception("Não foi possivel identificar as linhas do arquivo");
+        }
+
+    }
+
+    public static long countLineNumber(File file) {
+
+        FileReader reader = null;
+        LineNumberReader readerLine = null;
+
+        try {
+            reader = new FileReader(file);
+            readerLine = new LineNumberReader(reader);
+
+            String line = null;
+
+            List<String> lines = new LinkedList<>();
+
+            int count = 0;
+            String header = null;
+
+            do {
+                line = readerLine.readLine();
+
+                if (count == 0) {
+                    header = line;
+                } else {
+                    lines.add(line);
+                }
+
+            } while (line != null);
+
+            long fileSizeLines = (lines.size() - 1);
+
+            List<File> filesTemps = new ArrayList<>();
+
+            if (fileSizeLines > 0) {
+                if (fileSizeLines > 10000) {
+
+                    int div = (int) Math.ceil(fileSizeLines / 10000);
+
+                    List<List<String>> partitions = ListUtils.partition(lines, div);
+
+                }
+            }
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                readerLine.close();
+                reader.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
+        return 0l;
     }
 
 }

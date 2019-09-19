@@ -88,7 +88,7 @@ public class BeanIoReader {
         return Optional.ofNullable(record);
     }
 
-    private long countLineNumber(File file) {
+    public static long countLineNumber(File file) {
         long count = 0;
         FileReader reader = null;
         LineNumberReader readerLine = null;
