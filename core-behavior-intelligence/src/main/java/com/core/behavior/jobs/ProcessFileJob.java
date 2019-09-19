@@ -19,22 +19,21 @@ import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -76,6 +75,8 @@ public class ProcessFileJob extends QuartzJobBean {
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
+
+    private final SimpleDateFormat formatter5 = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
 
     private static final int DIAS = 90;
 
@@ -147,37 +148,8 @@ public class ProcessFileJob extends QuartzJobBean {
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
                 success.parallelStream().forEach(t -> {
-                    t.setStatus(TicketStatusEnum.APPROVED);
+                    t.setStatus(TicketStatusEnum.VALIDATION);
                 });
-
-                if (!success.isEmpty()) {
-
-//                    success.sort((Ticket a, Ticket b) -> {
-//                        return a.getDataEmissao().getTime() > b.getDataEmissao().getTime() ? -1 : 1;
-//                    });
-//                    
-//                    Ticket ticket = success.get(0);
-                    LocalDate s = Utils.dateToLocalDate(new Date()).minusDays(DIAS);
-                    LocalDate e = Utils.dateToLocalDate(new Date());
-
-                    final List<TicketDuplicityDTO> listDuplicity = ticketService.listDuplicityByDateEmission(s, e);
-
-                    start = System.currentTimeMillis();
-
-                    success.forEach(t -> {
-                        Optional<TicketDuplicityDTO> opt = factoryBean.getBean().validate(listDuplicity, t);
-
-                        if (opt.isPresent()) {
-
-                            listDuplicity.add(opt.get());
-
-                        }
-
-                    });
-
-                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-                }
 
                 if (!error.isEmpty()) {
                     start = System.currentTimeMillis();
@@ -185,11 +157,46 @@ public class ProcessFileJob extends QuartzJobBean {
                     Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
                 }
 
-                List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.APPROVED)).collect(Collectors.toList());
+                //:FIXEME IMPMENETAR FLUXO PARA BILHETES QUE FICARA NO BACKOFFICE
+                //List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION)).collect(Collectors.toList());
 
                 start = System.currentTimeMillis();
-                ticketService.saveBatch(insert);
+                ticketService.saveBatch(success);
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST TICKET ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+                List<Ticket> tickets = this.ticketService.listByFileId(idFile);
+                this.generateBilheteBehavior(tickets);
+
+                if (!tickets.isEmpty()) {
+
+                    LocalDate s = Utils.dateToLocalDate(new Date()).minusDays(DIAS);
+                    LocalDate e = Utils.dateToLocalDate(new Date());
+
+                    final List<TicketDuplicityDTO> listDuplicity = ticketService.listDuplicityByDateEmission(s, e);
+
+                    start = System.currentTimeMillis();
+
+                    tickets.forEach(t -> {
+                        Optional<TicketDuplicityDTO> opt = factoryBean.getBean().validate(listDuplicity, t);
+
+                        if (opt.isPresent()) {
+                            listDuplicity.add(opt.get());
+                        }
+
+                    });
+                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+                }
+                
+                
+                //Atualiza os tickets
+                start = System.currentTimeMillis();
+                tickets.parallelStream().forEach(t->{               
+                    t.setStatus(TicketStatusEnum.APPROVED);
+                    ticketService.save(t);                    
+                });
+                
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ ATUALIZAR TICKETS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+                
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -225,72 +232,33 @@ public class ProcessFileJob extends QuartzJobBean {
         }
     }
 
-    private void createLoteFile(File file) throws Exception {
+    private void generateBilheteBehavior(List<Ticket> tickets) {
 
-        long count = BeanIoReader.countLineNumber(file);
+        tickets.parallelStream().forEach(t -> {
+            String bilheteBehavior = "";
+            final SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
+            String dataEmissao = formmaterDate.format(t.getDataEmissao());
+            String ano = dataEmissao.substring(dataEmissao.length() - 1);
+            String mes = dataEmissao.substring(2, 4);
 
-        if (count == 0) {
-            throw new Exception("Não foi possivel identificar as linhas do arquivo");
-        }
-
-    }
-
-    public static long countLineNumber(File file) {
-
-        FileReader reader = null;
-        LineNumberReader readerLine = null;
-
-        try {
-            reader = new FileReader(file);
-            readerLine = new LineNumberReader(reader);
-
-            String line = null;
-
-            List<String> lines = new LinkedList<>();
-
-            int count = 0;
-            String header = null;
-
-            do {
-                line = readerLine.readLine();
-
-                if (count == 0) {
-                    header = line;
-                } else {
-                    lines.add(line);
-                }
-
-            } while (line != null);
-
-            long fileSizeLines = (lines.size() - 1);
-
-            List<File> filesTemps = new ArrayList<>();
-
-            if (fileSizeLines > 0) {
-                if (fileSizeLines > 10000) {
-
-                    int div = (int) Math.ceil(fileSizeLines / 10000);
-
-                    List<List<String>> partitions = ListUtils.partition(lines, div);
-
-                }
+            String sequencial = "";
+            String id = String.valueOf(t.getId());
+            
+            if (id.length() < 7) {
+                
+                sequencial = StringUtils.leftPad(id, 7, "0");
+            } else {
+                sequencial = id.substring(0, 7);
             }
 
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                readerLine.close();
-                reader.close();
-            } catch (IOException ex) {
-                Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
+            
+            t.setBilheteBehavior(bilheteBehavior);
 
-        }
+           // ticketService.save(t);
 
-        return 0l;
+        });
+
     }
 
 }

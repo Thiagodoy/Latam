@@ -91,7 +91,7 @@ public class TicketIntegrationDTO {
         this.tipo = Optional.ofNullable(ticket.getTipo()).isPresent() ? ticket.getTipo() : "";
         this.cabine = Optional.ofNullable(ticket.getCabine()).isPresent() ? ticket.getCabine() : "";
         this.ciaVoo = Optional.ofNullable(ticket.getCiaVoo()).isPresent() ? ticket.getCiaVoo() : "";
-        this.valorBrl = Optional.ofNullable(ticket.getValorBrl()).isPresent() ? numberFormat.format(ticket.getValorBrl()) : "0,00";
+        this.valorBrl = Optional.ofNullable(ticket.getValorBrl()).isPresent() ? numberFormat.format(ticket.getValorBrl()).replaceAll("([\\sR$.])", "") : "0,00";
         this.empresa = Optional.ofNullable(ticket.getEmpresa()).isPresent() ? ticket.getEmpresa() : "";
         this.cnpj = Optional.ofNullable(ticket.getCnpj()).isPresent() ? ticket.getCnpj() : "";
         this.iataAgencia = Optional.ofNullable(ticket.getIataAgencia()).isPresent() ? String.valueOf(ticket.getIataAgencia()) : "";
@@ -114,9 +114,9 @@ public class TicketIntegrationDTO {
             this.ondDirecional = Optional.ofNullable(ticket.getOndDirecional()).isPresent() ? ticket.getOndDirecional(): "";
             this.tourCode = Optional.ofNullable(ticket.getTourCode()).isPresent() ? ticket.getTourCode(): "";
             this.rtOw = Optional.ofNullable(ticket.getRtOw()).isPresent() ? ticket.getRtOw(): "";
-            this.valorUs = Optional.ofNullable(ticket.getValorUs()).isPresent() ? numberFormat.format(ticket.getValorUs()) : "0,00";
-            this.tarifaPublica = Optional.ofNullable(ticket.getTarifaPublica()).isPresent() ? numberFormat.format(ticket.getTarifaPublica()) : "0,00";
-            this.tarifaPublicUs = Optional.ofNullable(ticket.getTarifaPublicUs()).isPresent() ? numberFormat.format(ticket.getTarifaPublicUs()) : "0,00";
+            this.valorUs = Optional.ofNullable(ticket.getValorUs()).isPresent() ? numberFormat.format(ticket.getValorUs()).replaceAll("([\\sR$.])", "") : "0,00";
+            this.tarifaPublica = Optional.ofNullable(ticket.getTarifaPublica()).isPresent() ? numberFormat.format(ticket.getTarifaPublica()).replaceAll("([\\sR$.])", "") : "0,00";
+            this.tarifaPublicUs = Optional.ofNullable(ticket.getTarifaPublicUs()).isPresent() ? numberFormat.format(ticket.getTarifaPublicUs()).replaceAll("([\\sR$.])", "") : "0,00";
             this.pnrAgencia  = Optional.ofNullable(ticket.getPnrAgencia()).isPresent() ? ticket.getPnrAgencia(): "";
             this.pnrCiaArea = Optional.ofNullable(ticket.getPnrCiaArea()).isPresent() ? ticket.getPnrCiaArea(): "";
             this.selfBookingOffiline = Optional.ofNullable(ticket.getSelfBookingOffiline()).isPresent() ? ticket.getSelfBookingOffiline(): "";
@@ -130,7 +130,7 @@ public class TicketIntegrationDTO {
             this.digitoVerificadorCC = Optional.ofNullable(ticket.getDigitoVerificadorCC()).isPresent() ? String.valueOf(ticket.getDigitoVerificadorCC()): "";
             this.grupoEmpresa = Optional.ofNullable(ticket.getGrupoEmpresa()).isPresent() ? ticket.getGrupoEmpresa(): "";
             this.nomeCliente = "";
-            this.grupoConsolidada = Optional.ofNullable(ticket.getGrupoConsolidada()).isPresent() ? ticket.getGrupoConsolidada(): "";;
+            this.grupoConsolidada = Optional.ofNullable(ticket.getGrupoConsolidada()).isPresent() ? ticket.getGrupoConsolidada(): "";
 
         }
 

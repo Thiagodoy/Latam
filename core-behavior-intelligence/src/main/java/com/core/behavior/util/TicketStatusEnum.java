@@ -10,6 +10,7 @@ package com.core.behavior.util;
  * @author thiag
  */
 public enum TicketStatusEnum {
+    VALIDATION,
     APPROVED,
     UNAPPROVED,
     WRITED,

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
+import java.sql.Statement;
 import java.time.LocalDate;
 import org.springframework.data.domain.PageRequest;
 
@@ -60,8 +61,10 @@ public class TicketService {
                 count++;
                 if (count == 1000) {
                     String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
-                    PreparedStatement ps = con.prepareStatement(query);
-                    ps.execute();                    
+                    Statement ps = con.createStatement();
+                    ps.clearBatch();
+                    ps.addBatch(query);
+                    int[]ids = ps.executeBatch();
                     con.commit();
                     count = 0;
                     inserts.clear();

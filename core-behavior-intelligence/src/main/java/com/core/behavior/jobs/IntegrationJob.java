@@ -95,11 +95,11 @@ public class IntegrationJob extends QuartzJobBean {
             List<Ticket> fullLayoutInsert = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
 
             if (!fullLayoutUpdate.isEmpty()) {
-                this.generateFile(fullLayoutUpdate, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.UPDATE, Stream.SHORT_LAYOUT_INTEGRATION);
+                this.generateFile(fullLayoutUpdate, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.UPDATE, Stream.FULL_LAYOUT_INTEGRATION);
             }
 
             if (!fullLayoutInsert.isEmpty()) {
-                this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.SHORT_LAYOUT_INTEGRATION);
+                this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.FULL_LAYOUT_INTEGRATION);
             }
         }
 

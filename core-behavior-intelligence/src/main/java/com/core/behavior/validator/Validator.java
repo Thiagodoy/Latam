@@ -1556,7 +1556,7 @@ public class Validator implements IValidator {
             Logger.getLogger(com.core.behavior.validator.Validator.class.getName()).log(Level.SEVERE, "[generateBilheteBehavior]", e);
         }
 
-        ticket.setBilheteBehavior(bilheteBehavior);
+        //ticket.setBilheteBehavior(bilheteBehavior);
     }
 
     @Override
@@ -1581,6 +1581,7 @@ public class Validator implements IValidator {
                     result =  Optional.of(new TicketDuplicityDTO(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), "",ticket.getBilheteBehavior(), ticket.getCupom()));
                 } else if (backOffice.isPresent()) {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE);                    
+                    ticket.setBilheteBehavior(null);
                 }
 
                 break;
@@ -1589,8 +1590,7 @@ public class Validator implements IValidator {
                 Optional<TicketDuplicityDTO> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
 
                 if (optChaveC.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);
-                    
+                    ticket.setType(TicketTypeEnum.UPDATE);                    
                 } else {
                     ticket.setType(TicketTypeEnum.INSERT);
                     verificaCupom(list, ticket);
