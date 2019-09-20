@@ -2,7 +2,6 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
-import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
@@ -25,13 +24,12 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
@@ -159,7 +157,6 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 //:FIXEME IMPMENETAR FLUXO PARA BILHETES QUE FICARA NO BACKOFFICE
                 //List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION)).collect(Collectors.toList());
-
                 start = System.currentTimeMillis();
                 ticketService.saveBatch(success);
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST TICKET ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
@@ -169,34 +166,38 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 if (!tickets.isEmpty()) {
 
-                    LocalDate s = Utils.dateToLocalDate(new Date()).minusDays(DIAS);
-                    LocalDate e = Utils.dateToLocalDate(new Date());
+                    
 
-                    final List<TicketDuplicityDTO> listDuplicity = ticketService.listDuplicityByDateEmission(s, e);
+                    LocalDate e = LocalDate.now().plusDays(1);
+                    LocalDate s = LocalDate.now().minusDays(90);
+
+                    
+                    final List<Ticket> ticketsOld = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e));
+                    
+                    ticketsOld.sort(Comparator.comparing(Ticket::getDataEmbarque));
+                    tickets.sort(Comparator.comparing(Ticket::getDataEmbarque));
 
                     start = System.currentTimeMillis();
 
                     tickets.forEach(t -> {
-                        Optional<TicketDuplicityDTO> opt = factoryBean.getBean().validate(listDuplicity, t);
+                        Optional<Ticket> opt = factoryBean.getBean().validate(ticketsOld, t);
 
                         if (opt.isPresent()) {
-                            listDuplicity.add(opt.get());
+                            ticketsOld.add(opt.get());
                         }
 
                     });
                     Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
                 }
-                
-                
+
                 //Atualiza os tickets
                 start = System.currentTimeMillis();
-                tickets.parallelStream().forEach(t->{               
+                tickets.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.APPROVED);
-                    ticketService.save(t);                    
+                    ticketService.save(t);
                 });
-                
+
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ ATUALIZAR TICKETS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-                
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -243,20 +244,19 @@ public class ProcessFileJob extends QuartzJobBean {
 
             String sequencial = "";
             String id = String.valueOf(t.getId());
-            
+
             if (id.length() < 7) {
-                
+
                 sequencial = StringUtils.leftPad(id, 7, "0");
             } else {
                 sequencial = id.substring(0, 7);
             }
 
             bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
-            
+
             t.setBilheteBehavior(bilheteBehavior);
 
-           // ticketService.save(t);
-
+            // ticketService.save(t);
         });
 
     }

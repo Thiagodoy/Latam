@@ -38,9 +38,8 @@
                 <field name="headerHoraEmissao" trim="true" type="string"  literal="HORA_EMISSAO"/>
                 <field name="headerDataReserva" trim="true" type="string"  literal="DATA_RESERVA"/>
                 <field name="headerHoraReserva" trim="true" type="string"  literal="HORA_RESERVA"/>
-                <field name="headerHoraPouso" trim="true" type="string"  literal="HORA_POUSO"/>                
+                
                 <field name="headerBaseTarifaria" trim="true" type="string"  literal="BASE_TARIFARIA"/>
-                <field name="headerTktDesignator" trim="true" type="string"  literal="TKT_DESIGNATOR"/>                
                 <field name="headerFamiliaTarifaria" trim="true" type="string"  literal="FAMILIA_TARIFARIA"/>
                 <field name="headerClasseTarifaria" trim="true" type="string"  literal="CLASSE_TARIFA"/>
                 <field name="headerClasseServico" trim="true" type="string"  literal="CLASSE_SERVICO"/>
@@ -54,14 +53,16 @@
                 <field name="headerPnrCiaArea" trim="true" type="string"  literal="PNR_CIA_AEREA"/>
                 <field name="headerSelfBookingOffline" trim="true" type="string"  literal="SELFBOOKING_OFFLINE"/>
                 <field name="headerNomePax" trim="true" type="string"  literal="NOME_PAX"/>
-                <field name="headerTipoPax" trim="true" type="string"  literal="TIPO_PAX"/>
+                <field name="headerTipoPax" trim="true" type="string"  literal="TIPO_PAX"/>                
                 <field name="headerCpfPax" trim="true" type="string"  literal="CPF_PAX"/>
-                <field name="headerEmailPax" trim="true" type="string"  literal="E-MAIL_PAX"/>
-                <field name="headerCellPax" trim="true" type="string"  literal="CEL_PAX"/>                            
                 <field name="headerTierFidelidadePax" trim="true" type="string"  literal="TIER_FIDELIDADE_PAX"/>
                 <field name="headerTipoPagamento" trim="true" type="string"  literal="TIPO_PAGAMENTO"/>
                 <field name="headerDigitoVerificadorCC" trim="true" type="string"  literal="DIGITO_VERIFICADOR_CC"/>
-                <field name="headerNomeCliente" trim="true" type="string"  literal="NOME_CLIENTE"/>                                    
+                <field name="headerNomeCliente" trim="true" type="string"  literal="NOME_CLIENTE"/>                 
+                <field name="headerTktDesignator" trim="true" type="string"  literal="TKT_DESIGNATOR"/>                
+                <field name="headerEmailPax" trim="true" type="string"  literal="E-MAIL_PAX"/>
+                <field name="headerCellPax" trim="true" type="string"  literal="CEL_PAX"/> 
+                <field name="headerHoraPouso" trim="true" type="string"  literal="HORA_POUSO"/>                                
                 <field name="headerGrupoEmpresa" trim="true" type="string"  literal="GRUPO_EMPRESA"/>
                 <field name="headerGrupoConsolidada" trim="true" type="string"  literal="GRUPO_CONSOLIDADA"/>
             </record>    
@@ -91,6 +92,7 @@
                 <field type="string" name="horaEmissao" trim="true" />
                 <field type="string" name="dataReserva" trim="true"/>
                 <field type="string" name="horaReserva" trim="true" />
+                
                 <field type="string" name="baseTarifaria" trim="true"/>
                 <field type="string" name="familiaTarifaria" trim="true"/>
                 <field type="string" name="classeTarifa" trim="true"/>
@@ -116,25 +118,6 @@
                 <field type="string" name="cellPax" trim="true"/>
                 <field type="string" name="horaPouso" trim="true"  />
                 <field type="string" name="grupoEmpresa" trim="true"/>
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-               
-                
-                
-                
             </record>
         </group>
     </stream>  

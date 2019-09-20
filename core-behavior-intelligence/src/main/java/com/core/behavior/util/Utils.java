@@ -382,5 +382,9 @@ public class Utils {
     public static String formatDate(Date date) {
         return formmatDate2.format(date);
     }
+    
+    public static Date localDateToDate(LocalDate date){
+        return  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
 
 }

@@ -9,6 +9,7 @@ import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     //@Query(nativeQuery = true,countQuery = "select count(*) from ticket where status= :status" ,value = "select * from ticket where status= :status")
     List<Ticket>findByStatus(TicketStatusEnum status, Pageable page);
+    
+    List<Ticket>findBydataEmissaoBetween(Date startTime,Date endTime);
     
     
 }

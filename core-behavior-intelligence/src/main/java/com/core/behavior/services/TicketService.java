@@ -124,5 +124,10 @@ public class TicketService {
     public List<TicketDuplicityDTO> listDuplicityByDateEmission(LocalDate start, LocalDate end){
         return ticketRepository.listDuplicityByDateEmission(start, end);
     }
+    
+    
+    public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end){
+        return ticketRepository.findBydataEmissaoBetween(start, end);
+    }
 
 }

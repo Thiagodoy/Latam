@@ -1287,14 +1287,11 @@ public class Validator implements IValidator {
 
         String selfBookingOffiline = ticketDTO.getSelfBookingOffiline();
 
-        
-        if( Optional.ofNullable(selfBookingOffiline).isPresent() && selfBookingOffiline.length() == 0){
+        if (Optional.ofNullable(selfBookingOffiline).isPresent() && selfBookingOffiline.length() == 0) {
             ticket.setSelfBookingOffiline("");
-           return this;
+            return this;
         }
-    
-    
-        
+
         if (!Optional.ofNullable(selfBookingOffiline).isPresent()) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
         } else {
@@ -1540,16 +1537,16 @@ public class Validator implements IValidator {
             String dataEmissao = formatter5.format(this.ticket.getDataEmissao());
             String ano = dataEmissao.substring(dataEmissao.length() - 1);
             String mes = dataEmissao.substring(2, 4);
-            
-            String sequencial =  "";
-            
-            if(ticket.getBilhete().length() < 7){                
-                int sizeLeftPad = 7 - ticket.getBilhete().length();                
-                sequencial = StringUtils.leftPad(ticket.getBilhete(), sizeLeftPad, "0");                
-            }else{
+
+            String sequencial = "";
+
+            if (ticket.getBilhete().length() < 7) {
+                int sizeLeftPad = 7 - ticket.getBilhete().length();
+                sequencial = StringUtils.leftPad(ticket.getBilhete(), sizeLeftPad, "0");
+            } else {
                 sequencial = ticket.getBilhete().substring(0, 7);
             }
-            
+
             bilheteBehavior = this.ticket.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
 
         } catch (Exception e) {
@@ -1560,63 +1557,69 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public Optional<TicketDuplicityDTO> validate(List<TicketDuplicityDTO> list, Ticket ticket) {
+    public Optional<Ticket> validate(List<Ticket> list, Ticket ticket) {
 
-        Optional<TicketDuplicityDTO> result = Optional.empty();
-        
+        Optional<Ticket> result = Optional.empty();
+
         switch (ticket.getLayout()) {
             case FULL:
-                
-                 
 
-                Optional<TicketDuplicityDTO> update = list.parallelStream().filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
-                Optional<TicketDuplicityDTO> insert = list.parallelStream().filter(t -> !t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) ).findFirst();
-                Optional<TicketDuplicityDTO> backOffice = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) ).findFirst();
+                Optional<Ticket> update = list.parallelStream().filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
+                Optional<Ticket> insert = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom())).findFirst();
+                Optional<Ticket> backOffice = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
 
-                if (update.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);                    
+                if (update.isPresent() && ticket.getCupom() == update.get().getCupom()) {
+                    ticket.setType(TicketTypeEnum.UPDATE);
+
+                    Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
+
+                    if (opt.isPresent()) {
+                        ticket.setBilheteBehavior(opt.get().getBilheteBehavior());
+                    }
+
                 } else if (!insert.isPresent()) {
                     ticket.setType(TicketTypeEnum.INSERT);
+
+                    Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
+
+                    if (opt.isPresent()) {
+                        ticket.setBilheteBehavior(opt.get().getBilheteBehavior());
+                    }
+
                     verificaCupom(list, ticket);
-                    result =  Optional.of(new TicketDuplicityDTO(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), "",ticket.getBilheteBehavior(), ticket.getCupom()));
+                    result = Optional.of(ticket);
                 } else if (backOffice.isPresent()) {
-                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);                    
+                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                     ticket.setBilheteBehavior(null);
                 }
 
                 break;
             case SHORT:
 
-                Optional<TicketDuplicityDTO> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
+                Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
 
                 if (optChaveC.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);                    
+                    ticket.setType(TicketTypeEnum.UPDATE);
                 } else {
                     ticket.setType(TicketTypeEnum.INSERT);
                     verificaCupom(list, ticket);
-                    result =  Optional.of(new TicketDuplicityDTO("", "", ticket.getAgrupamentoC(),ticket.getBilheteBehavior(), ticket.getCupom()));
+                    result = Optional.of(ticket);
                 }
-
-               
         }
-        
+
         return result;
 
     }
-    
-    private void verificaCupom(List<TicketDuplicityDTO> list, Ticket ticket){        
-               
-        final long count = list.stream().filter(f-> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).count();
-        Optional<TicketDuplicityDTO> opt = list.stream().filter(f-> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).max(Comparator.comparing(TicketDuplicityDTO::getCupom));        
-        
-        if(opt.isPresent() && !opt.get().getCupom().equals(count)){
-         ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-        }
-        
-    }
 
-    private synchronized void insert(List<TicketDuplicityDTO> list, TicketDuplicityDTO dTO) {
-        list.add(dTO);
+    private void verificaCupom(List<Ticket> list, Ticket ticket) {
+
+        final long count = list.stream().filter(f -> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).count();
+        Optional<Ticket> opt = list.stream().filter(f -> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).max(Comparator.comparing(Ticket::getCupom));
+
+        if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
+            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
+        }
+
     }
 
     @Override
