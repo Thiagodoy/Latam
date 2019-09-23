@@ -5,11 +5,17 @@
  */
 package com.core.behavior.services;
 
+import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.LineErrorDTO;
+import com.core.behavior.exception.ApplicationException;
+import com.core.behavior.jobs.FileReturnJob;
+import com.core.behavior.jobs.ProcessFileJob;
+import com.core.behavior.model.Agency;
 import com.core.behavior.model.Log;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.repository.LogRepository;
+import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,173 +35,95 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Comparator;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import java.util.Date;
+import java.util.Optional;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.util.CellAddress;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 /**
  *
  * @author thiag
  */
 @Service
-public class GeneratorFileReturnService {
-
+public class GeneratorFileReturnService {    
+    
     @Autowired
-    private LogRepository logRepository;
+    private SchedulerFactoryBean bean;
+    
+    
+    @Autowired
+    private ClientAws clientAws;
+    
     
     @Autowired
     private AgencyRepository agencyRepository;
+
     
-
-    @Autowired
-    private FileRepository fileRepository;
-
-    public File generateFileReturnFriendly(Long id) throws IOException {
-
-        final List<Log> logs = logRepository.findByFileId(id);
-        final com.core.behavior.model.File file = fileRepository.findById(id).get();
+    
+    public File downloadFileReturn(Long idAgencia, String fileName) throws IOException{
         
+        final Agency agency = agencyRepository.findById(idAgencia).get();
         
-        final long layout = agencyRepository.findById(file.getCompany()).get().getLayoutFile();
-       Comparator lineNumber = Comparator.comparingLong(Log::getLineNumber);
-        final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
-        logDistinct.sort(lineNumber);
-        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
-        LineErrorDTO.reset();
-
-        logDistinct.stream().forEach(l -> {
-
-            LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
-
-            logs.stream().filter(ll -> ll.getRecordContent().equals(l.getRecordContent())).forEach(lll -> {
-
-                final String column = Utils.getPositionExcelColumn(lll.fieldName);
-                error.put(column, lll.getMessageError());
-
-            });
-            e.add(error);
-        });
+        String folder  = agency.getS3Path().split("\\\\")[1];
         
-        return generateFile(e, layout);
+        File file = clientAws.downloadFileReturn(fileName, folder);
+        
+        return file;
     }
-
-    private File generateFile(List<LineErrorDTO> errors, long layout) throws FileNotFoundException, IOException {
-
-        String sheetName = "Erros";
-
-        XSSFWorkbook wb = new XSSFWorkbook();
+    
+    
+    public void generateFileReturnFriendly(Long id, String email) throws Exception {
         
-        XSSFSheet sheet = wb.createSheet(sheetName);
+        
+        
+        JobDataMap data = new JobDataMap();
+        data.put(FileReturnJob.DATA_FILE_ID, id);
+        data.put(FileReturnJob.DATA_EMAIL_ID, email);
+        
 
-        CellStyle backgroundStyle = wb.createCellStyle();
+        JobDetail detail = JobBuilder
+                .newJob(FileReturnJob.class)
+                .withIdentity("FILE-RETURN-JOB-" + String.valueOf(id), "process-file-return")
+                .withDescription("Processing Return file")
+                .usingJobData(data)
+                .build();
 
-        CellStyle cellBold = wb.createCellStyle();
+        SimpleTrigger trigger = TriggerBuilder
+                .newTrigger()
+                .withIdentity("FILE-RETURN-TRIGGER-" + String.valueOf(id), "process-file-return")
+                .startAt(new Date())
+                .withSchedule(simpleSchedule())
+                .build();
 
-        backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-        backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        CellStyle borderStyle = wb.createCellStyle();
-
-        XSSFFont font = wb.createFont();
-        font.setFontHeightInPoints((short) 10);
-        font.setFontName("Arial");
-        font.setColor(IndexedColors.BLACK.getIndex());
-        font.setBold(true);
-        font.setItalic(true);
-
-
-        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");
-        XSSFRow rr = sheet.createRow(0);
-        cellBold.setFont(font);
-
-        for (int i = 0; i < header.length; i++) {
-            XSSFCell cell = rr.createCell(i);
-            cell.setCellValue(header[i]);
+        
+        
+        Optional<JobExecutionContext> opt =  bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj)->jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
+        
+        if(opt.isPresent()){
+            throw new ApplicationException(MessageCode.JOB_IS_RUNNING);
+        }else{
+            bean.getScheduler().scheduleJob(detail, trigger);
         }
-
         
-         XSSFFont fontRecord = wb.createFont();
-         fontRecord.setCharSet(XSSFFont.ANSI_CHARSET);
         
-        XSSFCellStyle style =  wb.createCellStyle();
-        style.setFont(fontRecord);
-        for (int r = 0; r < errors.size(); r++) {
-            XSSFRow row = sheet.createRow(r + 1);
-
-            //iterating c number of columns
-            String[] values = errors.get(r).getLineContent().split("\\[col\\]");
-            for (int c = 0; c < values.length; c++) {
-                XSSFCell cell = row.createCell(c);
-                //cell.setCellStyle(style);
-                cell.setCellValue(values[c]);
-                
-
-            }
-        }
-
-        //Realiza append para comentarios da mesma Celula
-        Map<String, String> comments = new HashMap<String, String>();
-        errors.forEach(dto -> {
-            dto.getComments().forEach((key, message) -> {
-                if (comments.containsKey(key)) {
-                    String value = comments.get(key) + "\n" + message;
-                    comments.put(key, value);
-                } else {
-                    comments.put(key, message);
-                }
-            });
-        });
-
-        //Create a comments
-        comments.forEach((key, value) -> {            
-            CellReference cellReference = new CellReference(key);
-            XSSFRow row = sheet.getRow(cellReference.getRow());
-
-            XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
-
-            Comment com = createCellComment(sheet, "Behavior", value, cell);
-            cell.setCellComment(com);
-            com.setAddress(cell.getAddress());
-            cell.setCellStyle(borderStyle);
-            cell.setCellStyle(backgroundStyle);
-
-        });
-
-        File temp = File.createTempFile("temp", ".xlsx");
-        FileOutputStream fileOut = new FileOutputStream(temp);
-
-        //write this workbook to an Outputstream.
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        return temp;
     }
 
-    private static Comment createCellComment(XSSFSheet sheet, String author, String comment, XSSFCell cell) {
-
-        // comments only supported for XLSX
-        CreationHelper factory = sheet.getWorkbook().getCreationHelper();
-        Drawing drawing = sheet.createDrawingPatriarch();
-
-        ClientAnchor anchor = factory.createClientAnchor();
-        anchor.setCol1(cell.getColumnIndex());
-        anchor.setCol2(cell.getColumnIndex() + 10);
-        anchor.setRow1(cell.getRowIndex());
-        anchor.setRow2(cell.getRowIndex() + 15);
-
-        Comment cmt = drawing.createCellComment(anchor);
-
-        RichTextString str = factory.createRichTextString(comment);
-        cmt.setString(str);
-        cmt.setAuthor(author);
-        return cmt;
-
-    }
+    
 
 }

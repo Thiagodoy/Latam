@@ -5,7 +5,6 @@
  */
 package com.core.behavior.dto;
 
-import com.google.common.collect.HashBiMap;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
@@ -28,8 +27,7 @@ public class LineErrorDTO {
         this.lineContent = content;
     }
 
-    public LineErrorDTO() {
-       
+    public LineErrorDTO() {       
         this.line = ++LineErrorDTO.rowNum;        
     }
     

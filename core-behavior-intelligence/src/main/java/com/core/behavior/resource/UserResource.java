@@ -6,7 +6,7 @@
 package com.core.behavior.resource;
 
 import com.core.behavior.activiti.response.PageResponse;
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.response.UserResponse;
@@ -81,7 +81,7 @@ public class UserResource {
         try {
             service.deleteUser(id);
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
         } catch (Exception ex) {
@@ -97,7 +97,7 @@ public class UserResource {
         try {
             service.updateUser(user);
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
         } catch (Exception ex) {

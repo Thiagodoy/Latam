@@ -192,8 +192,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 //Atualiza os tickets
                 start = System.currentTimeMillis();
-                tickets.parallelStream().forEach(t -> {
-                    t.setStatus(TicketStatusEnum.APPROVED);
+                tickets.parallelStream().forEach(t -> {                    
                     ticketService.save(t);
                 });
 
@@ -246,7 +245,6 @@ public class ProcessFileJob extends QuartzJobBean {
             String id = String.valueOf(t.getId());
 
             if (id.length() < 7) {
-
                 sequencial = StringUtils.leftPad(id, 7, "0");
             } else {
                 sequencial = id.substring(0, 7);

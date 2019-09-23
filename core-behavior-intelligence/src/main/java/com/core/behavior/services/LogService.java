@@ -78,7 +78,7 @@ public class LogService {
             for (Log t : logs) {
                 inserts.add(Utils.<Log>mountBatchInsert(t, TypeField.LOG));
                 count++;
-                if (count == 1000) {
+                if (count == 3000) {
                     String query = "INSERT INTO `behavior`.`log` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     Statement ps = con.createStatement();
                     ps.clearBatch();

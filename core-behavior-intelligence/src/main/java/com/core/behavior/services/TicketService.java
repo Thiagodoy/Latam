@@ -59,7 +59,7 @@ public class TicketService {
             for (Ticket t : ticket) {
                 inserts.add(mountBatchInsert(t,TypeField.TICKET));
                 count++;
-                if (count == 1000) {
+                if (count == 3000) {
                     String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     Statement ps = con.createStatement();
                     ps.clearBatch();

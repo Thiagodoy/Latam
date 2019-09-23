@@ -4,7 +4,7 @@ import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
 import com.core.activiti.repository.UserActivitiRepository;
 import com.core.activiti.repository.UserInfoRepository;
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.UserStatusEnum;
 import java.util.List;
@@ -77,7 +77,7 @@ public class UserInfoService {
     }
     
     @Transactional
-    public void expiredPassword(String id) throws ActivitiException {
+    public void expiredPassword(String id) throws ApplicationException {
         UserInfo passwordExpiration = new UserInfo(id, Constantes.EXPIRATION_PASSWORD, "true");
         infoRepository.save(passwordExpiration);
     }

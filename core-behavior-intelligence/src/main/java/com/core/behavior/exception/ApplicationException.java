@@ -10,6 +10,6 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class ActivitiException extends RuntimeException {       
+public class ApplicationException extends RuntimeException {       
     private Long codeMessage;
 }

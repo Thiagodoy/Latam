@@ -1,6 +1,6 @@
 package com.core.behavior.resource;
 
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.request.ChangePasswordRequest;
 import com.core.behavior.request.ForgotAcessRequest;
 import com.core.behavior.request.LoginRequest;
@@ -44,7 +44,7 @@ public class AuthenticationResource {
         try {            
             service.changePassword(request);
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);            
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }       
@@ -58,7 +58,7 @@ public class AuthenticationResource {
     public ResponseEntity login(@RequestBody LoginRequest user){
         try {
             return ResponseEntity.ok(service.login(user));
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
         }
@@ -73,7 +73,7 @@ public class AuthenticationResource {
         try {            
             service.forgotAccess(request.getEmail());            
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
         } catch (MessagingException ex) {
@@ -92,7 +92,7 @@ public class AuthenticationResource {
         try {            
             infoService.expiredPassword(email);            
             return ResponseEntity.ok().build();
-        } catch (ActivitiException ex) {
+        } catch (ApplicationException ex) {
             Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
         }  catch (Exception ex) {

@@ -1570,7 +1570,8 @@ public class Validator implements IValidator {
 
                 if (update.isPresent() && ticket.getCupom() == update.get().getCupom()) {
                     ticket.setType(TicketTypeEnum.UPDATE);
-
+                    ticket.setStatus(TicketStatusEnum.APPROVED);
+                    
                     Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
 
                     if (opt.isPresent()) {
@@ -1579,6 +1580,7 @@ public class Validator implements IValidator {
 
                 } else if (!insert.isPresent()) {
                     ticket.setType(TicketTypeEnum.INSERT);
+                    ticket.setStatus(TicketStatusEnum.APPROVED);
 
                     Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
 
@@ -1592,10 +1594,9 @@ public class Validator implements IValidator {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                     ticket.setBilheteBehavior(null);
                 }
-
+              
                 break;
             case SHORT:
-
                 Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
 
                 if (optChaveC.isPresent()) {
@@ -1605,6 +1606,7 @@ public class Validator implements IValidator {
                     verificaCupom(list, ticket);
                     result = Optional.of(ticket);
                 }
+                ticket.setStatus(TicketStatusEnum.APPROVED);
         }
 
         return result;
@@ -1657,10 +1659,10 @@ public class Validator implements IValidator {
                         .checkDataReserva()
                         .checkHoraReserva()
                         .checkHoraPouso()
-                        .checkBaseTarifaria()
+                        //.checkBaseTarifaria()
                         .checkTktDesignator()
                         .checkFamiliaTarifaria()
-                        .checkClasseTarifa()
+                        //.checkClasseTarifa()
                         .checkClasseServico()
                         .checkOndDirecional()
                         .checkTourCode()

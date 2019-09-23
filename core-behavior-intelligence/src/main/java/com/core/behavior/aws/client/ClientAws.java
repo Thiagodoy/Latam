@@ -33,6 +33,7 @@ public class ClientAws {
 
     private AmazonS3 amazonS3;
     private static final String REGION = "sa-east-1";
+    private static final String FOLDER_RETURN = "/RETORNO/";
 
     @Autowired
     private AmazonProperties amazonConfiguration;
@@ -60,6 +61,20 @@ public class ClientAws {
         this.amazonS3.getObject(request, fileTemp);
         
         return fileTemp;
+    }
+    
+    public File downloadFileReturn(String fileName,String folder) throws IOException{
+        GetObjectRequest request = new GetObjectRequest(amazonConfiguration.getBucketName(), folder + FOLDER_RETURN + fileName);
+        File fileTemp = File.createTempFile("down", "load");
+        this.amazonS3.getObject(request, fileTemp);
+        
+        return fileTemp;
+    }
+    
+    public String uploadFileReturn(File file, String folder) throws IOException {
+        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + FOLDER_RETURN + file.getName(), file);        
+        PutObjectResult result = this.amazonS3.putObject(request);        
+        return result.getETag();        
     }
 
 }

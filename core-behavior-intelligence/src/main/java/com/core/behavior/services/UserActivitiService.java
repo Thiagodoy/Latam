@@ -1,6 +1,6 @@
 package com.core.behavior.services;
 
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.activiti.model.GroupActiviti;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
@@ -75,7 +75,7 @@ public class UserActivitiService {
         groupMemberSevice.deleteByUserId(user.getId());
         infoService.deleteByUserId(user.getId());
 
-        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
 
         userActiviti.merge(user);
         userActivitiRepository.save(userActiviti);
@@ -86,7 +86,7 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(id);
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         return getResponseUsers(Arrays.asList(opt.get())).get(0);
@@ -111,20 +111,20 @@ public class UserActivitiService {
 
         UserActiviti user = userActivitiRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+                .orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
 
         if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
-            throw new ActivitiException(MessageCode.USER_DESATIVADO);
+            throw new ApplicationException(MessageCode.USER_DESATIVADO);
         }
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
@@ -139,7 +139,7 @@ public class UserActivitiService {
             if (time.isAfter(dateLastAcess)) {
                 UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_PASSWORD, "true");
                 infoService.save(passwordExpiration);
-                throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+                throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
             }
         }
 
@@ -152,11 +152,11 @@ public class UserActivitiService {
         if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");
             infoService.save(passwordExpiration);
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         if (!user.getPassword().equals(request.getPassword())) {
-            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
         }
 
         List<GroupResponse> listGroupsResponse = new ArrayList();
@@ -203,17 +203,17 @@ public class UserActivitiService {
     @Transactional
     public void resendAccess(String id, boolean master) throws MessagingException, IOException {
 
-        UserActiviti userActiviti = userActivitiRepository.findById(id).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+        UserActiviti userActiviti = userActivitiRepository.findById(id).orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
 
         Optional<UserInfo> opt = userActiviti.getInfo().stream().filter(u -> u.getKey().equals(Constantes.EXPIRATION_ACCESS)).findFirst();
         Optional<UserInfo> optPass = userActiviti.getInfo().stream().filter(u -> u.getKey().equals(Constantes.EXPIRATION_PASSWORD)).findFirst();
 
         if (!master && opt.isPresent()) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         if (!master && optPass.isPresent()) {
-            throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
 
         if (master) {
@@ -260,17 +260,17 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(id);
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
 
         UserActiviti userActiviti = opt.get();
@@ -361,11 +361,11 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(request.getEmail());
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         if (!opt.get().getPassword().equals(request.getPassword())) {
-            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
         }
 
         UserActiviti user = opt.get();
