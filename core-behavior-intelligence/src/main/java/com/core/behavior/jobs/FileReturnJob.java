@@ -67,7 +67,7 @@ public class FileReturnJob extends QuartzJobBean {
 
     @Autowired
     private ClientAws clientAws;
-    
+
     @Autowired
     private UserActivitiService userActivitiService;
 
@@ -86,7 +86,10 @@ public class FileReturnJob extends QuartzJobBean {
         Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
         String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
 
+        long start = System.currentTimeMillis();
         final List<Log> logs = logRepository.findByFileId(id);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ LOAD LOGS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
         final com.core.behavior.model.File file = fileRepository.findById(id).get();
         final Agency agency = agencyRepository.findById(file.getCompany()).get();
 
@@ -112,22 +115,25 @@ public class FileReturnJob extends QuartzJobBean {
 
         File fileTemp = null;
         try {
-             fileTemp = this.generateFile(e, layout, file.getName());
+            
+            start = System.currentTimeMillis();
+            fileTemp = this.generateFile(e, layout, file.getName());            
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ MAKE XLSX ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            
             this.uploadFileReturn(fileTemp, agency);
 
             Notificacao notificacao = new Notificacao();
-            notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);            
+            notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
 
             Map<String, String> parameter = new HashMap<String, String>();
             parameter.put(":email", emailUser);
-            
-            String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileTemp.getName();            
-            
+
+            String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileTemp.getName();
+
             parameter.put(":link", link);
-            
+
             String nameUser = userActivitiService.getUser(file.getUserId()).getFirstName();
-            
-            
+
             parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
             parameter.put(":arquivo", fileTemp.getName());
 
@@ -139,13 +145,14 @@ public class FileReturnJob extends QuartzJobBean {
         } finally {
 
             try {
-                
-                if(fileTemp != null)
+
+                if (fileTemp != null) {
                     FileUtils.forceDelete(fileTemp);
-                
-             } catch (IOException ex) {
-                 Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
-             }
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
+            }
         }
 
     }
