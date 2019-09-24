@@ -58,7 +58,7 @@ public class QuartzConfiguration {
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
-        //scheduler.scheduleJob(detail2, crontrigger2);
+        scheduler.scheduleJob(detail2, crontrigger2);
     }
 
 }

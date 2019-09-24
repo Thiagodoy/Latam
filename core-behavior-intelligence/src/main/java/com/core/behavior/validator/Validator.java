@@ -73,7 +73,7 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Confort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_CLASSE_SERVICO = "(Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Co(n|m)fort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
     private static Properties props = new Properties();
 
@@ -1564,37 +1564,35 @@ public class Validator implements IValidator {
         switch (ticket.getLayout()) {
             case FULL:
 
-                Optional<Ticket> update = list.parallelStream().filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
-                Optional<Ticket> insert = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom())).findFirst();
-                Optional<Ticket> backOffice = list.parallelStream().filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA())).findFirst();
+                Optional<Ticket> update = list
+                        .parallelStream()
+                        .filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
+                        .findFirst();
+                
+                Optional<Ticket> insert = list
+                        .parallelStream()
+                        .filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
+                        .findFirst();
+                
+                Optional<Ticket> backOffice = list
+                        .parallelStream()
+                        .filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
+                        .findFirst();
 
-                if (update.isPresent() && ticket.getCupom() == update.get().getCupom()) {
+                if (update.isPresent()) {
                     ticket.setType(TicketTypeEnum.UPDATE);
-                    ticket.setStatus(TicketStatusEnum.APPROVED);
-                    
-                    Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
-
-                    if (opt.isPresent()) {
-                        ticket.setBilheteBehavior(opt.get().getBilheteBehavior());
-                    }
-
+                    ticket.setStatus(TicketStatusEnum.APPROVED); 
+                    ticket.setBilheteBehavior(update.get().getBilheteBehavior());
                 } else if (!insert.isPresent()) {
                     ticket.setType(TicketTypeEnum.INSERT);
                     ticket.setStatus(TicketStatusEnum.APPROVED);
-
-                    Optional<Ticket> opt = list.stream().filter(tt -> tt.getAgrupamentoA().equals(ticket.getAgrupamentoA())).sorted(Comparator.comparing(Ticket::getDataEmissao)).findFirst();
-
-                    if (opt.isPresent()) {
-                        ticket.setBilheteBehavior(opt.get().getBilheteBehavior());
-                    }
-
                     verificaCupom(list, ticket);
                     result = Optional.of(ticket);
                 } else if (backOffice.isPresent()) {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                     ticket.setBilheteBehavior(null);
-                }
-              
+                }              
+                
                 break;
             case SHORT:
                 Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();

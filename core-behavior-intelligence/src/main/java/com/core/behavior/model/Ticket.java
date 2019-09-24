@@ -26,6 +26,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  *
@@ -47,7 +48,7 @@ import lombok.Data;
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
-//@IdClass(Ticket.IdClass.class)
+@DynamicUpdate
 @Data
 public class Ticket {
 

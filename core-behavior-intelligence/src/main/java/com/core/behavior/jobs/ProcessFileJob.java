@@ -1,5 +1,6 @@
 package com.core.behavior.jobs;
 
+import com.core.behavior.comparator.TicketComparator;
 import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.model.Log;
@@ -155,6 +156,10 @@ public class ProcessFileJob extends QuartzJobBean {
                     Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
                 }
 
+                LocalDate e = LocalDate.now().plusDays(1);
+                LocalDate s = LocalDate.now().minusDays(90);
+                final List<Ticket> ticketsOld = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e));
+
                 //:FIXEME IMPMENETAR FLUXO PARA BILHETES QUE FICARA NO BACKOFFICE
                 //List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION)).collect(Collectors.toList());
                 start = System.currentTimeMillis();
@@ -162,20 +167,22 @@ public class ProcessFileJob extends QuartzJobBean {
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST TICKET ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
                 List<Ticket> tickets = this.ticketService.listByFileId(idFile);
+
                 this.generateBilheteBehavior(tickets);
+
+                
 
                 if (!tickets.isEmpty()) {
 
+                    if(!ticketsOld.isEmpty() && ticketsOld.size() > 1){
+                        ticketsOld.sort(new TicketComparator());
+                    }
+                    
+                    if(!tickets.isEmpty() && tickets.size() > 1){
+                        tickets.sort(new TicketComparator());
+                    }
                     
 
-                    LocalDate e = LocalDate.now().plusDays(1);
-                    LocalDate s = LocalDate.now().minusDays(90);
-
-                    
-                    final List<Ticket> ticketsOld = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e));
-                    
-                    ticketsOld.sort(Comparator.comparing(Ticket::getDataEmbarque));
-                    tickets.sort(Comparator.comparing(Ticket::getDataEmbarque));
 
                     start = System.currentTimeMillis();
 
@@ -192,7 +199,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 //Atualiza os tickets
                 start = System.currentTimeMillis();
-                tickets.parallelStream().forEach(t -> {                    
+                tickets.forEach(t -> {
                     ticketService.save(t);
                 });
 
