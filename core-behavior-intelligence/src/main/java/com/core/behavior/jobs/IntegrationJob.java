@@ -68,7 +68,7 @@ public class IntegrationJob extends QuartzJobBean {
             uploadFolder.mkdir();
         }
 
-        PageRequest page = PageRequest.of(0, 5000);
+        PageRequest page = PageRequest.of(0, 1000);
 
         List<Ticket> tickets = ticketService.listByStatus(TicketStatusEnum.APPROVED, page);
 
@@ -76,8 +76,8 @@ public class IntegrationJob extends QuartzJobBean {
         List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
 
         if (!shortLayout.isEmpty()) {
-            List<Ticket> shortLayoutUpdate = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
-            List<Ticket> shortLayoutInsert = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
+            List<Ticket> shortLayoutInsert = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
+            List<Ticket> shortLayoutUpdate = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
 
             if (!shortLayoutUpdate.isEmpty()) {
                 this.generateFile(shortLayoutUpdate, uploadFolder, TicketLayoutEnum.SHORT, TicketTypeEnum.UPDATE, Stream.SHORT_LAYOUT_INTEGRATION);
@@ -89,10 +89,11 @@ public class IntegrationJob extends QuartzJobBean {
 
         }
 
-        if (!fullLayout.isEmpty()) {
+        if (!fullLayout.isEmpty()) {           
+            
 
-            List<Ticket> fullLayoutUpdate = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
-            List<Ticket> fullLayoutInsert = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
+            List<Ticket> fullLayoutInsert = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
+            List<Ticket> fullLayoutUpdate = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
 
             if (!fullLayoutUpdate.isEmpty()) {
                 this.generateFile(fullLayoutUpdate, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.UPDATE, Stream.FULL_LAYOUT_INTEGRATION);
