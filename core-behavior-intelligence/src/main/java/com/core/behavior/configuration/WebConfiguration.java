@@ -1,5 +1,7 @@
 package com.core.behavior.configuration;
 
+import com.core.behavior.jobs.Executor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -38,5 +40,8 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addResourceHandler("/swagger-ui.html**").addResourceLocations("classpath:/META-INF/resources/swagger-ui.html");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
+    
+    
+   
 
 }

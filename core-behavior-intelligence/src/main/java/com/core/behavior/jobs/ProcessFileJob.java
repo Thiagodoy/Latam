@@ -38,6 +38,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -143,7 +145,7 @@ public class ProcessFileJob extends QuartzJobBean {
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 this.saveTickets(success);
-                this.runRule2(success);
+                this.runRules3(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -158,8 +160,8 @@ public class ProcessFileJob extends QuartzJobBean {
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
-        } catch (Throwable e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, e);
+        } catch (Exception e) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal]", e);
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
@@ -216,6 +218,24 @@ public class ProcessFileJob extends QuartzJobBean {
         return map;
     }
 
+    private void runRules3(List<Ticket> success) {
+
+        long start = System.currentTimeMillis();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
+
+        success.parallelStream().forEach(t -> {
+            executorService.submit(new Executor(ticketService,t));
+        });
+
+        executorService.shutdown();
+        //Aguarda o termino do processamento
+        while (!executorService.isTerminated()) {
+        }
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+    }
+
     private void runRule2(List<Ticket> success) {
 
         if (!success.isEmpty()) {
@@ -232,7 +252,7 @@ public class ProcessFileJob extends QuartzJobBean {
                 Optional<TicketValidationDTO> count = rules.stream().filter(r -> r.getRule().equals("COUNT")).findFirst();
                 Optional<TicketValidationDTO> cupom = rules.stream().filter(r -> r.getRule().equals("CUPOM")).findFirst();
 
-                if ( update.get().getValue() > 0 ) {
+                if (update.get().getValue() > 0) {
                     t.setType(TicketTypeEnum.UPDATE);
                     t.setStatus(TicketStatusEnum.APPROVED);
                     List<Ticket> updates = this.ticketService.findtToUpdate(t);
@@ -241,21 +261,21 @@ public class ProcessFileJob extends QuartzJobBean {
                 } else if (insert.get().getValue() == 0) {
                     t.setType(TicketTypeEnum.INSERT);
                     t.setStatus(TicketStatusEnum.APPROVED);
-                   
+
                     if (cupom.isPresent() && !cupom.get().getValue().equals(count.get().getValue())) {
                         t.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-                    }else if(count.get().getValue() > 0L){
-                       Ticket optT = ticketService.findtFirstTicket(t);
-                      
-                        if(optT!= null && !t.getBilheteBehavior().equals(optT.getBilheteBehavior())){             
-                               t.setBilheteBehavior(optT.getBilheteBehavior());
-                         } 
+                    } else if (count.get().getValue() > 0L) {
+                        Ticket optT = ticketService.findtFirstTicket(t);
+
+                        if (optT != null && !t.getBilheteBehavior().equals(optT.getBilheteBehavior())) {
+                            t.setBilheteBehavior(optT.getBilheteBehavior());
+                        }
                     }
                 } else if (backoffice.get().getValue() > 0) {
                     t.setStatus(TicketStatusEnum.BACKOFFICE);
                     t.setBilheteBehavior(null);
                 }
-                
+
                 ticketService.save(t);
 
             });

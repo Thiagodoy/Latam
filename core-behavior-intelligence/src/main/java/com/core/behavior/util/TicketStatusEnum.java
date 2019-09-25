@@ -15,5 +15,6 @@ public enum TicketStatusEnum {
     UNAPPROVED,
     WRITED,
     BACKOFFICE,
-    BACKOFFICE_CUPOM
+    BACKOFFICE_CUPOM,
+    ERROR_EXECUTOR;
 }
