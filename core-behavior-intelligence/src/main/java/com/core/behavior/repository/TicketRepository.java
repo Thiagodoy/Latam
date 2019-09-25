@@ -36,7 +36,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findtToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom, @Param("id") Long id);
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = 1 and t.agrupamento_a = :agrupa ")
-    Ticket findtFirstTicket(@Param("agrupa") String agrupamentoA);
+    List<Ticket> findtFirstTicket(@Param("agrupa") String agrupamentoA);
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket> findByFileId(@Param("fileId") Long fileId);

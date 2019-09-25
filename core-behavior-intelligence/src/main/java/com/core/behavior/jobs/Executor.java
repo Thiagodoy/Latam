@@ -10,13 +10,12 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
+import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
@@ -61,7 +60,7 @@ public class Executor implements Runnable {
                 if (cupom.isPresent() && !cupom.get().getValue().equals(count.get().getValue())) {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
                 } else if (count.get().getValue() > 0L) {
-                    Ticket optT = service.findtFirstTicket(ticket);
+                    Ticket optT = service.findtFirstTicket(ticket).stream().sorted(Comparator.comparing(Ticket::getCreatedAt)).findFirst().get();
 
                     if (optT != null && !ticket.getBilheteBehavior().equals(optT.getBilheteBehavior())) {
                         ticket.setBilheteBehavior(optT.getBilheteBehavior());
@@ -75,6 +74,7 @@ public class Executor implements Runnable {
             service.save(ticket);
 
         } catch (Exception e) {
+             Logger.getLogger(Executor.class.getName()).log(Level.INFO, MessageFormat.format("id -> {0}", ticket.getId()));
              Logger.getLogger(Executor.class.getName()).log(Level.SEVERE, "[ EXECUTOR ]", e);
             ticket.setStatus(TicketStatusEnum.ERROR_EXECUTOR);
             service.save(ticket);

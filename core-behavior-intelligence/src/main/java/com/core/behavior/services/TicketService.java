@@ -136,7 +136,7 @@ public class TicketService {
         return ticketRepository.findtToUpdate(ticket.getAgrupamentoA(),ticket.getCupom(), ticket.getId());
     }
     
-    public Ticket findtFirstTicket (Ticket ticket){
+    public List<Ticket> findtFirstTicket (Ticket ticket){
         return ticketRepository.findtFirstTicket(ticket.getAgrupamentoA());
     }
     

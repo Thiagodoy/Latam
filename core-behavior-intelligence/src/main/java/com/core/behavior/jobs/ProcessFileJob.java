@@ -234,56 +234,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-    }
-
-    private void runRule2(List<Ticket> success) {
-
-        if (!success.isEmpty()) {
-
-            long start = System.currentTimeMillis();
-
-            success.parallelStream().forEach(t -> {
-
-                List<TicketValidationDTO> rules = this.ticketService.checkRules(t);
-
-                Optional<TicketValidationDTO> update = rules.stream().filter(r -> r.getRule().equals("UPDATE")).findFirst();
-                Optional<TicketValidationDTO> insert = rules.stream().filter(r -> r.getRule().equals("INSERT")).findFirst();
-                Optional<TicketValidationDTO> backoffice = rules.stream().filter(r -> r.getRule().equals("BACKOFFICE")).findFirst();
-                Optional<TicketValidationDTO> count = rules.stream().filter(r -> r.getRule().equals("COUNT")).findFirst();
-                Optional<TicketValidationDTO> cupom = rules.stream().filter(r -> r.getRule().equals("CUPOM")).findFirst();
-
-                if (update.get().getValue() > 0) {
-                    t.setType(TicketTypeEnum.UPDATE);
-                    t.setStatus(TicketStatusEnum.APPROVED);
-                    List<Ticket> updates = this.ticketService.findtToUpdate(t);
-                    Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getCupom)).get();
-                    t.setBilheteBehavior(uo.getBilheteBehavior());
-                } else if (insert.get().getValue() == 0) {
-                    t.setType(TicketTypeEnum.INSERT);
-                    t.setStatus(TicketStatusEnum.APPROVED);
-
-                    if (cupom.isPresent() && !cupom.get().getValue().equals(count.get().getValue())) {
-                        t.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-                    } else if (count.get().getValue() > 0L) {
-                        Ticket optT = ticketService.findtFirstTicket(t);
-
-                        if (optT != null && !t.getBilheteBehavior().equals(optT.getBilheteBehavior())) {
-                            t.setBilheteBehavior(optT.getBilheteBehavior());
-                        }
-                    }
-                } else if (backoffice.get().getValue() > 0) {
-                    t.setStatus(TicketStatusEnum.BACKOFFICE);
-                    t.setBilheteBehavior(null);
-                }
-
-                ticketService.save(t);
-
-            });
-
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-        }
-
-    }
+    }    
 
     private void generateIds(List<Ticket> tickets) throws Exception {
 
