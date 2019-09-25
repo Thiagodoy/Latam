@@ -2,6 +2,7 @@ package com.core.behavior.validator;
 
 import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.jobs.ProcessFileJob;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
@@ -1561,6 +1562,8 @@ public class Validator implements IValidator {
 
         Optional<Ticket> result = Optional.empty();
 
+        long start = System.currentTimeMillis();
+        
         switch (ticket.getLayout()) {
             case FULL:
 
@@ -1607,9 +1610,17 @@ public class Validator implements IValidator {
                 ticket.setStatus(TicketStatusEnum.APPROVED);
         }
 
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         return result;
 
     }
+    
+//    private boolean isUpdate(Ticket ticket){
+//        
+//        
+//        
+//        
+//    }
 
     private void verificaCupom(List<Ticket> list, Ticket ticket) {
 

@@ -231,7 +231,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
             long start = System.currentTimeMillis();
 
-            success.parallelStream().forEach(t -> {
+            success.forEach(t -> {
                 factoryBean.getBean().validate(store, t);                
             });
 
