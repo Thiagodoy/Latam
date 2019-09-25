@@ -5,6 +5,7 @@
  */
 package com.core.behavior.model;
 
+import com.core.behavior.util.SequenceTableEnum;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,15 +13,18 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  *
  * @author thiag
  */
 @Entity
-@Table(name = "sequence")
+@Table(name = "sequences")
 @Data
+@DynamicUpdate
 public class Sequence {
 
     @Id
@@ -33,9 +37,12 @@ public class Sequence {
 
     @Column(name = "sequence")
     private Long sequenceMin;
+    
+    @Column(name = "vs")
+    @Version
+    private Long version;
 
     private transient Long sequenceMax;
-
     private transient Long sequenceCur;
 
     @PostLoad
@@ -43,7 +50,7 @@ public class Sequence {
         this.sequenceCur = this.sequenceMin;
     }
 
-    public Long getSequence() {
+    public synchronized Long getSequence() {
 
         this.sequenceCur = ++this.sequenceCur;
 

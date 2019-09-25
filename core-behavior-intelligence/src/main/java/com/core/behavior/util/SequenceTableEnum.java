@@ -11,6 +11,6 @@ package com.core.behavior.util;
  */
 public enum SequenceTableEnum {
     
-    TICKET
+    TICKET;
     
 }

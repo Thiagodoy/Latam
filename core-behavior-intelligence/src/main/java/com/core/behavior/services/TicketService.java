@@ -126,7 +126,7 @@ public class TicketService {
     }
     
     
-    public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end){
+    public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end, String codigoAgencia){
         return ticketRepository.findBydataEmissaoBetween(start, end);
     }
 

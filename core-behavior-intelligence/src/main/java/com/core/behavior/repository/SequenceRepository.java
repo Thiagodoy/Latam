@@ -7,11 +7,7 @@ package com.core.behavior.repository;
 
 import com.core.behavior.model.Sequence;
 import com.core.behavior.util.SequenceTableEnum;
-import javax.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 /**
  *
@@ -21,9 +17,8 @@ public interface SequenceRepository extends JpaRepository<Sequence, Long> {
 
 
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = "select a from sequence where table = :table")
-    Sequence findByTable(@Param("table")SequenceTableEnum table);
+    //@Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)    
+    Sequence findByTable(SequenceTableEnum table);
 
 
     

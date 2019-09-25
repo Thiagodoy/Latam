@@ -6,11 +6,14 @@ import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
+import com.core.behavior.model.Sequence;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
+import com.core.behavior.services.SequenceService;
 import com.core.behavior.services.TicketService;
+import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.StageEnum;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
@@ -25,10 +28,12 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -67,17 +72,17 @@ public class ProcessFileJob extends QuartzJobBean {
     @Autowired
     private TicketService ticketService;
 
-    //@Autowired
-    //private Validator validator;
+    @Autowired
+    private SequenceService sequenceService;    
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
 
-    private final SimpleDateFormat formatter5 = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
+    
 
-    private static final int DIAS = 90;
+    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -124,86 +129,24 @@ public class ProcessFileJob extends QuartzJobBean {
                 fileService.setStage(idFile, StageEnum.VALIDATION_CONTENT.getCode());
 
                 long startValidation = System.currentTimeMillis();
-
-                List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
-                List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
-
-                start = System.currentTimeMillis();
-
-                dto.getTicket().parallelStream().forEach(t -> {
-                    Optional<Ticket> op = factoryBean.getBean().validate(t);
-
-                    synchronized (success) {
-
-                        if (op.isPresent() && op.get().getErrors().isEmpty()) {
-                            success.add(op.get());
-                        } else if (op.isPresent()) {
-                            error.addAll(op.get().getErrors());
-                        }
-                    }
-
-                });
-
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
+                Map<String, Object> resul = this.runRule1(dto);
+                
+                List<Ticket> success = (List<Ticket>)resul.get("success"); 
+                List<Log> error =  (List<Log>)resul.get("error"); 
+                
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });
 
-                if (!error.isEmpty()) {
-                    start = System.currentTimeMillis();
-                    logService.saveBatch(error);
-                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-                }
+                this.writeErrors(error);
+                final List<Ticket> ticketsOld = this.getTicketWrited(codigoAgencia);
+                this.generateIds(success);
+                this.generateBilheteBehavior(success);
+                this.runRule2(success, ticketsOld);
 
-                LocalDate e = LocalDate.now().plusDays(1);
-                LocalDate s = LocalDate.now().minusDays(90);
-                final List<Ticket> ticketsOld = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e));
-
-                //:FIXEME IMPMENETAR FLUXO PARA BILHETES QUE FICARA NO BACKOFFICE
-                //List<Ticket> insert = success.stream().filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION)).collect(Collectors.toList());
                 start = System.currentTimeMillis();
                 ticketService.saveBatch(success);
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST TICKET ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-                List<Ticket> tickets = this.ticketService.listByFileId(idFile);
-
-                this.generateBilheteBehavior(tickets);
-
-                
-
-                if (!tickets.isEmpty()) {
-
-                    if(!ticketsOld.isEmpty() && ticketsOld.size() > 1){
-                        ticketsOld.sort(new TicketComparator());
-                    }
-                    
-                    if(!tickets.isEmpty() && tickets.size() > 1){
-                        tickets.sort(new TicketComparator());
-                    }
-                    
-
-
-                    start = System.currentTimeMillis();
-
-                    tickets.forEach(t -> {
-                        Optional<Ticket> opt = factoryBean.getBean().validate(ticketsOld, t);
-
-                        if (opt.isPresent()) {
-                            ticketsOld.add(opt.get());
-                        }
-
-                    });
-                    Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-                }
-
-                //Atualiza os tickets
-                start = System.currentTimeMillis();
-                tickets.forEach(t -> {
-                    ticketService.save(t);
-                });
-
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ ATUALIZAR TICKETS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ SALVA TICKETS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -239,6 +182,100 @@ public class ProcessFileJob extends QuartzJobBean {
         }
     }
 
+    private Map<String, Object> runRule1(FileParsedDTO dto) {
+
+        
+        Map<String, Object> map = new HashMap<>();
+        List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
+        List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
+
+        long start = System.currentTimeMillis();
+
+        dto.getTicket().parallelStream().forEach(t -> {
+            Optional<Ticket> op = factoryBean.getBean().validate(t);
+
+            synchronized (success) {
+
+                if (op.isPresent() && op.get().getErrors().isEmpty()) {
+                    success.add(op.get());
+                } else if (op.isPresent()) {
+                    error.addAll(op.get().getErrors());
+                }
+            }
+
+        });
+
+        map.put("success", success);
+        map.put("error", error);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        
+        return map;
+    }
+
+    private void runRule2(List<Ticket> success, List<Ticket> ticketsOld) {
+
+        if (!success.isEmpty()) {
+
+            
+            CopyOnWriteArrayList<Ticket> store = new CopyOnWriteArrayList<>();
+            store.addAll(success);
+            store.addAll(ticketsOld);
+            
+            if (!ticketsOld.isEmpty() && ticketsOld.size() > 1) {
+                ticketsOld.sort(new TicketComparator());
+            }
+
+            if (!success.isEmpty() && success.size() > 1) {
+                success.sort(new TicketComparator());
+            }
+
+            long start = System.currentTimeMillis();
+
+            success.parallelStream().forEach(t -> {
+                factoryBean.getBean().validate(store, t);                
+            });
+
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        }
+
+    }
+
+    private void generateIds(List<Ticket> tickets) throws Exception {
+
+        if (!tickets.isEmpty()) {
+            long start = System.currentTimeMillis();
+
+            Sequence sequence = sequenceService.getSequence(SequenceTableEnum.TICKET, tickets.size());
+
+            tickets.parallelStream().forEach(t -> {
+                t.setId(sequence.getSequence());
+            });
+
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ GERANDO IDS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        }
+
+    }
+
+    private List<Ticket> getTicketWrited(String codigoAgencia) {
+        
+        long start = System.currentTimeMillis();
+        LocalDate e = LocalDate.now().plusDays(1);
+        LocalDate s = LocalDate.now().minusDays(90);
+        List<Ticket> result =  ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e),codigoAgencia);
+        
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PARSER ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        return result;
+    }
+
+    private void writeErrors(List<Log> error) {
+
+        if (!error.isEmpty()) {
+            long start = System.currentTimeMillis();
+            logService.saveBatch(error);
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        }
+    }
+
     private void generateBilheteBehavior(List<Ticket> tickets) {
 
         tickets.parallelStream().forEach(t -> {
@@ -261,7 +298,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
             t.setBilheteBehavior(bilheteBehavior);
 
-            // ticketService.save(t);
+            
         });
 
     }

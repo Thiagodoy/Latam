@@ -73,7 +73,7 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Co(n|m)fort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_CLASSE_SERVICO = "(Primeira Classe|Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Co(n|m)fort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
     private static Properties props = new Properties();
 
@@ -1566,17 +1566,17 @@ public class Validator implements IValidator {
 
                 Optional<Ticket> update = list
                         .parallelStream()
-                        .filter(t -> t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
+                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
                         .findFirst();
                 
                 Optional<Ticket> insert = list
                         .parallelStream()
-                        .filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
+                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
                         .findFirst();
                 
                 Optional<Ticket> backOffice = list
                         .parallelStream()
-                        .filter(t -> t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
+                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
                         .findFirst();
 
                 if (update.isPresent()) {
@@ -1613,13 +1613,36 @@ public class Validator implements IValidator {
 
     private void verificaCupom(List<Ticket> list, Ticket ticket) {
 
-        final long count = list.stream().filter(f -> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).count();
-        Optional<Ticket> opt = list.stream().filter(f -> f.getBilheteBehavior().equals(ticket.getBilheteBehavior())).max(Comparator.comparing(Ticket::getCupom));
+        final long count = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
+        Optional<Ticket> opt = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
 
         if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
             ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
+        }else if(count > 0){
+            Optional<Ticket> optT = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
+            
+            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){
+               synchronized(ticket){
+                   ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
+               } 
+            }
         }
 
+    }
+    
+    private void generateNameClient(){
+        
+        Optional<String> consolida = Optional.ofNullable(this.ticket.getConsolidada());
+        Optional<String> empresa = Optional.ofNullable(this.ticket.getEmpresa());
+        String nomeEmpresa = "";
+        
+        if((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()){
+           nomeEmpresa = MessageFormat.format("{0}{1}",ticketDTO.getCodigoAgencia(), consolida.get()); 
+        }else if(empresa.isPresent()){
+            nomeEmpresa = MessageFormat.format("{0}{1}",ticketDTO.getCodigoAgencia(), empresa.get()); 
+        }
+        
+        this.ticket.setNomeCliente(nomeEmpresa);
     }
 
     @Override
@@ -1657,10 +1680,10 @@ public class Validator implements IValidator {
                         .checkDataReserva()
                         .checkHoraReserva()
                         .checkHoraPouso()
-                        //.checkBaseTarifaria()
+                        //.checkBaseTarifaria() Cancelado a pedido do Mauricelio 22/09/2019
                         .checkTktDesignator()
                         .checkFamiliaTarifaria()
-                        //.checkClasseTarifa()
+                        //.checkClasseTarifa() Cancelado a pedido do Mauricelio 22/09/2019
                         .checkClasseServico()
                         .checkOndDirecional()
                         .checkTourCode()
@@ -1696,8 +1719,9 @@ public class Validator implements IValidator {
                     this.generateAgrupamentoC();
                 }
 
+                this.generateNameClient();
                 // gerar o bilhete behavior
-                this.generateBilheteBehavior();
+                //this.generateBilheteBehavior();
 
             }
 

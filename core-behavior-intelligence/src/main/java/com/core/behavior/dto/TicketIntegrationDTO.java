@@ -129,7 +129,7 @@ public class TicketIntegrationDTO {
             this.tipoPagamento = Optional.ofNullable(ticket.getTipoPagamento()).isPresent() ? ticket.getTipoPagamento(): "";
             this.digitoVerificadorCC = Optional.ofNullable(ticket.getDigitoVerificadorCC()).isPresent() ? String.valueOf(ticket.getDigitoVerificadorCC()): "";
             this.grupoEmpresa = Optional.ofNullable(ticket.getGrupoEmpresa()).isPresent() ? ticket.getGrupoEmpresa(): "";
-            this.nomeCliente = "";
+            this.nomeCliente = ticket.getNomeCliente();
             this.grupoConsolidada = Optional.ofNullable(ticket.getGrupoConsolidada()).isPresent() ? ticket.getGrupoConsolidada(): "";
 
         }
