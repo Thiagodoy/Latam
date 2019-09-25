@@ -1562,7 +1562,7 @@ public class Validator implements IValidator {
 
         Optional<Ticket> result = Optional.empty();
 
-        long start = System.currentTimeMillis();
+      //  long start = System.currentTimeMillis();
         
         switch (ticket.getLayout()) {
             case FULL:
@@ -1610,7 +1610,7 @@ public class Validator implements IValidator {
                 ticket.setStatus(TicketStatusEnum.APPROVED);
         }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+       // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         return result;
 
     }
