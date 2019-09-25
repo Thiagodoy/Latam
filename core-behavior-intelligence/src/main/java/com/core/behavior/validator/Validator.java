@@ -1621,11 +1621,9 @@ public class Validator implements IValidator {
         }else if(count > 0){
             Optional<Ticket> optT = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
             
-            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){
-               synchronized(ticket){
+            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){             
                    ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
-               } 
-            }
+             } 
         }
 
     }
