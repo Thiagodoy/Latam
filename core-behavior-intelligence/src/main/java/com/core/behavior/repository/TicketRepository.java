@@ -6,11 +6,13 @@
 package com.core.behavior.repository;
 
 import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,22 +28,27 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    
+
     @Query(nativeQuery = true)
-    List<TicketDuplicityDTO>rules(@Param("agrupamento_a") String agrupamentoA,@Param("agrupamento_b")String agrupamentoB,@Param("cupom") Long cupom,@Param("id") Long id);
-    
+    List<TicketValidationDTO> rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom, @Param("id") Long id);
+
+    @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa and id <> :id")
+    List<Ticket> findtToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom, @Param("id") Long id);
+
+    @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = 1 and t.agrupamento_a = :agrupa ")
+    Ticket findtFirstTicket(@Param("agrupa") String agrupamentoA);
+
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
-    List<Ticket>findByFileId(@Param("fileId")Long fileId);
-    
-    @Modifying 
+    List<Ticket> findByFileId(@Param("fileId") Long fileId);
+
+    @Modifying
     @Transactional
     @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
-    void deleteByFileId(@Param("fileId")Long fileId);
-    
+    void deleteByFileId(@Param("fileId") Long fileId);
+
     //@Query(nativeQuery = true,countQuery = "select count(*) from ticket where status= :status" ,value = "select * from ticket where status= :status")
-    List<Ticket>findByStatus(TicketStatusEnum status, Pageable page);
-    
-    List<Ticket>findBydataEmissaoBetween(Date startTime,Date endTime);
-    
-    
+    List<Ticket> findByStatus(TicketStatusEnum status, Pageable page);
+
+    List<Ticket> findBydataEmissaoBetween(Date startTime, Date endTime);
+
 }

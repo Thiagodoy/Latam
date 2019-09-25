@@ -1557,63 +1557,63 @@ public class Validator implements IValidator {
         //ticket.setBilheteBehavior(bilheteBehavior);
     }
 
-    @Override
-    public void validate(List<Ticket> list, Ticket ticket) {
+    
+//    public void validate(List<Ticketlist, Ticket ticket) {
 
        /// Optional<Ticket> result = Optional.empty();
 
       //  long start = System.currentTimeMillis();
         
-        switch (ticket.getLayout()) {
-            case FULL:
-
-                Optional<Ticket> update = list
-                        .parallelStream()
-                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
-                        .findFirst();
-                
-                Optional<Ticket> insert = list
-                        .parallelStream()
-                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
-                        .findFirst();
-                
-                Optional<Ticket> backOffice = list
-                        .parallelStream()
-                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
-                        .findFirst();
-
-                if (update.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);
-                    ticket.setStatus(TicketStatusEnum.APPROVED); 
-                    ticket.setBilheteBehavior(update.get().getBilheteBehavior());
-                } else if (!insert.isPresent()) {
-                    ticket.setType(TicketTypeEnum.INSERT);
-                    ticket.setStatus(TicketStatusEnum.APPROVED);
-                    verificaCupom(list, ticket);
-                    //result = Optional.of(ticket);
-                } else if (backOffice.isPresent()) {
-                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
-                    ticket.setBilheteBehavior(null);
-                }              
-                
-                break;
-            case SHORT:
-                Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
-
-                if (optChaveC.isPresent()) {
-                    ticket.setType(TicketTypeEnum.UPDATE);
-                } else {
-                    ticket.setType(TicketTypeEnum.INSERT);
-                    verificaCupom(list, ticket);
-                    //result = Optional.of(ticket);
-                }
-                ticket.setStatus(TicketStatusEnum.APPROVED);
-        }
+//        switch (ticket.getLayout()) {
+//            case FULL:
+//
+//                Optional<Ticket> update = list
+//                        .parallelStream()
+//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
+//                        .findFirst();
+//                
+//                Optional<Ticket> insert = list
+//                        .parallelStream()
+//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
+//                        .findFirst();
+//                
+//                Optional<Ticket> backOffice = list
+//                        .parallelStream()
+//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
+//                        .findFirst();
+//
+//                if (update.isPresent()) {
+//                    ticket.setType(TicketTypeEnum.UPDATE);
+//                    ticket.setStatus(TicketStatusEnum.APPROVED); 
+//                    ticket.setBilheteBehavior(update.get().getBilheteBehavior());
+//                } else if (!insert.isPresent()) {
+//                    ticket.setType(TicketTypeEnum.INSERT);
+//                    ticket.setStatus(TicketStatusEnum.APPROVED);
+//                    verificaCupom(list, ticket);
+//                    //result = Optional.of(ticket);
+//                } else if (backOffice.isPresent()) {
+//                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
+//                    ticket.setBilheteBehavior(null);
+//                }              
+//                
+//                break;
+//            case SHORT:
+//                Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
+//
+//                if (optChaveC.isPresent()) {
+//                    ticket.setType(TicketTypeEnum.UPDATE);
+//                } else {
+//                    ticket.setType(TicketTypeEnum.INSERT);
+//                    verificaCupom(list, ticket);
+//                    //result = Optional.of(ticket);
+//                }
+//                ticket.setStatus(TicketStatusEnum.APPROVED);
+//        }
 
        // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
       //  return result;
 
-    }
+   // }
     
 //    private boolean isUpdate(Ticket ticket){
 //        

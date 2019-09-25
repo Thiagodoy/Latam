@@ -1,6 +1,8 @@
 package com.core.behavior.services;
 
+import com.amazonaws.services.rds.model.Option;
 import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.TicketStatusEnum;
@@ -22,6 +24,7 @@ import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 
 
@@ -122,9 +125,20 @@ public class TicketService {
     }
     
     public List<TicketDuplicityDTO> listDuplicityByDateEmission(LocalDate start, LocalDate end){
-        return ticketRepository.listDuplicityByDateEmission(start, end);
+        return null;//ticketRepository.listDuplicityByDateEmission(start, end);
     }
     
+    public List<TicketValidationDTO> checkRules(Ticket ticket){
+        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom(), ticket.getId());
+    }
+    
+    public List<Ticket> findtToUpdate(Ticket ticket){
+        return ticketRepository.findtToUpdate(ticket.getAgrupamentoA(),ticket.getCupom(), ticket.getId());
+    }
+    
+    public Ticket findtFirstTicket (Ticket ticket){
+        return ticketRepository.findtFirstTicket(ticket.getAgrupamentoA());
+    }
     
     public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end, String codigoAgencia){
         return ticketRepository.findBydataEmissaoBetween(start, end);

@@ -1,7 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
-import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
@@ -32,19 +32,25 @@ import org.hibernate.annotations.DynamicUpdate;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-@SqlResultSetMapping(name = "TicketDuplicity",
+@SqlResultSetMapping(name = "TicketRules",
         classes = @ConstructorResult(
-                targetClass = TicketDuplicityDTO.class,
+                targetClass = TicketValidationDTO.class,
                 columns = {
-                        @ColumnResult(name = "agrupamento_a", type = String.class),
-                        @ColumnResult(name = "agrupamento_b", type = String.class),
-                        @ColumnResult(name = "agrupamento_c", type = String.class),
-                        @ColumnResult(name = "bilhete_behavior", type = String.class),
-                        @ColumnResult(name = "cupom", type = Long.class)
+                        @ColumnResult(name = "rule", type = String.class),
+                        @ColumnResult(name = "value", type = Long.class)                        
                     }))
 
-@NamedNativeQuery(name = "Ticket.listDuplicityByDateEmission", resultSetMapping = "TicketDuplicity",
-        query = "select agrupamento_a, agrupamento_b, agrupamento_c, bilhete_behavior, cupom from behavior.ticket where status = 'APPROVED' and  data_emissao between :start and :end")
+@NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
+        query = ""
+                +   "select 'UPDATE' as rule,count(1) as value from ticket where cupom = :cupom and agrupamento_a = :agrupa and id <> :id\n" +
+                    "union\n" +
+                    "select 'INSERT' as rule,count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and cupom = :cupom and  id <> :id\n" +
+                    "union\n" +
+                    "select 'COUNT' as rule,count(1) as value from ticket where agrupamento_a = :agrupa\n"+
+                    "union\n" +
+                    "select 'CUPOM' as rule,max(cupom) as value from ticket where agrupamento_a = :agrupa\n"+
+                    "union\n" + 
+                    "select 'BACKOFFICE' as rule,count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb and  id <> :id")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")

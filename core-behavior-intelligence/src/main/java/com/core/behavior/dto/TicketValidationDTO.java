@@ -16,5 +16,10 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class TicketValidationDTO {
+ 
+    private String rule;
+    private Long value;
+    
+    
     
 }
