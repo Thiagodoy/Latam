@@ -221,17 +221,17 @@ public class ProcessFileJob extends QuartzJobBean {
             store.addAll(success);
             store.addAll(ticketsOld);
             
-            if (!ticketsOld.isEmpty() && ticketsOld.size() > 1) {
-                ticketsOld.sort(new TicketComparator());
-            }
-
-            if (!success.isEmpty() && success.size() > 1) {
-                success.sort(new TicketComparator());
-            }
+//            if (!ticketsOld.isEmpty() && ticketsOld.size() > 1) {
+//                ticketsOld.sort(new TicketComparator());
+//            }
+//
+//            if (!success.isEmpty() && success.size() > 1) {
+//                success.sort(new TicketComparator());
+//            }
 
             long start = System.currentTimeMillis();
 
-            success.forEach(t -> {
+            success.parallelStream().forEach(t -> {
                 factoryBean.getBean().validate(store, t);                
             });
 
@@ -263,7 +263,7 @@ public class ProcessFileJob extends QuartzJobBean {
         LocalDate s = LocalDate.now().minusDays(90);
         List<Ticket> result =  ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e),codigoAgencia);
         
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PARSER ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ getTicketWrited ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         return result;
     }
 

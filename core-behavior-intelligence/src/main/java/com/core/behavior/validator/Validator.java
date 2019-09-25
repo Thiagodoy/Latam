@@ -1558,9 +1558,9 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public Optional<Ticket> validate(List<Ticket> list, Ticket ticket) {
+    public void validate(List<Ticket> list, Ticket ticket) {
 
-        Optional<Ticket> result = Optional.empty();
+       /// Optional<Ticket> result = Optional.empty();
 
       //  long start = System.currentTimeMillis();
         
@@ -1590,7 +1590,7 @@ public class Validator implements IValidator {
                     ticket.setType(TicketTypeEnum.INSERT);
                     ticket.setStatus(TicketStatusEnum.APPROVED);
                     verificaCupom(list, ticket);
-                    result = Optional.of(ticket);
+                    //result = Optional.of(ticket);
                 } else if (backOffice.isPresent()) {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                     ticket.setBilheteBehavior(null);
@@ -1605,13 +1605,13 @@ public class Validator implements IValidator {
                 } else {
                     ticket.setType(TicketTypeEnum.INSERT);
                     verificaCupom(list, ticket);
-                    result = Optional.of(ticket);
+                    //result = Optional.of(ticket);
                 }
                 ticket.setStatus(TicketStatusEnum.APPROVED);
         }
 
        // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-        return result;
+      //  return result;
 
     }
     
@@ -1624,19 +1624,20 @@ public class Validator implements IValidator {
 
     private void verificaCupom(List<Ticket> list, Ticket ticket) {
 
-        final long count = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
-        Optional<Ticket> opt = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
+        //long start = System.currentTimeMillis();
+        final long count = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
+        Optional<Ticket> opt = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
 
         if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
             ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
         }else if(count > 0){
-            Optional<Ticket> optT = list.stream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
+            Optional<Ticket> optT = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
             
             if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){             
                    ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
              } 
         }
-
+        //Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ verificaCupom ] -> " + ((System.currentTimeMillis() - start)) + " milesegundos");
     }
     
     private void generateNameClient(){

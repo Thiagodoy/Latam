@@ -28,7 +28,7 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     @Query(nativeQuery = true)
-    List<TicketDuplicityDTO>listDuplicityByDateEmission(@Param("start")LocalDate start, @Param("end") LocalDate end);
+    List<TicketDuplicityDTO>rules(@Param("agrupamento_a") String agrupamentoA,@Param("agrupamento_b")String agrupamentoB,@Param("cupom") Long cupom,@Param("id") Long id);
     
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket>findByFileId(@Param("fileId")Long fileId);

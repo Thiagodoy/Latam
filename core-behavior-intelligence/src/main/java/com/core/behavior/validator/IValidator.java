@@ -69,7 +69,7 @@ public interface IValidator {
     IValidator checkGrupoConsolida(); 
     
     Optional<Ticket> validate(TicketDTO ticketDto);
-    Optional<Ticket> validate(List<Ticket> list, Ticket ticket);
+    void validate(List<Ticket> list, Ticket ticket);
     
     
 }
