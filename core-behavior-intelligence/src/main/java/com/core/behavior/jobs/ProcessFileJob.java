@@ -1,9 +1,7 @@
 package com.core.behavior.jobs;
 
-import com.core.behavior.comparator.TicketComparator;
 import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
-import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
@@ -20,7 +18,6 @@ import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
@@ -31,13 +28,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
@@ -85,6 +80,7 @@ public class ProcessFileJob extends QuartzJobBean {
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
+    private static final int THREAD_POLL = 100;
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -136,16 +132,17 @@ public class ProcessFileJob extends QuartzJobBean {
                 List<Ticket> success = (List<Ticket>) resul.get("success");
                 List<Log> error = (List<Log>) resul.get("error");
 
-//                success.parallelStream().forEach(t -> {
-//                    t.setStatus(TicketStatusEnum.VALIDATION);
-//                });
-
+                success.parallelStream().forEach(t -> {
+                    t.setStatus(TicketStatusEnum.VALIDATION);
+                });
+                
                 this.writeErrors(error);
                 //final List<Ticket> ticketsOld = this.getTicketWrited(codigoAgencia);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 //Teste depois remover
                 //this.saveTickets(success);
+                this.runRules2(success);
                 this.runRules3(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
@@ -162,14 +159,14 @@ public class ProcessFileJob extends QuartzJobBean {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
         } catch (Exception e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal]", e);
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal] file -> " + fileId, e);
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
             try {
                 FileUtils.forceDelete(file);
             } catch (IOException ex) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "Erro ao deletar o arquivo -> " + fileId, ex);
             }
 
             if (f != null) {
@@ -182,13 +179,13 @@ public class ProcessFileJob extends QuartzJobBean {
         }
     }
 
-    private void saveTickets(List<Ticket> list) throws SQLException {
-
-        long start = System.currentTimeMillis();
-        ticketService.saveBatch(list);
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ SALVA TICKETS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-    }
+//    private void saveTickets(List<Ticket> list) throws SQLException {
+//
+//        long start = System.currentTimeMillis();
+//        ticketService.saveBatch(list);
+//        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ SALVA TICKETS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+//
+//    }
 
     private Map<String, Object> runRule1(FileParsedDTO dto) {
 
@@ -219,30 +216,40 @@ public class ProcessFileJob extends QuartzJobBean {
         return map;
     }
 
-    private void runRules3(List<Ticket> success) {
+    private void runRules2(List<Ticket> success) {
 
         long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(100);
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
         success.parallelStream().forEach(t -> {
-            executorService.submit(new Executor(ticketService,t));
+            executorService.submit(new Executor(ticketService, t));
         });
 
         executorService.shutdown();
         //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {
-        }
+        while (!executorService.isTerminated()) { }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-    }    
-    
-    private void checkCupom(List<Ticket> succes){
-        
-        
-        
-        
-        
+    }
+
+    private void runRules3(List<Ticket> success) {
+
+        long start = System.currentTimeMillis();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
+
+        success.parallelStream()
+                .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
+                .forEach(t -> {
+                    executorService.submit(new TicketCupomValidationJob(ticketService, t));
+                });
+
+        executorService.shutdown();
+        //Aguarda o termino do processamento
+        while (!executorService.isTerminated()) { }
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
     }
 
     private void generateIds(List<Ticket> tickets) throws Exception {
@@ -261,23 +268,23 @@ public class ProcessFileJob extends QuartzJobBean {
 
     }
 
-    private List<Ticket> getTicketWrited(String codigoAgencia) {
-
-        long start = System.currentTimeMillis();
-        LocalDate e = LocalDate.now().plusDays(1);
-        LocalDate s = LocalDate.now().minusDays(90);
-        List<Ticket> result = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e), codigoAgencia);
-
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ getTicketWrited ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-        return result;
-    }
+//    private List<Ticket> getTicketWrited(String codigoAgencia) {
+//
+//        long start = System.currentTimeMillis();
+//        LocalDate e = LocalDate.now().plusDays(1);
+//        LocalDate s = LocalDate.now().minusDays(90);
+//        List<Ticket> result = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e), codigoAgencia);
+//
+//        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ getTicketWrited ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+//        return result;
+//    }
 
     private void writeErrors(List<Log> error) {
 
         if (!error.isEmpty()) {
             long start = System.currentTimeMillis();
             logService.saveBatch(error);
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PERSIST LOG ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
     }
 

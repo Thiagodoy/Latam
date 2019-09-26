@@ -1,6 +1,6 @@
 package com.core.behavior.services;
 
-import com.amazonaws.services.rds.model.Option;
+import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
@@ -25,7 +25,6 @@ import  static com.core.behavior.util.Utils.TypeField;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 
 
@@ -148,6 +147,10 @@ public class TicketService {
     
     public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end, String codigoAgencia){
         return ticketRepository.findBydataEmissaoBetween(start, end);
+    }
+    
+    public TicketCountCupomDTO rulesCountCupom(Ticket ticket){
+        return ticketRepository.rulesCountCupom(ticket.getAgrupamentoA(), ticket.getCupom());
     }
 
 }

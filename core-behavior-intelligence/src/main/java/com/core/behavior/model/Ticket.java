@@ -1,6 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
+import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
@@ -18,8 +19,6 @@ import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
@@ -43,12 +42,23 @@ import org.hibernate.annotations.DynamicUpdate;
                         @ColumnResult(name = "backoffice", type = Long.class),
                     }))
 
+
+@SqlResultSetMapping(name = "TicketRulesCountCupom",
+        classes = @ConstructorResult(
+                targetClass = TicketCountCupomDTO.class,
+                columns = {
+                        @ColumnResult(name = "count", type = Long.class)                       
+                    }))
+
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
         query = "select (select count(1)  from ticket where cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update',\n" +
                 "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
                 "(select count(1) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR') ) as count,\n" +
                 "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as cupom ,\n" +
                 "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as backoffice")
+
+@NamedNativeQuery(name = "Ticket.rulesCountCupom", resultSetMapping = "TicketRulesCountCupom",
+        query = "select count(cupom) count  from ticket where agrupamento_a = :agrupa and cupom <= :cupom and type = 'INSERT'")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")

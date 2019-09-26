@@ -1622,23 +1622,23 @@ public class Validator implements IValidator {
 //        
 //    }
 
-    private void verificaCupom(List<Ticket> list, Ticket ticket) {
-
-        //long start = System.currentTimeMillis();
-        final long count = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
-        Optional<Ticket> opt = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
-
-        if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
-            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-        }else if(count > 0){
-            Optional<Ticket> optT = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
-            
-            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){             
-                   ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
-             } 
-        }
-        //Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ verificaCupom ] -> " + ((System.currentTimeMillis() - start)) + " milesegundos");
-    }
+//    private void verificaCupom(List<Ticket> list, Ticket ticket) {
+//
+//        //long start = System.currentTimeMillis();
+//        final long count = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
+//        Optional<Ticket> opt = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
+//
+//        if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
+//            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
+//        }else if(count > 0){
+//            Optional<Ticket> optT = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
+//            
+//            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){             
+//                   ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
+//             } 
+//        }
+//        //Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ verificaCupom ] -> " + ((System.currentTimeMillis() - start)) + " milesegundos");
+//    }
     
     private void generateNameClient(){
         

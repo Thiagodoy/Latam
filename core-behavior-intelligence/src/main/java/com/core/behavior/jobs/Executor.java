@@ -40,7 +40,7 @@ public class Executor implements Runnable {
 
             if (rules.getInsert() == 0 || rules.getInsert() > 0 && rules.getUpdate() == 0) {
                 ticket.setType(TicketTypeEnum.INSERT);
-                ticket.setStatus(TicketStatusEnum.APPROVED);
+                //ticket.setStatus(TicketStatusEnum.APPROVED);
 
                 if (rules.getInsert() > 0 && rules.getUpdate() == 0) {
                     List<Ticket> updates = this.service.findtFirstTicket(ticket);
@@ -52,7 +52,7 @@ public class Executor implements Runnable {
             } else if (rules.getUpdate() > 0) {
 
                 ticket.setType(TicketTypeEnum.UPDATE);
-                ticket.setStatus(TicketStatusEnum.APPROVED);
+                //ticket.setStatus(TicketStatusEnum.APPROVED);
                 List<Ticket> updates = this.service.findtToUpdate(ticket);
                 Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getLineFile)).get();
                 ticket.setBilheteBehavior(uo.getBilheteBehavior());

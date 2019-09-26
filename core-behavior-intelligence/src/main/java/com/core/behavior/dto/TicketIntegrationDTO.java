@@ -76,6 +76,7 @@ public class TicketIntegrationDTO {
     private static final NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
     
       
+       
 
     public TicketIntegrationDTO(Ticket ticket) {
 

@@ -53,6 +53,8 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
+    
+    private final int QTD_LOAD = 100000;
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -68,7 +70,7 @@ public class IntegrationJob extends QuartzJobBean {
             uploadFolder.mkdir();
         }
 
-        PageRequest page = PageRequest.of(0, 1000);
+        PageRequest page = PageRequest.of(0, QTD_LOAD);
 
         List<Ticket> tickets = ticketService.listByStatus(TicketStatusEnum.APPROVED, page);
 

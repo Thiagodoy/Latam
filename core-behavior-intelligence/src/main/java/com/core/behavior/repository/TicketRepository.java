@@ -5,6 +5,7 @@
  */
 package com.core.behavior.repository;
 
+import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
@@ -31,6 +32,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(nativeQuery = true)
     TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom);
+    
+    @Query(nativeQuery = true)
+    TicketCountCupomDTO rulesCountCupom(@Param("agrupa") String agrupamentoA,Long cupom);
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa")
     List<Ticket> findtToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom);
