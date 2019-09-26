@@ -39,34 +39,40 @@ public class Executor implements Runnable {
 
         try {
 
-            List<TicketValidationDTO> rules = this.service.checkRules(ticket);
+            TicketValidationDTO rules = this.service.checkRules(ticket);
 
-            Optional<TicketValidationDTO> update = rules.stream().filter(r -> r.getRule().equals("UPDATE")).findFirst();
-            Optional<TicketValidationDTO> insert = rules.stream().filter(r -> r.getRule().equals("INSERT")).findFirst();
-            Optional<TicketValidationDTO> backoffice = rules.stream().filter(r -> r.getRule().equals("BACKOFFICE")).findFirst();
-            Optional<TicketValidationDTO> count = rules.stream().filter(r -> r.getRule().equals("COUNT")).findFirst();
-            Optional<TicketValidationDTO> cupom = rules.stream().filter(r -> r.getRule().equals("CUPOM")).findFirst();
+            
+            
+            
+            
+//            if(insert.get().getValue() == 0){
+//                ticket.setType(TicketTypeEnum.INSERT);
+//                ticket.setStatus(TicketStatusEnum.APPROVED);
+//            }else if(insert.get().getValue() > 0 && update.get().getValue() > 0){
+//            
+//            }
+            
 
-            if (update.get().getValue() > 0) {
+            if (rules.getUpdate() > 0) {
                 ticket.setType(TicketTypeEnum.UPDATE);
                 ticket.setStatus(TicketStatusEnum.APPROVED);
                 List<Ticket> updates = this.service.findtToUpdate(ticket);
                 Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getCupom)).get();
                 ticket.setBilheteBehavior(uo.getBilheteBehavior());
-            } else if (insert.get().getValue() == 0) {
+            } else if (rules.getInsert() == 0) {
                 ticket.setType(TicketTypeEnum.INSERT);
                 ticket.setStatus(TicketStatusEnum.APPROVED);
 
-                if (cupom.isPresent() && !cupom.get().getValue().equals(count.get().getValue())) {
+                if (!rules.getCupom().equals(rules.getCount())) {
                     ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-                } else if (count.get().getValue() > 0L) {
-                    Ticket optT = service.findtFirstTicket(ticket).stream().sorted(Comparator.comparing(Ticket::getCreatedAt)).findFirst().get();
+                } else if (rules.getCount() > 0L) {
+                    Ticket optT = service.findtFirstTicket(ticket).stream().sorted(Comparator.comparing(Ticket::getLineFile)).findFirst().get();
 
                     if (optT != null && !ticket.getBilheteBehavior().equals(optT.getBilheteBehavior())) {
                         ticket.setBilheteBehavior(optT.getBilheteBehavior());
                     }
                 }
-            } else if (backoffice.get().getValue() > 0) {
+            } else if (rules.getBackoffice() > 0) {
                 ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                 ticket.setBilheteBehavior(null);
             }

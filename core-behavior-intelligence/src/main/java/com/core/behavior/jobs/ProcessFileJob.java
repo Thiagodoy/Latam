@@ -144,6 +144,7 @@ public class ProcessFileJob extends QuartzJobBean {
                 //final List<Ticket> ticketsOld = this.getTicketWrited(codigoAgencia);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
+                //Teste depois remover
                 this.saveTickets(success);
                 this.runRules3(success);
 

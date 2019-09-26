@@ -36,21 +36,19 @@ import org.hibernate.annotations.DynamicUpdate;
         classes = @ConstructorResult(
                 targetClass = TicketValidationDTO.class,
                 columns = {
-                        @ColumnResult(name = "rule", type = String.class),
-                        @ColumnResult(name = "value", type = Long.class)                        
+                        @ColumnResult(name = "update", type = Long.class),
+                        @ColumnResult(name = "insert", type = Long.class),
+                        @ColumnResult(name = "count", type = Long.class),                        
+                        @ColumnResult(name = "cupom", type = Long.class),
+                        @ColumnResult(name = "backoffice", type = Long.class),
                     }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = ""
-                +   "select 'UPDATE' as rule,count(1) as value from ticket where cupom = :cupom and agrupamento_a = :agrupa and id <> :id\n" +
-                    "union\n" +
-                    "select 'INSERT' as rule,count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and cupom = :cupom and  id <> :id\n" +
-                    "union\n" +
-                    "select 'COUNT' as rule,count(1) as value from ticket where agrupamento_a = :agrupa\n"+
-                    "union\n" +
-                    "select 'CUPOM' as rule,max(cupom) as value from ticket where agrupamento_a = :agrupa\n"+
-                    "union\n" + 
-                    "select 'BACKOFFICE' as rule,count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb and  id <> :id")
+        query = "select (select count(1)  from ticket where cupom = :cupom and agrupamento_a = :agrupa and id <> :id and type is null) as 'update',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and  id <> :id and type is null) as 'insert',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa ) as count,\n" +
+                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa) as cupom ,\n" +
+                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb and  id <> :id) as backoffice")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")

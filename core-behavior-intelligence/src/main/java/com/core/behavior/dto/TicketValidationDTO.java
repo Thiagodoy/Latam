@@ -17,9 +17,11 @@ import lombok.Data;
 @AllArgsConstructor
 public class TicketValidationDTO {
  
-    private String rule;
-    private Long value;
     
-    
+    private Long update;
+    private Long insert;
+    private Long count;
+    private Long cupom;
+    private Long backoffice;
     
 }

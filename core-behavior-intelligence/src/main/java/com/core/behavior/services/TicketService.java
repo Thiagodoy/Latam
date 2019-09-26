@@ -128,7 +128,7 @@ public class TicketService {
         return null;//ticketRepository.listDuplicityByDateEmission(start, end);
     }
     
-    public List<TicketValidationDTO> checkRules(Ticket ticket){
+    public TicketValidationDTO checkRules(Ticket ticket){
         return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom(), ticket.getId());
     }
     

@@ -30,12 +30,12 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(nativeQuery = true)
-    List<TicketValidationDTO> rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom, @Param("id") Long id);
+    TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom, @Param("id") Long id);
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa and id <> :id")
     List<Ticket> findtToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom, @Param("id") Long id);
 
-    @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = 1 and t.agrupamento_a = :agrupa ")
+    @Query(nativeQuery = true, value = "select * from ticket t where t.agrupamento_a = :agrupa ")
     List<Ticket> findtFirstTicket(@Param("agrupa") String agrupamentoA);
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
