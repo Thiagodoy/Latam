@@ -136,16 +136,16 @@ public class ProcessFileJob extends QuartzJobBean {
                 List<Ticket> success = (List<Ticket>) resul.get("success");
                 List<Log> error = (List<Log>) resul.get("error");
 
-                success.parallelStream().forEach(t -> {
-                    t.setStatus(TicketStatusEnum.VALIDATION);
-                });
+//                success.parallelStream().forEach(t -> {
+//                    t.setStatus(TicketStatusEnum.VALIDATION);
+//                });
 
                 this.writeErrors(error);
                 //final List<Ticket> ticketsOld = this.getTicketWrited(codigoAgencia);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 //Teste depois remover
-                this.saveTickets(success);
+                //this.saveTickets(success);
                 this.runRules3(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
@@ -236,6 +236,14 @@ public class ProcessFileJob extends QuartzJobBean {
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }    
+    
+    private void checkCupom(List<Ticket> succes){
+        
+        
+        
+        
+        
+    }
 
     private void generateIds(List<Ticket> tickets) throws Exception {
 

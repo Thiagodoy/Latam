@@ -44,11 +44,11 @@ import org.hibernate.annotations.DynamicUpdate;
                     }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select (select count(1)  from ticket where cupom = :cupom and agrupamento_a = :agrupa and id <> :id and type is null) as 'update',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and  id <> :id and type is null) as 'insert',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa ) as count,\n" +
-                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa) as cupom ,\n" +
-                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb and  id <> :id) as backoffice")
+        query = "select (select count(1)  from ticket where cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR') ) as count,\n" +
+                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as cupom ,\n" +
+                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as backoffice")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
@@ -242,7 +242,7 @@ public class Ticket {
 
     @PositionParameter(value = 46)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     public Long id;
 

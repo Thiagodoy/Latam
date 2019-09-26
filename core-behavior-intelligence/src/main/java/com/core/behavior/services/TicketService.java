@@ -24,6 +24,7 @@ import  static com.core.behavior.util.Utils.mountBatchInsert;
 import  static com.core.behavior.util.Utils.TypeField;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 
@@ -43,6 +44,11 @@ public class TicketService {
 
     @Autowired
     private DataSource dataSource;
+    
+    
+    public void saveOnly(Ticket ticke) throws SQLException{
+        this.saveBatch(Arrays.asList(ticke));
+    }
 
     public void saveBatch(List<Ticket> ticket) throws SQLException {
         
@@ -129,11 +135,11 @@ public class TicketService {
     }
     
     public TicketValidationDTO checkRules(Ticket ticket){
-        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom(), ticket.getId());
+        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom());
     }
     
     public List<Ticket> findtToUpdate(Ticket ticket){
-        return ticketRepository.findtToUpdate(ticket.getAgrupamentoA(),ticket.getCupom(), ticket.getId());
+        return ticketRepository.findtToUpdate(ticket.getAgrupamentoA(),ticket.getCupom());
     }
     
     public List<Ticket> findtFirstTicket (Ticket ticket){
