@@ -128,6 +128,7 @@ public class FileReturnJob extends QuartzJobBean {
             Map<String, String> parameter = new HashMap<String, String>();
             parameter.put(":email", emailUser);
 
+            //:FIXME Colocar o endereço no arquivo de configurações
             String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileTemp.getName();
 
             parameter.put(":link", link);
