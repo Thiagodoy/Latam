@@ -4,6 +4,7 @@ import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
+import javax.sql.DataSource;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -14,14 +15,28 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.quartz.QuartzDataSource;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Configuration
+@EnableAutoConfiguration
 public class QuartzConfiguration {
 
+    
+    
+    
+//    @Bean
+//    @QuartzDataSource
+//    public DataSource quartzDataSource() {
+//        return DataSourceBuilder.create().build();
+//    }
+    
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
         Scheduler scheduler = bean.getScheduler();
@@ -58,7 +73,7 @@ public class QuartzConfiguration {
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
-        scheduler.scheduleJob(detail2, crontrigger2);
+        //scheduler.scheduleJob(detail2, crontrigger2);
     }
 
 }

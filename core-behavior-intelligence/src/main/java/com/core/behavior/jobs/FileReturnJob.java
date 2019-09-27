@@ -93,14 +93,18 @@ public class FileReturnJob extends QuartzJobBean {
         final com.core.behavior.model.File file = fileRepository.findById(id).get();
         final Agency agency = agencyRepository.findById(file.getCompany()).get();
 
-        final long layout = agency.getLayoutFile();
-        Comparator lineNumber = Comparator.comparingLong(Log::getLineNumber);
-        final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
-        logDistinct.sort(lineNumber);
-        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
+        
+        start = System.currentTimeMillis();
+        
+        final long layout = agency.getLayoutFile();        
+        final List<Log> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
+        
+        logDistinct.parallelStream().sorted(Comparator.comparing(Log::getLineNumber));
+        
+        List<LineErrorDTO> e =   new LinkedList<LineErrorDTO>();
         LineErrorDTO.reset();
 
-        logDistinct.stream().forEach(l -> {
+        logDistinct.forEach(l -> {
 
             LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
 
@@ -112,6 +116,8 @@ public class FileReturnJob extends QuartzJobBean {
             });
             e.add(error);
         });
+        
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ MOUNT DTO ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
         File fileTemp = null;
         try {
@@ -190,6 +196,9 @@ public class FileReturnJob extends QuartzJobBean {
         String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");
         SXSSFRow rr = sheet.createRow(0);
         cellBold.setFont(font);
+        
+       
+        
 
         //Escreve o header do arquivo
         for (int i = 0; i < header.length; i++) {
