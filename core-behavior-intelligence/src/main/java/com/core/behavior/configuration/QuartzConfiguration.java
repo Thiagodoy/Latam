@@ -54,7 +54,7 @@ public class QuartzConfiguration {
                 .withDescription("Integrador")
                 .build();
         CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
