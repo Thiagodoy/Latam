@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -53,8 +55,8 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
-    
-    private final int QTD_LOAD = 100000;
+
+    private final int QTD_LOAD = 10000;
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -91,8 +93,7 @@ public class IntegrationJob extends QuartzJobBean {
 
         }
 
-        if (!fullLayout.isEmpty()) {           
-            
+        if (!fullLayout.isEmpty()) {
 
             List<Ticket> fullLayoutInsert = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
             List<Ticket> fullLayoutUpdate = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
@@ -117,11 +118,26 @@ public class IntegrationJob extends QuartzJobBean {
         boolean isUploaded = this.uploadAndMoveFile(file, generateTag(layout, type));
 
         if (isUploaded) {
-            list.parallelStream().forEach(t -> {
-                t.setFileIntegration(fileName);
-                t.setStatus(TicketStatusEnum.WRITED);
-                this.ticketService.save(t);
-            });
+
+            long start = System.currentTimeMillis();
+            ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
+
+            list.parallelStream()
+                    .forEach(t -> {
+                        executorService.submit(() -> {
+                            t.setFileIntegration(fileName);
+                            t.setStatus(TicketStatusEnum.WRITED);
+                            this.ticketService.save(t);
+                        });
+                    });
+
+            executorService.shutdown();
+            //Aguarda o termino do processamento
+            while (!executorService.isTerminated()) {
+            }
+
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ integração ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
         } else {
             file.delete();
         }
@@ -171,7 +187,14 @@ public class IntegrationJob extends QuartzJobBean {
         FileIntegrationDTO dTO = new FileIntegrationDTO();
         List<TicketIntegrationDTO> l = Collections.synchronizedList(new ArrayList<TicketIntegrationDTO>());
         list.parallelStream().forEach(t -> {
-            l.add(new TicketIntegrationDTO((t)));
+            
+            try {
+                l.add(new TicketIntegrationDTO((t)));
+            } catch (Exception e) {
+                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[mountDTO] id -> " + t.getId(), e);
+            }
+            
+            
         });
 
         dTO.setIntegrationDTOs(l);
