@@ -322,9 +322,9 @@ public class FileService {
         String header = Utils.layoutMin.stream().collect(Collectors.joining(";"));
         buffer.append("ERRO;" + header + "\n");
 
-        logService.listByFileId(idFile).forEach(l -> {
-            buffer.append(l);
-        });
+//        logService.listByFileId(idFile).forEach(l -> {
+//            buffer.append(l);
+//        });
 
         return buffer;
     }

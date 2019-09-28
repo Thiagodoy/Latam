@@ -50,6 +50,10 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
@@ -80,28 +84,97 @@ public class FileReturnJob extends QuartzJobBean {
     @Autowired
     private NotificacaoService notificacaoService;
 
-    @Override
-    protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+    private SXSSFWorkbook wb;
+    private SXSSFSheet sheet;
 
-        Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
-        String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
+    private void createFile(long layout, String fileName) {
+
+        String sheetName = "Erros";
+
+        wb = new SXSSFWorkbook(1000);
+
+        sheet = wb.createSheet(sheetName);
+
+        CellStyle cellBold = wb.createCellStyle();
+
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short) 10);
+        font.setFontName("Arial");
+        font.setColor(IndexedColors.BLACK.getIndex());
+        font.setBold(true);
+        font.setItalic(true);
+
+        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");
+        SXSSFRow rr = sheet.createRow(0);
+        cellBold.setFont(font);
+
+        //Escreve o header do arquivo
+        for (int i = 0; i < header.length; i++) {
+            SXSSFCell cell = rr.createCell(i);
+            cell.setCellValue(header[i]);
+        }
+
+        Font fontRecord = wb.createFont();
+        fontRecord.setCharSet(XSSFFont.ANSI_CHARSET);
+
+        CellStyle style = wb.createCellStyle();
+        style.setFont(fontRecord);
+
+    }
+
+    private void writeLote(List<LineErrorDTO> errors) {
 
         long start = System.currentTimeMillis();
-        final List<Log> logs = logRepository.findByFileId(id);
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ LOAD LOGS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        CellStyle backgroundStyle = wb.createCellStyle();
+        backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-        final com.core.behavior.model.File file = fileRepository.findById(id).get();
-        final Agency agency = agencyRepository.findById(file.getCompany()).get();
+        Font fontRecord = wb.createFont();
+        fontRecord.setCharSet(XSSFFont.ANSI_CHARSET);
 
+        CellStyle style = wb.createCellStyle();
+        style.setFont(fontRecord);
+
+        Map<String, String> comments = this.appendComments(errors);
+
+        for (int r = 0; r < errors.size(); r++) {
+            SXSSFRow row = sheet.createRow(r + 1);
+
+            //iterating c number of columns
+            String[] values = errors.get(r).getLineContent().split("\\[col\\]");
+            for (int c = 0; c < values.length; c++) {
+                SXSSFCell cell = row.createCell(c);
+                //cell.setCellStyle(style);
+                cell.setCellValue(values[c]);
+                CellReference cellReference = new CellReference(cell);
+                CellAddress currentCellAddress = new CellAddress(cellReference);
+
+                String value = comments.remove(currentCellAddress.formatAsString());
+
+                //Adicionando comentarios                
+                if (value != null) {
+                    Comment com = createCellComment(sheet, "Behavior", value, cell);
+                    cell.setCellComment(com);
+                    com.setAddress(cell.getAddress());
+                    //.setCellStyle(borderStyle);
+                    cell.setCellStyle(backgroundStyle);
+                }
+
+            }
+        }
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeLote ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+    }
+
+    private List<LineErrorDTO> prepareData(List<Log> logs, Agency agency) {
+
+        long start = System.currentTimeMillis();
         
-        start = System.currentTimeMillis();
-        
-        final long layout = agency.getLayoutFile();        
         final List<Log> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
-        
+
         logDistinct.parallelStream().sorted(Comparator.comparing(Log::getLineNumber));
-        
-        List<LineErrorDTO> e =   new LinkedList<LineErrorDTO>();
+
+        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
         LineErrorDTO.reset();
 
         logDistinct.forEach(l -> {
@@ -116,52 +189,91 @@ public class FileReturnJob extends QuartzJobBean {
             });
             e.add(error);
         });
-        
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ MOUNT DTO ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-        File fileTemp = null;
-        try {
-            
-            start = System.currentTimeMillis();
-            fileTemp = this.generateFile(e, layout, file.getName());            
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ MAKE XLSX ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-            
-            this.uploadFileReturn(fileTemp, agency);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-            Notificacao notificacao = new Notificacao();
+        return e;
+    }
+    
+    private void createNotification(String fileName, String fileNameReturn, String emailUser, Agency agency){
+        Notificacao notificacao = new Notificacao();
             notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
 
             Map<String, String> parameter = new HashMap<String, String>();
             parameter.put(":email", emailUser);
 
             //:FIXME Colocar o endereço no arquivo de configurações
-            String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileTemp.getName();
+            String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
 
             parameter.put(":link", link);
 
-            String nameUser = userActivitiService.getUser(file.getUserId()).getFirstName();
+            String nameUser = userActivitiService.getUser(emailUser).getFirstName();
 
             parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
-            parameter.put(":arquivo", fileTemp.getName());
+            parameter.put(":arquivo", fileName);
 
             notificacao.setParameters(Utils.mapToString(parameter));
             notificacaoService.save(notificacao);
 
+
+    }
+
+    @Override
+    protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+
+        Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
+        String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
+
+        PageRequest page = PageRequest.of(0, 50000, Sort.by("lineNumber").ascending());
+        Page<Log> pageResponse = logRepository.findByFileId(id, page);
+
+        final com.core.behavior.model.File file = fileRepository.findById(id).get();
+        final Agency agency = agencyRepository.findById(file.getCompany()).get();
+
+        this.createFile(agency.getLayoutFile(), file.getName());
+
+        List<LineErrorDTO> errors = this.prepareData(pageResponse.getContent(), agency);
+        this.writeLote(errors);
+
+        Pageable nex = page.next();
+
+        while (nex != null) {
+            pageResponse = logRepository.findByFileId(id, page);
+            errors = this.prepareData(pageResponse.getContent(), agency);
+            this.writeLote(errors);
+            nex = page.next();
+        }
+
+        String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
+
+        File temp = new File(fileNameNew + "_error.xlsx");
+        FileOutputStream fileOut;
+        try {
+            fileOut = new FileOutputStream(temp);
+            wb.write(fileOut);
+            wb.dispose();
+            fileOut.flush();
+            fileOut.close();
+            
+            this.uploadFileReturn(temp, agency);
+            
+            this.createNotification(file.getName(),temp.getName(),emailUser,agency);
+
         } catch (Exception ex) {
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
-        } finally {
+            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+        }finally {
 
             try {
 
-                if (fileTemp != null) {
-                    FileUtils.forceDelete(fileTemp);
+                if (temp != null) {
+                    FileUtils.forceDelete(temp);
                 }
 
             } catch (IOException ex) {
                 Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
             }
         }
-
+        
     }
 
     private void uploadFileReturn(File file, Agency agency) throws IOException {
@@ -196,9 +308,6 @@ public class FileReturnJob extends QuartzJobBean {
         String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");
         SXSSFRow rr = sheet.createRow(0);
         cellBold.setFont(font);
-        
-       
-        
 
         //Escreve o header do arquivo
         for (int i = 0; i < header.length; i++) {

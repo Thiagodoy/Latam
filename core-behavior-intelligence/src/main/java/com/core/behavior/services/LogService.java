@@ -20,6 +20,8 @@ import static com.core.behavior.util.Utils.TypeField;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 /**
  *
@@ -53,8 +55,8 @@ public class LogService {
         logRepository.save(log);
     }
 
-    public List<Log> listByFileId(Long fileId) {
-        return logRepository.findByFileId(fileId);
+    public Page<Log> listByFileId(Long fileId, PageRequest page) {
+        return logRepository.findByFileId(fileId, page);
     }
 
     public List<LogStatusSinteticoDTO> listLogSintetico(Long fileId, String fieldName) {
