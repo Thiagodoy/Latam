@@ -20,6 +20,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
+import javax.persistence.NamedQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,8 @@ import lombok.EqualsAndHashCode;
         + "from behavior.log "
         + "where file_id = :fileId and field_name = :fieldName"
         + " group by message_error", resultSetMapping = "LogResult")
+
+
 
 @Entity
 @Table(schema = "behavior", name = "log")

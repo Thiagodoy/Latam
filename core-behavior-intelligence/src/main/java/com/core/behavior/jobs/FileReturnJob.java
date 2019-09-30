@@ -13,6 +13,7 @@ import com.core.behavior.model.Notificacao;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.repository.LogRepository;
+import com.core.behavior.services.LogService;
 import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
@@ -21,14 +22,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -65,9 +72,11 @@ public class FileReturnJob extends QuartzJobBean {
 
     public static final String DATA_FILE_ID = "DATA_FILE_ID";
     public static final String DATA_EMAIL_ID = "DATA_EMAIL_ID";
+    private long line;
+    private int lineWrited;
 
     @Autowired
-    private LogRepository logRepository;
+    private LogService logRepository;
 
     @Autowired
     private ClientAws clientAws;
@@ -91,7 +100,7 @@ public class FileReturnJob extends QuartzJobBean {
 
         String sheetName = "Erros";
 
-        wb = new SXSSFWorkbook(1000);
+        wb = new SXSSFWorkbook();
 
         sheet = wb.createSheet(sheetName);
 
@@ -120,6 +129,8 @@ public class FileReturnJob extends QuartzJobBean {
         CellStyle style = wb.createCellStyle();
         style.setFont(fontRecord);
 
+        this.line = sheet.getLastRowNum();
+
     }
 
     private void writeLote(List<LineErrorDTO> errors) {
@@ -137,8 +148,12 @@ public class FileReturnJob extends QuartzJobBean {
 
         Map<String, String> comments = this.appendComments(errors);
 
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeLote ]  getLastRowNum -> " + sheet.getLastRowNum());
+
+        this.lineWrited = sheet.getLastRowNum();
+
         for (int r = 0; r < errors.size(); r++) {
-            SXSSFRow row = sheet.createRow(r + 1);
+            SXSSFRow row = sheet.createRow(++this.lineWrited);
 
             //iterating c number of columns
             String[] values = errors.get(r).getLineContent().split("\\[col\\]");
@@ -169,111 +184,147 @@ public class FileReturnJob extends QuartzJobBean {
     private List<LineErrorDTO> prepareData(List<Log> logs, Agency agency) {
 
         long start = System.currentTimeMillis();
-        
+
         final List<Log> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
 
-        logDistinct.parallelStream().sorted(Comparator.comparing(Log::getLineNumber));
-
+        //logDistinct.parallelStream().sorted(Comparator.comparing(Log::getLineNumber));
         List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
         LineErrorDTO.reset();
 
-        logDistinct.forEach(l -> {
+        logDistinct.parallelStream().forEach(l -> {
+            LineErrorDTO error = new LineErrorDTO(l.getRecordContent(), l.getLineNumber());
+            synchronized (e) {
+                e.add(error);
+            }
 
-            LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
+        });
 
-            logs.stream().filter(ll -> ll.getRecordContent().equals(l.getRecordContent())).forEach(lll -> {
+        e.parallelStream().sorted(Comparator.comparing(LineErrorDTO::getLineNumber));
 
+        e.forEach(l -> {
+            l.setLine((int) ++this.line);
+        });
+
+        e.parallelStream().forEach(ee -> {
+            logs.parallelStream().filter(ll -> ll.getRecordContent().equals(ee.getLineContent())).forEach(lll -> {
                 final String column = Utils.getPositionExcelColumn(lll.fieldName);
-                error.put(column, lll.getMessageError());
-
+                ee.put(column, lll.getMessageError());
             });
-            e.add(error);
         });
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
         return e;
     }
-    
-    private void createNotification(String fileName, String fileNameReturn, String emailUser, Agency agency){
+
+    private void createNotification(String fileName, String fileNameReturn, String emailUser, Agency agency) {
         Notificacao notificacao = new Notificacao();
-            notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
+        notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
 
-            Map<String, String> parameter = new HashMap<String, String>();
-            parameter.put(":email", emailUser);
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":email", emailUser);
 
-            //:FIXME Colocar o endereço no arquivo de configurações
-            String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
+        //:FIXME Colocar o endereço no arquivo de configurações
+        String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
 
-            parameter.put(":link", link);
+        parameter.put(":link", link);
 
-            String nameUser = userActivitiService.getUser(emailUser).getFirstName();
+        String nameUser = userActivitiService.getUser(emailUser).getFirstName();
 
-            parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
-            parameter.put(":arquivo", fileName);
+        parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
+        parameter.put(":arquivo", fileName);
 
-            notificacao.setParameters(Utils.mapToString(parameter));
-            notificacaoService.save(notificacao);
-
+        notificacao.setParameters(Utils.mapToString(parameter));
+        notificacaoService.save(notificacao);
 
     }
 
     @Override
+
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
         String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
 
-        PageRequest page = PageRequest.of(0, 50000, Sort.by("lineNumber").ascending());
-        Page<Log> pageResponse = logRepository.findByFileId(id, page);
+        PageRequest page = PageRequest.of(0, 500000, Sort.by("lineNumber").ascending());
+        // Page<Log> pageResponse = logRepository.findDistinct(id, page);
+        Stream<Log> pageResponse = logRepository.listDistinctByFileId(id);
 
-        final com.core.behavior.model.File file = fileRepository.findById(id).get();
-        final Agency agency = agencyRepository.findById(file.getCompany()).get();
+        List<LineErrorDTO> e = Collections.synchronizedList(new ArrayList<>());
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+        long start = System.currentTimeMillis();
+        pageResponse.parallel().forEach(l -> {
 
-        this.createFile(agency.getLayoutFile(), file.getName());
+            final LineErrorDTO error = new LineErrorDTO(l.getRecordContent(), l.getLineNumber());
 
-        List<LineErrorDTO> errors = this.prepareData(pageResponse.getContent(), agency);
-        this.writeLote(errors);
+            executorService.submit(() -> {
 
-        Pageable nex = page.next();
+                List<Log> j = logRepository.listByRecordContent(id,error.getLineContent());
 
-        while (nex != null) {
-            pageResponse = logRepository.findByFileId(id, page);
-            errors = this.prepareData(pageResponse.getContent(), agency);
-            this.writeLote(errors);
-            nex = page.next();
+                j.parallelStream().forEach(lll -> {
+                    final String column = Utils.getPositionExcelColumn(lll.fieldName);
+                    error.put(column, lll.getMessageError());
+                });
+
+                e.add(error);
+
+            });
+
+        });
+
+        executorService.shutdown();
+        //Aguarda o termino do processamento
+        while (!executorService.isTerminated()) {
         }
 
-        String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-        File temp = new File(fileNameNew + "_error.xlsx");
-        FileOutputStream fileOut;
-        try {
-            fileOut = new FileOutputStream(temp);
-            wb.write(fileOut);
-            wb.dispose();
-            fileOut.flush();
-            fileOut.close();
-            
-            this.uploadFileReturn(temp, agency);
-            
-            this.createNotification(file.getName(),temp.getName(),emailUser,agency);
-
-        } catch (Exception ex) {
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
-        }finally {
-
-            try {
-
-                if (temp != null) {
-                    FileUtils.forceDelete(temp);
-                }
-
-            } catch (IOException ex) {
-                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
-            }
-        }
-        
+//
+//        final com.core.behavior.model.File file = fileRepository.findById(id).get();
+//        final Agency agency = agencyRepository.findById(file.getCompany()).get();
+//
+//        this.createFile(agency.getLayoutFile(), file.getName());
+//
+//        List<LineErrorDTO> errors = this.prepareData(pageResponse.getContent(), agency);
+//        this.writeLote(errors);
+//
+//        Pageable nex = pageResponse.getPageable().next();
+//        while (nex != null) {
+//            pageResponse = logRepository.findByFileId(id, page);
+//            errors = this.prepareData(pageResponse.getContent(), agency);
+//            this.writeLote(errors);
+//            nex = pageResponse.getPageable().next();
+//        }
+//
+//        String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
+//
+//        File temp = new File(fileNameNew + "_error.xlsx");
+//        FileOutputStream fileOut;
+//        try {
+//            fileOut = new FileOutputStream(temp);
+//            wb.write(fileOut);
+//            wb.dispose();
+//            fileOut.flush();
+//            fileOut.close();
+//
+//            this.uploadFileReturn(temp, agency);
+//
+//            this.createNotification(file.getName(), temp.getName(), emailUser, agency);
+//
+//        } catch (Exception ex) {
+//            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+//        } finally {
+//
+//            try {
+//
+//                if (temp != null) {
+//                    FileUtils.forceDelete(temp);
+//                }
+//
+//            } catch (IOException ex) {
+//                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
+//            }
+//        }
     }
 
     private void uploadFileReturn(File file, Agency agency) throws IOException {

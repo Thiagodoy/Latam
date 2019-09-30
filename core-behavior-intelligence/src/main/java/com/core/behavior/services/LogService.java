@@ -1,8 +1,11 @@
 package com.core.behavior.services;
 
 import com.core.behavior.dto.LogStatusSinteticoDTO;
+import com.core.behavior.jobs.ProcessFileJob;
+import com.core.behavior.jobs.TicketCupomValidationJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.repository.LogRepository;
+import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,9 +22,14 @@ import org.springframework.stereotype.Service;
 import static com.core.behavior.util.Utils.TypeField;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 /**
  *
@@ -55,8 +63,47 @@ public class LogService {
         logRepository.save(log);
     }
 
-    public Page<Log> listByFileId(Long fileId, PageRequest page) {
-        return logRepository.findByFileId(fileId, page);
+    
+    public List<Log> listByRecordContent(Long fileId,String content) {
+        return logRepository.findByRecordContentAndFileId(content,fileId);
+    }
+
+    public Stream<Log> listDistinctByFileId(Long fileId) {
+
+        long start = System.currentTimeMillis();
+
+        final List<Log> listLogDistinct = Collections.synchronizedList(new ArrayList<>());
+
+        PageRequest page = PageRequest.of(0, 50000, Sort.by("lineNumber"));
+
+        Page<Log> result = logRepository.findByFileId(fileId, page);
+
+        List<Log> l = result.get().distinct().collect(Collectors.toList());
+        listLogDistinct.addAll(l);
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+
+        for (int i = 1; i < result.getTotalPages(); i++) {
+
+            PageRequest p = PageRequest.of(i, 10000, Sort.by("lineNumber"));
+
+            executorService.submit(() -> {
+
+                Page<Log> r = logRepository.findByFileId(fileId, p);
+                List<Log> ll = r.get().distinct().collect(Collectors.toList());
+                listLogDistinct.addAll(ll);
+
+            });
+
+        }
+
+        executorService.shutdown();
+        //Aguarda o termino do processamento
+        while (!executorService.isTerminated()) {
+        }
+
+        Logger.getLogger(LogService.class.getName()).log(Level.INFO, "[ listDistinctByFileId ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+        return listLogDistinct.stream();
     }
 
     public List<LogStatusSinteticoDTO> listLogSintetico(Long fileId, String fieldName) {

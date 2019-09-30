@@ -185,7 +185,7 @@ public class Utils {
 
     }
 
-    public static String getPositionExcelColumn(String field) {
+    public synchronized static String getPositionExcelColumn(String field) {
         return positionColumnByField.get(field);
     }
 
