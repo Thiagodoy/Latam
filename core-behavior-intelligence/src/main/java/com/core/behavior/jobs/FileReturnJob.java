@@ -7,12 +7,11 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.LineErrorDTO;
+import com.core.behavior.dto.LogDTO;
 import com.core.behavior.model.Agency;
-import com.core.behavior.model.Log;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
-import com.core.behavior.repository.LogRepository;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.UserActivitiService;
@@ -29,13 +28,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -46,6 +41,7 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.RichTextString;
+
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.streaming.SXSSFCell;
@@ -53,14 +49,17 @@ import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
+
+import org.apache.spark.sql.SparkSession;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
@@ -101,6 +100,7 @@ public class FileReturnJob extends QuartzJobBean {
         String sheetName = "Erros";
 
         wb = new SXSSFWorkbook();
+        wb.setCompressTempFiles(true);
 
         sheet = wb.createSheet(sheetName);
 
@@ -172,7 +172,7 @@ public class FileReturnJob extends QuartzJobBean {
                     cell.setCellComment(com);
                     com.setAddress(cell.getAddress());
                     //.setCellStyle(borderStyle);
-                    cell.setCellStyle(backgroundStyle);
+                    //cell.setCellStyle(backgroundStyle);
                 }
 
             }
@@ -181,40 +181,77 @@ public class FileReturnJob extends QuartzJobBean {
 
     }
 
-    private List<LineErrorDTO> prepareData(List<Log> logs, Agency agency) {
+    private List<LineErrorDTO> prepareData(List<LogDTO> logs) {
 
         long start = System.currentTimeMillis();
 
-        final List<Log> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
-
-        //logDistinct.parallelStream().sorted(Comparator.comparing(Log::getLineNumber));
-        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
+        final List<LogDTO> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> etapa 1");
+        List<LineErrorDTO> e = new ArrayList<LineErrorDTO>();
         LineErrorDTO.reset();
 
         logDistinct.parallelStream().forEach(l -> {
-            LineErrorDTO error = new LineErrorDTO(l.getRecordContent(), l.getLineNumber());
+            LineErrorDTO error = new LineErrorDTO(l.getRecord_content(), l.getLine_number());
             synchronized (e) {
                 e.add(error);
             }
 
         });
 
-        e.parallelStream().sorted(Comparator.comparing(LineErrorDTO::getLineNumber));
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> etapa 2");
 
-        e.forEach(l -> {
+        List<LineErrorDTO> eSorted = e.parallelStream().sorted(Comparator.comparing(LineErrorDTO::getLineNumber)).collect(Collectors.toList());
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> etapa 3");
+
+        eSorted.forEach(l -> {
             l.setLine((int) ++this.line);
         });
 
-        e.parallelStream().forEach(ee -> {
-            logs.parallelStream().filter(ll -> ll.getRecordContent().equals(ee.getLineContent())).forEach(lll -> {
-                final String column = Utils.getPositionExcelColumn(lll.fieldName);
-                ee.put(column, lll.getMessageError());
-            });
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData map ] -> etapa 4");
+
+        Map<String, Map<String, String>> messages = new HashMap<>();
+
+        logs.forEach(mm -> {
+            if (messages.containsKey(mm.getRecord_content())) {
+                Map<String, String> mapfield = messages.get(mm.getRecord_content());
+
+                if (mapfield.containsKey(mm.getField_name())) {
+                    String m = mapfield.get(mm.getField_name()) + "\n" + mm.getMessage_error();
+                    mapfield.put(mm.getField_name(), m);
+                } else {
+                    mapfield.put(mm.getField_name(), mm.getMessage_error());
+                }
+
+            } else {
+                Map<String, String> mapfield = new HashMap<String, String>();
+                mapfield.put(mm.getField_name(), mm.getMessage_error());
+                messages.put(mm.getRecord_content(), mapfield);
+            }
         });
 
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> etapa 5");
+        eSorted.forEach(ee -> {
+            if (messages.containsKey(ee.getLineContent())) {
+                Map<String, String> mapfield = messages.get(ee.getLineContent());
+
+                mapfield.forEach((field, value) -> {
+                    final String column = Utils.getPositionExcelColumn(field);
+                    ee.put(column, value);
+                });
+            }
+
+            messages.remove(ee.getLineContent());
+//            uu.forEach(lll -> {
+//                final String column = Utils.getPositionExcelColumn(lll.field_name);
+//                ee.put(column, lll.getMessage_error());
+//            });
+        });
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> etapa 6");
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-        return e;
+        return eSorted;
     }
 
     private void createNotification(String fileName, String fileNameReturn, String emailUser, Agency agency) {
@@ -239,92 +276,151 @@ public class FileReturnJob extends QuartzJobBean {
 
     }
 
-    @Override
+    private List<LogDTO> getData(Long id) throws ClassNotFoundException {
 
+        JavaSparkContext sc = new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]").set("spark.scheduler.mode", "FAIR").set("spark.scheduler.pool", "5"));
+        
+
+        long start1 = System.currentTimeMillis();
+
+        Class.forName("com.mysql.jdbc.Driver");
+
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("Java Spark SQL data sources example")
+                .config("spark.cores.max", "4")
+                .getOrCreate();
+
+        Dataset<Row> jdbcDF = spark.sqlContext().read()
+                .format("jdbc")
+                .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
+                .option("dbtable", "behavior.log")
+                .option("numPartitions", "10")
+                .option("user", "behint_hmg")
+                .option("password", "Beh1ntHmg_App#2018")
+                .load();
+
+        Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
+        
+        
+        
+
+        long start = System.currentTimeMillis();
+        Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
+        //System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
+        System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
+        
+        
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
+        List<LogDTO> list = logsOfFile.collectAsList();//Collections.synchronizedList(new ArrayList<>());
+
+//        logsOfFile.foreachPartition((itrtr) -> {
+//
+//            List<LogDTO> temp = new ArrayList<>();
+//
+//            while (itrtr.hasNext()) {
+//                temp.add(itrtr.next());
+//            }
+//
+//            synchronized (list) {
+//                list.addAll(temp);
+//            }
+//
+//        });
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+        spark.close();
+        sc.close();
+
+        return list;
+
+    }
+
+    @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
         String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
 
-        PageRequest page = PageRequest.of(0, 500000, Sort.by("lineNumber").ascending());
-        // Page<Log> pageResponse = logRepository.findDistinct(id, page);
-        Stream<Log> pageResponse = logRepository.listDistinctByFileId(id);
+        try {
+            List<LogDTO> logsDTO = this.getData(id);
 
-        List<LineErrorDTO> e = Collections.synchronizedList(new ArrayList<>());
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
-        long start = System.currentTimeMillis();
-        pageResponse.parallel().forEach(l -> {
+//        PageRequest page = PageRequest.of(0, 500000, Sort.by("lineNumber").ascending());
+//        // Page<Log> pageResponse = logRepository.findDistinct(id, page);
+//        Stream<Log> pageResponse = logRepository.listDistinctByFileId(id);
+//
+//        List<LineErrorDTO> e = Collections.synchronizedList(new ArrayList<>());
+//        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+//        long start = System.currentTimeMillis();
+//        pageResponse.parallel().forEach(l -> {
+//
+//            final LineErrorDTO error = new LineErrorDTO(l.getRecordContent(), l.getLineNumber());
+//
+//            executorService.submit(() -> {
+//
+//                List<Log> j = logRepository.listByRecordContent(id, error.getLineContent());
+//
+//                j.parallelStream().forEach(lll -> {
+//                    final String column = Utils.getPositionExcelColumn(lll.fieldName);
+//                    error.put(column, lll.getMessageError());
+//                });
+//
+//                e.add(error);
+//
+//            });
+//
+//        });
+//
+//        executorService.shutdown();
+//        //Aguarda o termino do processamento
+//        while (!executorService.isTerminated()) {
+//        }
+//
+//        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+//
+            final com.core.behavior.model.File file = fileRepository.findById(id).get();
+            final Agency agency = agencyRepository.findById(file.getCompany()).get();
 
-            final LineErrorDTO error = new LineErrorDTO(l.getRecordContent(), l.getLineNumber());
+            this.createFile(agency.getLayoutFile(), file.getName());
 
-            executorService.submit(() -> {
+            List<LineErrorDTO> errors = this.prepareData(logsDTO);
+            logsDTO = null;
+            this.writeLote(errors);
 
-                List<Log> j = logRepository.listByRecordContent(id,error.getLineContent());
+            String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
 
-                j.parallelStream().forEach(lll -> {
-                    final String column = Utils.getPositionExcelColumn(lll.fieldName);
-                    error.put(column, lll.getMessageError());
-                });
+            File temp = new File(fileNameNew + "_error.xlsx");
+            FileOutputStream fileOut;
+            try {
+                fileOut = new FileOutputStream(temp);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                wb.dispose();
 
-                e.add(error);
+                this.uploadFileReturn(temp, agency);
 
-            });
+                this.createNotification(file.getName(), temp.getName(), emailUser, agency);
 
-        });
+            } catch (Exception ex) {
+                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
 
-        executorService.shutdown();
-        //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {
+                try {
+
+                    if (temp != null) {
+                        FileUtils.forceDelete(temp);
+                    }
+
+                } catch (IOException ex) {
+                    Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-//
-//        final com.core.behavior.model.File file = fileRepository.findById(id).get();
-//        final Agency agency = agencyRepository.findById(file.getCompany()).get();
-//
-//        this.createFile(agency.getLayoutFile(), file.getName());
-//
-//        List<LineErrorDTO> errors = this.prepareData(pageResponse.getContent(), agency);
-//        this.writeLote(errors);
-//
-//        Pageable nex = pageResponse.getPageable().next();
-//        while (nex != null) {
-//            pageResponse = logRepository.findByFileId(id, page);
-//            errors = this.prepareData(pageResponse.getContent(), agency);
-//            this.writeLote(errors);
-//            nex = pageResponse.getPageable().next();
-//        }
-//
-//        String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
-//
-//        File temp = new File(fileNameNew + "_error.xlsx");
-//        FileOutputStream fileOut;
-//        try {
-//            fileOut = new FileOutputStream(temp);
-//            wb.write(fileOut);
-//            wb.dispose();
-//            fileOut.flush();
-//            fileOut.close();
-//
-//            this.uploadFileReturn(temp, agency);
-//
-//            this.createNotification(file.getName(), temp.getName(), emailUser, agency);
-//
-//        } catch (Exception ex) {
-//            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
-//        } finally {
-//
-//            try {
-//
-//                if (temp != null) {
-//                    FileUtils.forceDelete(temp);
-//                }
-//
-//            } catch (IOException ex) {
-//                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
-//            }
-//        }
     }
 
     private void uploadFileReturn(File file, Agency agency) throws IOException {

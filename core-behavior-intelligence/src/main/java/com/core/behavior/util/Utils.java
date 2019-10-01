@@ -9,6 +9,7 @@ import com.core.behavior.io.BeanIoReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -34,6 +35,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
 import org.beanio.StreamFactory;
@@ -385,6 +388,34 @@ public class Utils {
     
     public static Date localDateToDate(LocalDate date){
         return  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+    
+    private File zipFiles(String name,List<File>files) throws FileNotFoundException, IOException{
+        
+        
+        File fileZip = new File(name + ".zip");
+        
+        FileOutputStream fos = new FileOutputStream(fileZip);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        for (File fileToZip : files) {
+            
+            FileInputStream fis = new FileInputStream(fileToZip);
+            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+            zipOut.putNextEntry(zipEntry);
+ 
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        }
+        zipOut.close();
+        fos.close();
+        
+        
+       return fileZip;
+        
     }
 
 }
