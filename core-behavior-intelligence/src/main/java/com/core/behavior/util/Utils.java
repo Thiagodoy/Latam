@@ -390,7 +390,7 @@ public class Utils {
         return  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
     
-    private File zipFiles(String name,List<File>files) throws FileNotFoundException, IOException{
+    public static File zipFiles(String name,List<File>files) throws FileNotFoundException, IOException{
         
         
         File fileZip = new File(name + ".zip");

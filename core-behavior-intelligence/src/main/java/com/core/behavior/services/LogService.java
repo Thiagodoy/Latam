@@ -1,11 +1,8 @@
 package com.core.behavior.services;
 
 import com.core.behavior.dto.LogStatusSinteticoDTO;
-import com.core.behavior.jobs.ProcessFileJob;
-import com.core.behavior.jobs.TicketCupomValidationJob;
 import com.core.behavior.model.Log;
 import com.core.behavior.repository.LogRepository;
-import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -20,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static com.core.behavior.util.Utils.TypeField;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -63,9 +61,8 @@ public class LogService {
         logRepository.save(log);
     }
 
-    
-    public List<Log> listByRecordContent(Long fileId,String content) {
-        return logRepository.findByRecordContentAndFileId(content,fileId);
+    public List<Log> listByRecordContent(Long fileId, String content) {
+        return logRepository.findByRecordContentAndFileId(content, fileId);
     }
 
     public Stream<Log> listDistinctByFileId(Long fileId) {
@@ -116,6 +113,38 @@ public class LogService {
 
     public Optional<Log> findByFileIdAndField(String field, Long id) {
         return logRepository.findByFileIdAndFieldName(id, field);
+    }
+
+    public List<Log> listJdbc(Long id) throws SQLException {
+
+        Connection con = dataSource.getConnection();
+
+        Statement st = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, //or ResultSet.TYPE_FORWARD_ONLY
+                   ResultSet.CONCUR_READ_ONLY);
+
+        long start = System.currentTimeMillis();
+        
+        ResultSet result = st.executeQuery("select field_name, line_number, message_error, record_content from behavior.log where file_id = " + String.valueOf(id));
+        
+        List<Log>logs = new ArrayList();
+        while(result.next()){
+        
+            Log log = new Log();            
+            log.setFieldName(result.getString("field_name"));
+            log.setLineNumber(result.getLong("line_number"));
+            log.setMessageError(result.getString("message_error"));
+            log.setRecordContent(result.getString("record_content"));
+            
+            logs.add(log);
+        
+        }
+        
+        
+        Logger.getLogger(TicketService.class.getName()).log(Level.INFO, (System.currentTimeMillis() - start) /1000 + "sec"  );
+        
+        
+        return logs;
+
     }
 
     public void saveBatch(List<Log> logs) {

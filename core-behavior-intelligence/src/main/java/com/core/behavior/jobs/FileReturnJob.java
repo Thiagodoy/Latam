@@ -22,10 +22,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,12 +48,9 @@ import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
-
 import org.apache.spark.sql.SparkSession;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -73,6 +69,9 @@ public class FileReturnJob extends QuartzJobBean {
     public static final String DATA_EMAIL_ID = "DATA_EMAIL_ID";
     private long line;
     private int lineWrited;
+
+    @Autowired
+    private SparkSession sparkSession;
 
     @Autowired
     private LogService logRepository;
@@ -276,65 +275,63 @@ public class FileReturnJob extends QuartzJobBean {
 
     }
 
-    private List<LogDTO> getData(Long id) throws ClassNotFoundException {
+    private List<LogDTO> getData(Long id) {
 
-        JavaSparkContext sc = new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]").set("spark.scheduler.mode", "FAIR").set("spark.scheduler.pool", "5"));
-        
+        try {
 
-        long start1 = System.currentTimeMillis();
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
-        Class.forName("com.mysql.jdbc.Driver");
+            Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
+                    .format("jdbc")
+                    .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
+                    .option("dbtable", "behavior.log")
+                    //.option("numPartitions", "10")
+                    .option("user", "behint_hmg")
+                    .option("password", "Beh1ntHmg_App#2018")
+                    .load();
 
-        SparkSession spark = SparkSession
-                .builder()
-                .appName("Java Spark SQL data sources example")
-                .config("spark.cores.max", "4")
-                .getOrCreate();
+            Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
 
-        Dataset<Row> jdbcDF = spark.sqlContext().read()
-                .format("jdbc")
-                .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
-                .option("dbtable", "behavior.log")
-                .option("numPartitions", "10")
-                .option("user", "behint_hmg")
-                .option("password", "Beh1ntHmg_App#2018")
-                .load();
+            long start = System.currentTimeMillis();
+            Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
+            System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
+            System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
 
-        Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
-        
-        
-        
-
-        long start = System.currentTimeMillis();
-        Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
-        //System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
-        System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
-        
-        
-
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
-        List<LogDTO> list = logsOfFile.collectAsList();//Collections.synchronizedList(new ArrayList<>());
-
-//        logsOfFile.foreachPartition((itrtr) -> {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
+            List<LogDTO> list = new ArrayList<>();//logsOfFile.collectAsList();//Collections.synchronizedList(new ArrayList<>());
+            Iterator<LogDTO> it = logsOfFile.javaRDD().toLocalIterator();
+            
+            while(it.hasNext()){
+                list.add(it.next());
+            }
+            
 //
-//            List<LogDTO> temp = new ArrayList<>();
-//
-//            while (itrtr.hasNext()) {
-//                temp.add(itrtr.next());
-//            }
-//
-//            synchronized (list) {
-//                list.addAll(temp);
-//            }
-//
-//        });
+////        logsOfFile.foreachPartition((itrtr) -> {
+////
+////            List<LogDTO> temp = new ArrayList<>();
+////
+////            while (itrtr.hasNext()) {
+////                temp.add(itrtr.next());
+////            }
+////
+////            synchronized (list) {
+////                list.addAll(temp);
+////            }
+////
+////        });
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            return list;
 
-        spark.close();
-        sc.close();
+        } catch (Exception ex) {
+            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-        return list;
+        return new ArrayList<LogDTO>();
 
     }
 
@@ -344,8 +341,8 @@ public class FileReturnJob extends QuartzJobBean {
         Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
         String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
 
-        try {
-            List<LogDTO> logsDTO = this.getData(id);
+        // try {
+        this.getData(id);
 
 //        PageRequest page = PageRequest.of(0, 500000, Sort.by("lineNumber").ascending());
 //        // Page<Log> pageResponse = logRepository.findDistinct(id, page);
@@ -380,46 +377,63 @@ public class FileReturnJob extends QuartzJobBean {
 //
 //        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 //
-            final com.core.behavior.model.File file = fileRepository.findById(id).get();
-            final Agency agency = agencyRepository.findById(file.getCompany()).get();
+//            final com.core.behavior.model.File file = fileRepository.findById(id).get();
+//            final Agency agency = agencyRepository.findById(file.getCompany()).get();
+//
+//            List<LineErrorDTO> errors = this.prepareData(logsDTO);
+//            logsDTO = null;
+//
+//            List<List<LineErrorDTO>> patitions = ListUtils.partition(errors, 10000);
+//            List<File> filesCreated = new ArrayList<>();
+//
+//            int count = 0;
+//
+//            for (List<LineErrorDTO> patition : patitions) {
+//
+//                this.createFile(agency.getLayoutFile(), file.getName());
+//                this.writeLote(errors);
+//
+//                String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
+//                File temp = new File(fileNameNew + "_" + (++count) + "_error.xlsx");
+//
+//                FileOutputStream fileOut;
+//
+//                fileOut = new FileOutputStream(temp);
+//                wb.write(fileOut);
+//                fileOut.flush();
+//                fileOut.close();
+//                wb.dispose();
+//
+//                filesCreated.add(temp);
+//
+//                this.createNotification(file.getName(), temp.getName(), emailUser, agency);
+//
+//            }
+//
+//           File zipedFile = Utils.zipFiles(file.getName().replaceAll(".(csv|CSV)", ""), filesCreated);
+//           
+//           uploadFileReturn(zipedFile,agency);
+//           filesCreated.add(zipedFile);
+//           
+//           this.deleteFiles(filesCreated);
+//           
+//           
+//
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IOException ex) {
+//            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }
 
-            this.createFile(agency.getLayoutFile(), file.getName());
+    private void deleteFiles(List<File> files) {
 
-            List<LineErrorDTO> errors = this.prepareData(logsDTO);
-            logsDTO = null;
-            this.writeLote(errors);
-
-            String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
-
-            File temp = new File(fileNameNew + "_error.xlsx");
-            FileOutputStream fileOut;
+        for (File file : files) {
             try {
-                fileOut = new FileOutputStream(temp);
-                wb.write(fileOut);
-                fileOut.flush();
-                fileOut.close();
-                wb.dispose();
-
-                this.uploadFileReturn(temp, agency);
-
-                this.createNotification(file.getName(), temp.getName(), emailUser, agency);
-
-            } catch (Exception ex) {
-                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-
-                try {
-
-                    if (temp != null) {
-                        FileUtils.forceDelete(temp);
-                    }
-
-                } catch (IOException ex) {
-                    Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[executeInternal]", ex);
-                }
+                FileUtils.forceDelete(file);
+            } catch (IOException ex) {
+                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[ deleteFiles ]", ex);
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
