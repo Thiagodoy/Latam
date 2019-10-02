@@ -13,6 +13,7 @@ import com.core.behavior.util.Utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.beanio.StreamFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -52,10 +54,13 @@ public class ConsumerEmailJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        PageRequest page = PageRequest.of(0,20);
+        PageRequest page = PageRequest.of(0,25);
         List<Notificacao> notificacaos = notificacaoRepository.findByStatus(NotificacaoStatusEnum.READY, page);
 
         Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.INFO, "Iniciando o envio de emails");
+        
+        
+        List<FileSystemResource> resources = new ArrayList<>();
         
         notificacaos.forEach(n -> {
 
@@ -84,11 +89,12 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 Map<String, String> map = n.getLayout().getResouces();
                 Set<String> keys = map.keySet();
 
+                
                 for (String key : keys) {
                     File logo = Utils.loadLogo(map.get(key));
-                    FileSystemResource res = new FileSystemResource(logo);
+                    FileSystemResource res = new FileSystemResource(logo);                    
                     helper.addInline(key, res);
-
+                    resources.add(res);
                 }
 
                 sender.send(message);
@@ -108,10 +114,26 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 }
                 notificacaoRepository.save(n);
             }
-        });
-
+        });        
+        this.deleteResourcesCreated(resources);
     }
 
+    
+    private void deleteResourcesCreated(List<FileSystemResource>resources){
+        
+        
+        for (FileSystemResource resource : resources) {
+            
+            try {
+                FileUtils.forceDelete(resource.getFile());
+            } catch (IOException ex) {
+                Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.SEVERE, "[ deleteResourcesCreated ]", ex);
+            }
+            
+            
+        }
+        
+    }
     private String getContentEmail(String path) throws IOException {
         StreamFactory factory = StreamFactory.newInstance();
         InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(path);

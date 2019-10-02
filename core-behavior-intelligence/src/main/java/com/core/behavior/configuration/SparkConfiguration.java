@@ -5,31 +5,25 @@
  */
 package com.core.behavior.configuration;
 
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SparkSession;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 /**
  *
  * @author thiag
  */
-@Configuration
+//@Configuration
 public class SparkConfiguration {
 
-    @Bean
-    public JavaSparkContext sparkContext() {
-        return new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]"));
-
-    }
-
-    @Bean
-    public SparkSession sparkSession() {
-        return SparkSession
-                .builder()
-                .sparkContext(sparkContext().sc())
-                .appName("Java Spark SQL basic example")
-                .getOrCreate();
-    }
+   // @Bean
+//    public JavaSparkContext sparkContext() {
+//        return new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]"));
+//
+//    }
+//
+//    @Bean
+//    public SparkSession sparkSession() {
+//        return SparkSession
+//                .builder()
+//                .sparkContext(sparkContext().sc())
+//                .appName("Java Spark SQL basic example")
+//                .getOrCreate();
+//    }
 }

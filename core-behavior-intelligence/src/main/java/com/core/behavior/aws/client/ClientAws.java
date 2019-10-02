@@ -5,7 +5,6 @@
  */
 package com.core.behavior.aws.client;
 
-
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -18,6 +17,8 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 import com.core.behavior.properties.AmazonProperties;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,38 +44,49 @@ public class ClientAws {
         AWSCredentials credentials = new BasicAWSCredentials(amazonConfiguration.getAccessKey(), amazonConfiguration.getSecretKey());
         this.amazonS3 = AmazonS3ClientBuilder
                 .standard()
-                .withRegion(REGION) 
+                .withRegion(REGION)
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
 
     }
 
     public String uploadFile(File file, String folder) throws IOException {
-        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" + file.getName(), file);        
+        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(), folder + "/" + file.getName(), file);
         PutObjectResult result = this.amazonS3.putObject(request);
-        return result.getETag();        
+        return result.getETag();
     }
-    
-    public File downloadFile(String fileName,String folder) throws IOException{
+
+    public File downloadFile(String fileName, String folder) throws IOException {
         GetObjectRequest request = new GetObjectRequest(amazonConfiguration.getBucketName(), folder + "/" + fileName);
         File fileTemp = File.createTempFile("down", "load");
         this.amazonS3.getObject(request, fileTemp);
-        
+
         return fileTemp;
     }
-    
-    public File downloadFileReturn(String fileName,String folder) throws IOException{
+
+    public File downloadFileReturn(String fileName, String folder) throws IOException {
         GetObjectRequest request = new GetObjectRequest(amazonConfiguration.getBucketName(), folder + FOLDER_RETURN + fileName);
         File fileTemp = File.createTempFile("down", "load");
         this.amazonS3.getObject(request, fileTemp);
-        
+
         return fileTemp;
     }
-    
+
+    public boolean fileReturnExists(String fileName, String folder) {
+
+        try {
+            return this.amazonS3.doesObjectExist(amazonConfiguration.getBucketName(), folder + FOLDER_RETURN + fileName);
+        } catch (Exception e) {
+            Logger.getLogger(ClientAws.class.getName()).log(Level.SEVERE, "[fileReturnExists]", e);
+            return false;
+        }
+
+    }
+
     public String uploadFileReturn(File file, String folder) throws IOException {
-        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + FOLDER_RETURN + file.getName(), file);        
-        PutObjectResult result = this.amazonS3.putObject(request);        
-        return result.getETag();        
+        PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(), folder + FOLDER_RETURN + file.getName(), file);
+        PutObjectResult result = this.amazonS3.putObject(request);
+        return result.getETag();
     }
 
 }

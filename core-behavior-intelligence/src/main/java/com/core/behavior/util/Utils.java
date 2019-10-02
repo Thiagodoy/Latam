@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -390,10 +391,13 @@ public class Utils {
         return  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
     
-    public static File zipFiles(String name,List<File>files) throws FileNotFoundException, IOException{
+    public static File zipFiles(String name,Long versao,List<File>files) throws FileNotFoundException, IOException{
         
         
-        File fileZip = new File(name + ".zip");
+        
+        String fileName = MessageFormat.format("{0}_v{1}.zip", name, versao);
+        
+        File fileZip = new File(fileName);
         
         FileOutputStream fos = new FileOutputStream(fileZip);
         ZipOutputStream zipOut = new ZipOutputStream(fos);

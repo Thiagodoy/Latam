@@ -187,14 +187,16 @@ public class IntegrationJob extends QuartzJobBean {
         FileIntegrationDTO dTO = new FileIntegrationDTO();
         List<TicketIntegrationDTO> l = Collections.synchronizedList(new ArrayList<TicketIntegrationDTO>());
         list.parallelStream().forEach(t -> {
-            
+
             try {
-                l.add(new TicketIntegrationDTO((t)));
+                synchronized (l) {
+                    l.add(new TicketIntegrationDTO((t)));
+                }
+
             } catch (Exception e) {
                 Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[mountDTO] id -> " + t.getId(), e);
             }
-            
-            
+
         });
 
         dTO.setIntegrationDTOs(l);
