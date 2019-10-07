@@ -95,7 +95,7 @@ public class FileReturnJob extends QuartzJobBean {
     private SXSSFWorkbook wb;
     private SXSSFSheet sheet;
 
-    private final int LIMIT_ROWS = 50000;
+    private final int LIMIT_ROWS = 10000;
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
@@ -220,7 +220,10 @@ public class FileReturnJob extends QuartzJobBean {
             for (int c = 0; c < values.length; c++) {
                 SXSSFCell cell = row.createCell(c);
                 cell.setCellStyle(style);
-                cell.setCellValue(values[c]);
+                
+                String v = values[c].equals("[empty]") ? "" : values[c]; 
+                
+                cell.setCellValue(v);
                 CellReference cellReference = new CellReference(cell);
                 CellAddress currentCellAddress = new CellAddress(cellReference);
 
@@ -335,7 +338,7 @@ public class FileReturnJob extends QuartzJobBean {
         try {
 
             try {
-                Class.forName("com.mysql.jdbc.Driver");
+                Class.forName("com.mysql.cj.jdbc.Driver");
             } catch (ClassNotFoundException ex) {
                 Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
             }

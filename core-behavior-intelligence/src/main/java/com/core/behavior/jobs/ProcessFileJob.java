@@ -80,6 +80,11 @@ public class ProcessFileJob extends QuartzJobBean {
     public static final String DATA_COMPANY = "company";
     public static final String DATA_FILE_ID = "fileId";
     public static final String DATA_LAYOUT_FILE = "layoutFile";
+
+    public static final String LIST_DATA_SUCCESS = "success";
+    public static final String LIST_DATA_ERROR = "error";
+    public static final int SIZE_BILHETE_BEHAVIOR = 7; 
+
     private static final int THREAD_POLL = 100;
 
     @Override
@@ -129,19 +134,17 @@ public class ProcessFileJob extends QuartzJobBean {
                 long startValidation = System.currentTimeMillis();
                 Map<String, Object> resul = this.runRule1(dto);
 
-                List<Ticket> success = (List<Ticket>) resul.get("success");
-                List<Log> error = (List<Log>) resul.get("error");
+                List<Ticket> success = (List<Ticket>) resul.get(LIST_DATA_SUCCESS);
+                List<Log> error = (List<Log>) resul.get(LIST_DATA_ERROR);
 
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });
-                
+
                 this.writeErrors(error);
-                //final List<Ticket> ticketsOld = this.getTicketWrited(codigoAgencia);
+
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
-                //Teste depois remover
-                //this.saveTickets(success);
                 this.runRules2(success);
                 this.runRules3(success);
 
@@ -179,14 +182,6 @@ public class ProcessFileJob extends QuartzJobBean {
         }
     }
 
-//    private void saveTickets(List<Ticket> list) throws SQLException {
-//
-//        long start = System.currentTimeMillis();
-//        ticketService.saveBatch(list);
-//        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ SALVA TICKETS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-//
-//    }
-
     private Map<String, Object> runRule1(FileParsedDTO dto) {
 
         Map<String, Object> map = new HashMap<>();
@@ -209,9 +204,9 @@ public class ProcessFileJob extends QuartzJobBean {
 
         });
 
-        map.put("success", success);
-        map.put("error", error);
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ REGRAS 1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        map.put(LIST_DATA_SUCCESS, success);
+        map.put(LIST_DATA_ERROR, error);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRule1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
         return map;
     }
@@ -222,12 +217,12 @@ public class ProcessFileJob extends QuartzJobBean {
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
         success.parallelStream().forEach(t -> {
-            executorService.submit(new Executor(ticketService, t));
+            executorService.submit(new TicketDuplicityValidationJob(ticketService, t));
         });
 
         executorService.shutdown();
-        //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) { }
+        while (!executorService.isTerminated()) {
+        }
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
@@ -246,7 +241,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
         executorService.shutdown();
         //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) { }
+        while (!executorService.isTerminated()) {}
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
@@ -268,17 +263,6 @@ public class ProcessFileJob extends QuartzJobBean {
 
     }
 
-//    private List<Ticket> getTicketWrited(String codigoAgencia) {
-//
-//        long start = System.currentTimeMillis();
-//        LocalDate e = LocalDate.now().plusDays(1);
-//        LocalDate s = LocalDate.now().minusDays(90);
-//        List<Ticket> result = ticketService.listByDateEmission(Utils.localDateToDate(s), Utils.localDateToDate(e), codigoAgencia);
-//
-//        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ getTicketWrited ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-//        return result;
-//    }
-
     private void writeErrors(List<Log> error) {
 
         if (!error.isEmpty()) {
@@ -291,24 +275,29 @@ public class ProcessFileJob extends QuartzJobBean {
     private void generateBilheteBehavior(List<Ticket> tickets) {
 
         tickets.parallelStream().forEach(t -> {
-            String bilheteBehavior = "";
-            final SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
-            String dataEmissao = formmaterDate.format(t.getDataEmissao());
-            String ano = dataEmissao.substring(dataEmissao.length() - 1);
-            String mes = dataEmissao.substring(2, 4);
 
-            String sequencial = "";
-            String id = String.valueOf(t.getId());
+            try {
+                String bilheteBehavior = "";
+                final SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
+                String dataEmissao = formmaterDate.format(t.getDataEmissao());
+                String ano = dataEmissao.substring(dataEmissao.length() - 1);
+                String mes = dataEmissao.substring(2, 4);
 
-            if (id.length() < 7) {
-                sequencial = StringUtils.leftPad(id, 7, "0");
-            } else {
-                sequencial = id.substring(0, 7);
+                String sequencial = "";
+                String id = String.valueOf(t.getId());
+
+                if (id.length() < SIZE_BILHETE_BEHAVIOR) {
+                    sequencial = StringUtils.leftPad(id, SIZE_BILHETE_BEHAVIOR, "0");
+                } else {
+                    sequencial = id.substring(0, SIZE_BILHETE_BEHAVIOR);
+                }
+
+                bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
+
+                t.setBilheteBehavior(bilheteBehavior);
+            } catch (Exception e) {
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE,"[ generateBilheteBehavior ]", e);
             }
-
-            bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
-
-            t.setBilheteBehavior(bilheteBehavior);
 
         });
 

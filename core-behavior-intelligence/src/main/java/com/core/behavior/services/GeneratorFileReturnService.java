@@ -75,7 +75,7 @@ public class GeneratorFileReturnService {
 
         String fileName = file.getName().replaceAll(".(csv|CSV)", "");
 
-        Agency agency = agencyRepository.getOne(file.getCompany());
+        Agency agency = agencyRepository.findById(file.getCompany()).get();
 
         String folder = agency.getS3Path().split("\\\\")[1];
 

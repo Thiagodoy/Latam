@@ -46,6 +46,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.TriggerBuilder;
@@ -176,11 +177,7 @@ public class FileService {
             Stream layoutHeader = agency.getLayoutFile().equals(1L) ? Stream.HEADER_LAYOUT_SHORT : Stream.HEADER_LAYOUT_FULL;
 
             //Valida o header do arquivo
-            boolean headerIsValid = beanIoReader.headerIsValid(file,layoutHeader);
-
-            if (!headerIsValid) {
-                throw new ApplicationException(MessageCode.FILE_HEADER_INVALID);
-            }
+            beanIoReader.headerIsValid(file,layoutHeader);            
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao);
             this.processFile(userId, id, file, layout, f.getId());
@@ -254,9 +251,13 @@ public class FileService {
         data.put(ProcessFileJob.DATA_FILE_ID, fileId);
         data.put(ProcessFileJob.DATA_LAYOUT_FILE, layout);
 
+        
+        
+        String jobName = "WRITE-JOB-" + file.getName();
+        
         JobDetail detail = JobBuilder
                 .newJob(ProcessFileJob.class)
-                .withIdentity("WRITE-JOB-" + file.getName(), "process-file")
+                .withIdentity(jobName, "process-file")
                 .withDescription("Processing files")
                 .usingJobData(data)
                 .build();
@@ -267,8 +268,22 @@ public class FileService {
                 .startAt(new Date())
                 .withSchedule(simpleSchedule())
                 .build();
+        
+        
+        Optional<JobExecutionContext> opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
+        
+        
+       if(opt.isPresent()){           
+           this.deleteFile(fileId);
+           throw new ApplicationException(MessageCode.JOB_IS_RUNNING);
+       }else{
+           bean.getScheduler().scheduleJob(detail, trigger);
+       }
+        
+        
+        
 
-        bean.getScheduler().scheduleJob(detail, trigger);
+        
     }
 
     public void deleteFileCascade(File file) {
@@ -296,8 +311,9 @@ public class FileService {
             FileUtils.forceDelete(file);
             throw new ApplicationException(MessageCode.FILE_NAME_REPETED);
         }
-    }
-
+    }   
+    
+    
     @Transactional
     public com.core.behavior.model.File saveFile(com.core.behavior.model.File f) {
         return fileRepository.save(f);

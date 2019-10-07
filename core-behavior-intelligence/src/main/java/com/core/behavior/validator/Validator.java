@@ -1,14 +1,10 @@
 package com.core.behavior.validator;
 
 import com.core.behavior.dto.TicketDTO;
-import com.core.behavior.dto.TicketDuplicityDTO;
-import com.core.behavior.jobs.ProcessFileJob;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketLayoutEnum;
-import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.TypeErrorEnum;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
@@ -17,11 +13,11 @@ import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +52,8 @@ public class Validator implements IValidator {
     private final static String REGEX_CUPOM = "((^0*[1-9]$)|(^[1-9][0-9]$))";
     private final static String REGEX_BILHETE = "[A-Z0-9]{2,18}";
     private final static String REGEX_TIPO = "(I|N){0,1}";
-    private final static String REGEX_CABINE = "[A-Z]{0,1}";
+    //private final static String REGEX_CABINE = "[A-Z]{0,1}";
+    private final static String REGEX_CABINE = "[A-Z]*";
     private final static String REGEX_CIA_VOO = "([A-Z]{1}[0-9]{1})|([A-Z]{1}[A-Z]{1})|([0-9]{1}[A-Z]{1})";
     private final static String REGEX_VALOR_BRL = "^([0-9]{1,3}\\.?)+(,[0-9]{1,2})?$";
     private final static String REGEX_CNPJ = "(^\\d{2}.\\d{3}.\\d{3}/\\d{4}-\\d{2}$)";
@@ -74,7 +71,7 @@ public class Validator implements IValidator {
     private final static String REGEX_SELFBOOKING = "((S|s)elfbooking|(O|o)ffline)";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_TIPO_PAGAMENTO = "(Cartão|A Vista|Faturado)";
-    private final static String REGEX_CLASSE_SERVICO = "(Primeira Classe|Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economy Plus/Co(n|m)fort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
+    private final static String REGEX_CLASSE_SERVICO = "(Primeira Classe|Economy Plus|Econômica Promocional|Econômica|Econômica|Executiva|Economica|Promocional|Econômica Premium|Economica Premium|Economy Plus/Co(n|m)fort|Executiva Promocional|Primeira|Primeira Promocional|((O|o)utras))|[0-9]+";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
     private static Properties props = new Properties();
 
@@ -138,6 +135,15 @@ public class Validator implements IValidator {
         try {
             dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
             dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+
+            LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
+            LocalDate date2025 = LocalDate.ofYearDay(2025, 1);
+            LocalDate dateEmissao = this.dateToLocalDate(dataEmissao);
+
+            if (dateEmissao.isAfter(date2025) || dateEmissao.isBefore(date2017)) {
+                countError++;
+            }
+
         } catch (ParseException e3) {
             countError++;
         }
@@ -178,6 +184,15 @@ public class Validator implements IValidator {
         try {
             dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
             dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+
+            LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
+            LocalDate date2025 = LocalDate.ofYearDay(2025, 1);
+            LocalDate dateEmbarque = this.dateToLocalDate(dataEmbarque);
+
+            if (dateEmbarque.isAfter(date2025) || dateEmbarque.isBefore(date2017)) {
+                countError++;
+            }
+
         } catch (ParseException e3) {
             countError++;
         }
@@ -263,50 +278,56 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkTrechoTkt() {
 
-        int countError = 0;
-        Pattern p = Pattern.compile(REGEX_TRECHO);
-
-        if (!Optional.ofNullable(ticketDTO.getTrecho()).isPresent()) {
-            countError++;
-        }
-
         String trecho = ticketDTO.getTrecho();
-
-        Matcher matcher = p.matcher(trecho);
-
-        if (countError == 0 && !matcher.matches()) {
-            countError++;
-        }
-
-        if (matcher.matches()) {
-            String[] s = ticketDTO.getTrecho().split("/");
-
-            for (String string : s) {
-
-                if (string.length() > 3) {
-                    countError++;
-                }
-
-            }
-        }
-
-        if (trecho != null && trecho.length() < 7) {
-            countError++;
-        }
-
-        if (trecho != null && trecho.length() > 0) {
-            int index = trecho.length() - 1;
-            if (trecho.substring(index).equals("/")) {
-                countError++;
-            }
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.trecho.type"), "trecho");
+        if (!Optional.ofNullable(trecho).isPresent() || trecho.length() == 0) {
+            this.ticket.setTrecho("");
         } else {
-            ticket.setTrecho(trecho);
+            this.ticket.setTrecho(trecho);
         }
 
+//        int countError = 0;
+//        Pattern p = Pattern.compile(REGEX_TRECHO);
+//
+//        if (!Optional.ofNullable(ticketDTO.getTrecho()).isPresent()) {
+//            countError++;
+//        }
+//
+//        String trecho = ticketDTO.getTrecho();
+//
+//        Matcher matcher = p.matcher(trecho);
+//
+//        if (countError == 0 && !matcher.matches()) {
+//            countError++;
+//        }
+//
+//        if (matcher.matches()) {
+//            String[] s = ticketDTO.getTrecho().split("/");
+//
+//            for (String string : s) {
+//
+//                if (string.length() > 3) {
+//                    countError++;
+//                }
+//
+//            }
+//        }
+//
+//        if (trecho != null && trecho.length() < 7) {
+//            countError++;
+//        }
+//
+//        if (trecho != null && trecho.length() > 0) {
+//            int index = trecho.length() - 1;
+//            if (trecho.substring(index).equals("/")) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.trecho.type"), "trecho");
+//        } else {
+//            ticket.setTrecho(trecho);
+//        }
         return this;
     }
 
@@ -388,30 +409,33 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkBilhete() {
+        
+        
+        ticket.setBilhete(ticketDTO.getBilhete());
 
-        int countError = 0;
-
-        if (!Optional.ofNullable(ticketDTO.getBilhete()).isPresent()) {
-            countError++;
-        }
-
-        if (countError == 0) {
-            Pattern p = Pattern.compile(REGEX_BILHETE);
-            Matcher m = p.matcher(ticketDTO.getBilhete());
-
-            if (!m.matches()) {
-                countError++;
-            }
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.bilhete.type"), "bilhete");
-        } else {
-
-            String bilhete = MessageFormat.format("{0}{1}{2}", this.ticketDTO.getCodigoAgencia().replaceAll("AG", ""), this.ticketDTO.getBilhete(), this.ticketDTO.getDataEmissao().replaceAll("/", ""));
-
-            ticket.setBilhete(bilhete);
-        }
+//        int countError = 0;
+//
+//        if (!Optional.ofNullable(ticketDTO.getBilhete()).isPresent()) {
+//            countError++;
+//        }
+//
+//        if (countError == 0) {
+//            Pattern p = Pattern.compile(REGEX_BILHETE);
+//            Matcher m = p.matcher(ticketDTO.getBilhete());
+//
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.bilhete.type"), "bilhete");
+//        } else {
+//
+//            String bilhete = MessageFormat.format("{0}{1}{2}", this.ticketDTO.getCodigoAgencia().replaceAll("AG", ""), this.ticketDTO.getBilhete(), this.ticketDTO.getDataEmissao().replaceAll("/", ""));
+//
+//            ticket.setBilhete(bilhete);
+//        }
 
         return this;
     }
@@ -506,9 +530,15 @@ public class Validator implements IValidator {
         int countError = 0;
         Double value = null;
 
+        Long cupom = ticket.getCupom();
+
         String valor = ticketDTO.getValorBrl();
         if (!Optional.ofNullable(valor).isPresent()) {
             countError++;
+        } else {
+            if (valor.length() == 0 && cupom.equals(1L)) {
+                countError++;
+            }
         }
 
         if (countError == 0) {
@@ -573,87 +603,112 @@ public class Validator implements IValidator {
 
         String cnpj = ticketDTO.getCnpj();
 
-        int countError = 0;
-
-        if (cnpj != null && cnpj.length() > 0) {
-
-            Pattern p = Pattern.compile(REGEX_CNPJ);
-            Matcher m = p.matcher(cnpj);
-
-            if (!m.matches()) {
-                countError++;
-            }
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cnpj.type"), "cnpj");
+        if (!Optional.ofNullable(cnpj).isPresent()) {
+            ticket.setCnpj("");
         } else {
             ticket.setCnpj(cnpj);
         }
 
+//        int countError = 0;
+//
+//        if (cnpj != null && cnpj.length() > 0) {
+//
+//            Pattern p = Pattern.compile(REGEX_CNPJ);
+//            Matcher m = p.matcher(cnpj);
+//
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cnpj.type"), "cnpj");
+//        } else {
+//            ticket.setCnpj(cnpj);
+//        }
         return this;
     }
 
     @Override
     public IValidator checkIataAgenciaEmissora() {
 
-        int countError = 0;
-        Long value = null;
         String iataAgencia = ticketDTO.getIataAgencia();
         if (!Optional.ofNullable(iataAgencia).isPresent() || iataAgencia.length() == 0) {
-            countError++;
-        }
-
-        if (countError == 0) {
-            Pattern p = Pattern.compile(REGEX_IATA_AGENCIA);
-            Matcher m = p.matcher(iataAgencia);
-
-            if (!m.matches()) {
-                countError++;
-            } else if (iataAgencia.length() > 0) {
+            ticket.setIataAgencia(null);
+        } else {
+            try {
+                Long value = null;
                 value = Long.valueOf(iataAgencia);
-            } else {
-                value = null;
+                ticket.setIataAgencia(value);
+
+            } catch (Exception e) {
+                ticket.setIataAgencia(null);
             }
         }
 
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.iataAgencia.type"), "iataAgencia");
-        } else {
-            ticket.setIataAgencia(value);
-        }
-
+//        int countError = 0;
+//        Long value = null;
+//        String iataAgencia = ticketDTO.getIataAgencia();
+//        if (!Optional.ofNullable(iataAgencia).isPresent() || iataAgencia.length() == 0) {
+//            countError++;
+//        }
+//
+//        if (countError == 0) {
+//            Pattern p = Pattern.compile(REGEX_IATA_AGENCIA);
+//            Matcher m = p.matcher(iataAgencia);
+//
+//            if (!m.matches()) {
+//                countError++;
+//            } else if (iataAgencia.length() > 0) {
+//                value = Long.valueOf(iataAgencia);
+//            } else {
+//                value = null;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.iataAgencia.type"), "iataAgencia");
+//        } else {
+//            ticket.setIataAgencia(value);
+//        }
         return this;
     }
 
     @Override
     public IValidator checkBaseVenda() {
 
-        int countError = 0;
         String base = ticketDTO.getBaseVenda();
 
         if (!Optional.ofNullable(base).isPresent()) {
-
-            countError++;
-        }
-
-        if (countError == 0) {
-
-            Pattern p = Pattern.compile(REGEX_BASE_VENDA);
-            Matcher m = p.matcher(base);
-
-            if (!m.matches()) {
-                countError++;
-            }
-
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.baseVenda.type"), "baseVenda");
+            ticket.setBaseVenda("");
         } else {
             ticket.setBaseVenda(base);
         }
 
+//        int countError = 0;
+//        String base = ticketDTO.getBaseVenda();
+//
+//        if (!Optional.ofNullable(base).isPresent()) {
+//
+//            countError++;
+//        }
+//
+//        if (countError == 0) {
+//
+//            Pattern p = Pattern.compile(REGEX_BASE_VENDA);
+//            Matcher m = p.matcher(base);
+//
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.baseVenda.type"), "baseVenda");
+//        } else {
+//            ticket.setBaseVenda(base);
+//        }
         return this;
     }
 
@@ -744,40 +799,45 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkDataExtracao() {
 
-        int countError = 0;
-
+        //int countError = 0;
         Date dataExtracao = parseToDate(ticketDTO.getDataExtracao());
-        Date dataReserva = parseToDate(ticketDTO.getDataReserva());;
-        Date dataEmissao = parseToDate(this.ticketDTO.getDataEmissao());;
 
-        if (!Optional.ofNullable(dataExtracao).isPresent()) {
-            countError++;
-        }
-
-        if (dataExtracao != null && dataEmissao != null) {
-            LocalDateTime emissao = this.dateToLocalDateTime(dataEmissao);
-            LocalDateTime extracao = this.dateToLocalDateTime(dataExtracao);
-
-            if (extracao.isBefore(emissao)) {
-                countError++;
-            }
-        }
-
-        if (dataExtracao != null && dataReserva != null) {
-            LocalDateTime extracao = this.dateToLocalDateTime(dataExtracao);
-            LocalDateTime reserva = this.dateToLocalDateTime(dataReserva);
-
-            if (extracao.isBefore(reserva)) {
-                countError++;
-            }
-        }
-
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataExtracao.type"), "dataExtracao");
-        } else {
+        if (dataExtracao != null) {
             ticket.setDataExtracao(dataExtracao);
+        } else {
+            ticket.setDataExtracao(null);
         }
 
+//        Date dataReserva = parseToDate(ticketDTO.getDataReserva());;
+//        Date dataEmissao = parseToDate(this.ticketDTO.getDataEmissao());;
+//
+//        if (!Optional.ofNullable(dataExtracao).isPresent()) {
+//            countError++;
+//        }
+//
+//        if (dataExtracao != null && dataEmissao != null) {
+//            LocalDateTime emissao = this.dateToLocalDateTime(dataEmissao);
+//            LocalDateTime extracao = this.dateToLocalDateTime(dataExtracao);
+//
+//            if (extracao.isBefore(emissao)) {
+//                countError++;
+//            }
+//        }
+//
+//        if (dataExtracao != null && dataReserva != null) {
+//            LocalDateTime extracao = this.dateToLocalDateTime(dataExtracao);
+//            LocalDateTime reserva = this.dateToLocalDateTime(dataReserva);
+//
+//            if (extracao.isBefore(reserva)) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataExtracao.type"), "dataExtracao");
+//        } else {
+//            ticket.setDataExtracao(dataExtracao);
+//        }
         return this;
 
     }
@@ -924,63 +984,68 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkBaseTarifaria() {
 
-        Pattern p = Pattern.compile(REGEX_BASE_TARIFARIA);
-        int countError = 0;
+        String classeTarifaria = ticketDTO.getClasseTarifa();
 
-        if (Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0) {
-
-            String classeTarifaria = ticketDTO.getClasseTarifa();
-
-            if ((!Optional.ofNullable(classeTarifaria).isPresent() || classeTarifaria.length() == 0)) {
-                return this;
-            }
-
-            if (!classeTarifaria.equals(ticketDTO.getBaseTarifaria().substring(0, 1))) {
-                countError++;
-            }
-
-            try {
-                Matcher m = p.matcher(ticketDTO.getBaseTarifaria());
-                if (!m.matches()) {
-                    countError++;
-                }
-            } catch (Exception e) {
-                countError++;
-            }
-
+        if (Optional.ofNullable(classeTarifaria).isPresent() || classeTarifaria.length() == 0) {
+            ticket.setBaseTarifaria("");
         } else {
-            countError++;
+            ticket.setBaseTarifaria(classeTarifaria);
         }
 
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.baseTarifaria.type"), "baseTarifaria");
-        } else {
-            ticket.setBaseTarifaria(ticketDTO.getBaseTarifaria());
-        }
-
+//        Pattern p = Pattern.compile(REGEX_BASE_TARIFARIA);
+//        int countError = 0;
+//
+//        if (Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0) {
+//
+//            String classeTarifaria = ticketDTO.getClasseTarifa();
+//
+//            if ((!Optional.ofNullable(classeTarifaria).isPresent() || classeTarifaria.length() == 0)) {
+//                return this;
+//            }
+//
+//            if (!classeTarifaria.equals(ticketDTO.getBaseTarifaria().substring(0, 1))) {
+//                countError++;
+//            }
+//
+//            try {
+//                Matcher m = p.matcher(ticketDTO.getBaseTarifaria());
+//                if (!m.matches()) {
+//                    countError++;
+//                }
+//            } catch (Exception e) {
+//                countError++;
+//            }
+//
+//        } else {
+//            countError++;
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.baseTarifaria.type"), "baseTarifaria");
+//        } else {
+//            ticket.setBaseTarifaria(ticketDTO.getBaseTarifaria());
+//        }
         return this;
     }
 
     @Override
     public IValidator checkTktDesignator() {
 
-        Pattern p = Pattern.compile(REGEX_TKT_DESIGNATOR);
-        int countError = 0;
-
+        //Pattern p = Pattern.compile(REGEX_TKT_DESIGNATOR);
+        //int countError = 0;
         if (!Optional.ofNullable(ticketDTO.getTktDesignator()).isPresent() || ticketDTO.getTktDesignator().length() == 0) {
             ticket.setTktDesignator("");
         } else {
 
-            Matcher m = p.matcher(ticketDTO.getTktDesignator());
-            if (m.matches()) {
-                countError++;
-            }
-
-            if (countError > 0) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tktDesignator.type"), "tktDesignator");
-            } else {
-                ticket.setTktDesignator(ticketDTO.getTktDesignator());
-            }
+//            Matcher m = p.matcher(ticketDTO.getTktDesignator());
+//            if (m.matches()) {
+//                countError++;
+//            }
+//            if (countError > 0) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tktDesignator.type"), "tktDesignator");
+//            } else {
+            ticket.setTktDesignator(ticketDTO.getTktDesignator());
+//            }
 
         }
 
@@ -995,31 +1060,38 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkClasseTarifa() {
 
-        Pattern p = Pattern.compile(REGEX_CLASSE_TARIFARIA);
-        int countError = 0;
+        String classeTarifa = ticketDTO.getClasseTarifa();
 
-        if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
-            ++countError;
+        if (!Optional.ofNullable(classeTarifa).isPresent() || classeTarifa.length() == 0) {
+            ticket.setClasseTarifa("");
         } else {
-            String base = Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0 ? ticketDTO.getBaseTarifaria().substring(0, 1) : "";
-            String classe = Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() && ticketDTO.getClasseTarifa().length() > 0 ? ticketDTO.getClasseTarifa().substring(0, 1) : ""; //ticketDTO.getClasseTarifa().substring(0, 1);
-
-            if (!base.equals(classe)) {
-                countError++;
-            }
-
-            Matcher m = p.matcher(ticketDTO.getClasseTarifa());
-            if (!m.matches()) {
-                countError++;
-            }
+            ticket.setClasseTarifa(classeTarifa);
         }
 
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeTarifa.type"), "classeTarifa");
-        } else {
-            ticket.setClasseTarifa(ticketDTO.getClasseTarifa());
-        }
-
+//        Pattern p = Pattern.compile(REGEX_CLASSE_TARIFARIA);
+//        int countError = 0;
+//
+//        if (!Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() || ticketDTO.getClasseTarifa().length() == 0) {
+//            ++countError;
+//        } else {
+//            String base = Optional.ofNullable(ticketDTO.getBaseTarifaria()).isPresent() && ticketDTO.getBaseTarifaria().length() > 0 ? ticketDTO.getBaseTarifaria().substring(0, 1) : "";
+//            String classe = Optional.ofNullable(ticketDTO.getClasseTarifa()).isPresent() && ticketDTO.getClasseTarifa().length() > 0 ? ticketDTO.getClasseTarifa().substring(0, 1) : ""; //ticketDTO.getClasseTarifa().substring(0, 1);
+//
+//            if (!base.equals(classe)) {
+//                countError++;
+//            }
+//
+//            Matcher m = p.matcher(ticketDTO.getClasseTarifa());
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeTarifa.type"), "classeTarifa");
+//        } else {
+//            ticket.setClasseTarifa(ticketDTO.getClasseTarifa());
+//        }
         return this;
     }
 
@@ -1046,39 +1118,39 @@ public class Validator implements IValidator {
     public IValidator checkOndDirecional() {
 
         String ondDirecional = ticketDTO.getOndDirecional();
-        int countError = 0;
+        //int countError = 0;
 
         if (!Optional.ofNullable(ondDirecional).isPresent() || ondDirecional.length() == 0) {
             ticket.setOndDirecional("");
         } else {
 
-            Pattern p = Pattern.compile(REGEX_OND_DIRECIONAL);
-
-            Matcher m = p.matcher(ondDirecional);
-            if (!m.matches()) {
-                countError++;
-            }
-
-            if (countError == 0) {
-
-                try {
-                    String origem = ondDirecional.substring(0, 4);
-                    String destino = ondDirecional.substring(3);
-
-                    if (origem.equals(destino)) {
-                        countError++;
-                    }
-                } catch (Exception e) {
-                    countError++;
-                }
-
-            }
-
-            if (countError > 0) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.ondDirecional.type"), "ondDirecional");
-            } else {
-                ticket.setOndDirecional(ondDirecional);
-            }
+//            Pattern p = Pattern.compile(REGEX_OND_DIRECIONAL);
+//
+//            Matcher m = p.matcher(ondDirecional);
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//
+//            if (countError == 0) {
+//
+//                try {
+//                    String origem = ondDirecional.substring(0, 4);
+//                    String destino = ondDirecional.substring(3);
+//
+//                    if (origem.equals(destino)) {
+//                        countError++;
+//                    }
+//                } catch (Exception e) {
+//                    countError++;
+//                }
+//
+//            }
+//
+//            if (countError > 0) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.ondDirecional.type"), "ondDirecional");
+//            } else {
+            ticket.setOndDirecional(ondDirecional);
+//            }
 
         }
 
@@ -1125,6 +1197,7 @@ public class Validator implements IValidator {
     public IValidator checkValorUs() {
 
         String tipoVenda = ticketDTO.getTipo();
+        Long cupom = ticket.getCupom();
         boolean hasTipoVenda = Optional.ofNullable(tipoVenda).isPresent();
         boolean hasValorUs = Optional.ofNullable(this.ticketDTO.getValorUs()).isPresent();
 
@@ -1132,7 +1205,7 @@ public class Validator implements IValidator {
 
         if (hasTipoVenda && tipoVenda.equals("I")) {
 
-            if (!hasValorUs) {
+            if (!hasValorUs && cupom.equals(1L)) {
                 countError++;
             } else {
                 try {
@@ -1163,91 +1236,122 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkTarifaPublica() {
 
-        int countError = 0;
         String tarifaPublica = ticketDTO.getTarifaPublica();
-
         if (!Optional.ofNullable(tarifaPublica).isPresent()) {
-            countError++;
+            ticket.setTarifaPublicUs(0D);
         } else {
-            if (countError == 0) {
+            try {
 
                 Pattern p = Pattern.compile(REGEX_VALOR_BRL);
                 Matcher m = p.matcher(tarifaPublica);
+                Double valor = Double.valueOf(tarifaPublica.replace(".", "").replace(",", "."));
+                ticket.setTarifaPublicUs(valor);
 
-                if (!m.matches()) {
-                    countError++;
-                }
-
-                if (countError == 0) {
-                    try {
-                        Double value = Double.valueOf(tarifaPublica.replace(".", "").replace(",", "."));
-                        if (value.equals(0.0d)) {
-                            countError++;
-                        } else {
-                            ticket.setTarifaPublica(value);
-                        }
-                    } catch (NumberFormatException e) {
-                        countError++;
-                    }
-
-                }
-
+            } catch (NumberFormatException e) {
+                ticket.setTarifaPublicUs(0D);
             }
         }
 
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tarifaPublica.type"), "tarifaPublica");
-        }
-
+//        int countError = 0;
+//        String tarifaPublica = ticketDTO.getTarifaPublica();
+//
+//        if (!Optional.ofNullable(tarifaPublica).isPresent()) {
+//            countError++;
+//        } else {
+//            if (countError == 0) {
+//
+//                Pattern p = Pattern.compile(REGEX_VALOR_BRL);
+//                Matcher m = p.matcher(tarifaPublica);
+//
+//                if (!m.matches()) {
+//                    countError++;
+//                }
+//
+//                if (countError == 0) {
+//                    try {
+//                        Double value = Double.valueOf(tarifaPublica.replace(".", "").replace(",", "."));
+//                        if (value.equals(0.0d)) {
+//                            countError++;
+//                        } else {
+//                            ticket.setTarifaPublica(value);
+//                        }
+//                    } catch (NumberFormatException e) {
+//                        countError++;
+//                    }
+//
+//                }
+//
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tarifaPublica.type"), "tarifaPublica");
+//        }
         return this;
     }
 
     @Override
     public IValidator checkTarifaPublicaUs() {
 
-        int countError = 0;
-        String tipoVenda = ticketDTO.getTipo();
-        boolean hasTipoVenda = Optional.ofNullable(tipoVenda).isPresent();
-
         String tarifaPublicUs = ticketDTO.getTarifaPublicUs();
-        //tarifaPublicUs
 
-        if (hasTipoVenda && tipoVenda.equals("I")) {
+        if (!Optional.ofNullable(tarifaPublicUs).isPresent()) {
+            ticket.setTarifaPublicUs(0D);
+        } else {
+            try {
 
-            if (!Optional.ofNullable(tarifaPublicUs).isPresent()) {
-                countError++;
-            } else {
-                try {
+                Pattern p = Pattern.compile(REGEX_VALOR_BRL);
+                Matcher m = p.matcher(tarifaPublicUs);
+                Double valor = Double.valueOf(tarifaPublicUs.replace(".", "").replace(",", "."));
+                ticket.setTarifaPublicUs(valor);
 
-                    Pattern p = Pattern.compile(REGEX_VALOR_BRL);
-                    Matcher m = p.matcher(tarifaPublicUs);
-                    Double valor = Double.valueOf(tarifaPublicUs.replace(".", "").replace(",", "."));
-
-                    if (!m.matches()) {
-                        countError++;
-                    }
-
-                    if (valor.equals(0.0d)) {
-                        countError++;
-                    } else {
-                        ticket.setTarifaPublicUs(valor);
-                    }
-
-                } catch (NumberFormatException e) {
-                    countError++;
-                }
-            }
-
-        } else if (hasTipoVenda && tipoVenda.equals("D")) {
-            if (Optional.ofNullable(tarifaPublicUs).isPresent()) {
-                countError++;
+            } catch (NumberFormatException e) {
+                ticket.setTarifaPublicUs(0D);
             }
         }
 
-        if (countError > 0) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tarifaPublicUs.type"), "tarifaPublicUs");
-        }
-
+//        int countError = 0;
+//        String tipoVenda = ticketDTO.getTipo();
+//        boolean hasTipoVenda = Optional.ofNullable(tipoVenda).isPresent();
+//
+//        String tarifaPublicUs = ticketDTO.getTarifaPublicUs();
+//        //tarifaPublicUs
+//
+//        if (hasTipoVenda && tipoVenda.equals("I")) {
+//
+//            if (!Optional.ofNullable(tarifaPublicUs).isPresent()) {
+//                countError++;
+//            } else {
+//                try {
+//
+//                    Pattern p = Pattern.compile(REGEX_VALOR_BRL);
+//                    Matcher m = p.matcher(tarifaPublicUs);
+//                    Double valor = Double.valueOf(tarifaPublicUs.replace(".", "").replace(",", "."));
+//
+//                    if (!m.matches()) {
+//                        countError++;
+//                    }
+//
+//                    if (valor.equals(0.0d)) {
+//                        countError++;
+//                    } else {
+//                        ticket.setTarifaPublicUs(valor);
+//                    }
+//
+//                } catch (NumberFormatException e) {
+//                    countError++;
+//                }
+//            }
+//
+//        } else if (hasTipoVenda && tipoVenda.equals("D")) {
+//            if (Optional.ofNullable(tarifaPublicUs).isPresent()) {
+//                countError++;
+//            }
+//        }
+//
+//        if (countError > 0) {
+//            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tarifaPublicUs.type"), "tarifaPublicUs");
+//        }
         return this;
     }
 
@@ -1268,16 +1372,16 @@ public class Validator implements IValidator {
         String pnrCiaAgencia = ticketDTO.getPnrCiaArea();
 
         if (!Optional.ofNullable(pnrCiaAgencia).isPresent()) {
-            this.ticket.setPnrCiaArea("");
+            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.pnrCiaArea.type"), "pnrCiaArea");
         } else {
-            Pattern p = Pattern.compile(REGEX_PNR_CIA_AGENCIA);
-            Matcher m = p.matcher(pnrCiaAgencia);
-
-            if (m.matches()) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.pnrCiaArea.type"), "pnrCiaArea");
-            } else {
-                ticket.setPnrAgencia(pnrCiaAgencia);
-            }
+//            Pattern p = Pattern.compile(REGEX_PNR_CIA_AGENCIA);
+//            Matcher m = p.matcher(pnrCiaAgencia);
+//
+//            if (m.matches()) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.pnrCiaArea.type"), "pnrCiaArea");
+//            } else {
+            ticket.setPnrAgencia(pnrCiaAgencia);
+            // }
         }
 
         return this;
@@ -1294,16 +1398,17 @@ public class Validator implements IValidator {
         }
 
         if (!Optional.ofNullable(selfBookingOffiline).isPresent()) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
+            ticket.setSelfBookingOffiline("");
+            //this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
         } else {
-            Pattern p = Pattern.compile(REGEX_SELFBOOKING, Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(selfBookingOffiline);
-
-            if (!m.matches()) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
-            } else {
-                ticket.setSelfBookingOffiline(selfBookingOffiline);
-            }
+//            Pattern p = Pattern.compile(REGEX_SELFBOOKING, Pattern.CASE_INSENSITIVE);
+//            Matcher m = p.matcher(selfBookingOffiline);
+//
+//            if (!m.matches()) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.selfBookingOffiline.type"), "selfBookingOffiline");
+//            } else {
+            ticket.setSelfBookingOffiline(selfBookingOffiline);
+//            }
         }
 
         return this;
@@ -1315,16 +1420,17 @@ public class Validator implements IValidator {
         Pattern p = Pattern.compile(REGEX_NOME_PAX, Pattern.CASE_INSENSITIVE);
 
         if (!Optional.ofNullable(ticketDTO.getNomePax()).isPresent()) {
-            this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
+            //this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
+            ticket.setNomePax("NO NAME");
         } else {
 
-            Matcher m = p.matcher(ticketDTO.getNomePax());
-
-            if (m.matches()) {
-                ticket.setNomePax(ticketDTO.getNomePax());
-            } else {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
-            }
+//            Matcher m = p.matcher(ticketDTO.getNomePax());
+//
+//            if (m.matches()) {
+            ticket.setNomePax(ticketDTO.getNomePax());
+//            } else {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.nomePax.type"), "nomePax");
+//            }
         }
 
         return this;
@@ -1359,14 +1465,14 @@ public class Validator implements IValidator {
             ticket.setCpfPax("");
         } else {
 
-            Pattern p = Pattern.compile(REGEX_CPF);
-            Matcher m = p.matcher(cpfPax);
-
-            if (!m.matches()) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cpfPax.type"), "cpfPax");
-            } else {
-                ticket.setCpfPax(cpfPax);
-            }
+//            Pattern p = Pattern.compile(REGEX_CPF);
+//            Matcher m = p.matcher(cpfPax);
+//
+//            if (!m.matches()) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.cpfPax.type"), "cpfPax");
+//            } else {
+            ticket.setCpfPax(cpfPax);
+//            }
         }
         return this;
     }
@@ -1414,14 +1520,15 @@ public class Validator implements IValidator {
         int countError = 0;
         if (!Optional.ofNullable(tipoPagamento).isPresent()) {
             countError++;
-        } else {
-            Pattern p = Pattern.compile(REGEX_TIPO_PAGAMENTO, Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(tipoPagamento);
-
-            if (!m.matches()) {
-                countError++;
-            }
         }
+//        } else {
+//            Pattern p = Pattern.compile(REGEX_TIPO_PAGAMENTO, Pattern.CASE_INSENSITIVE);
+//            Matcher m = p.matcher(tipoPagamento);
+//
+//            if (!m.matches()) {
+//                countError++;
+//            }
+//        }
 
         if (countError > 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.tipoPagamento.type"), "tipoPagamento");
@@ -1557,13 +1664,9 @@ public class Validator implements IValidator {
         //ticket.setBilheteBehavior(bilheteBehavior);
     }
 
-    
 //    public void validate(List<Ticketlist, Ticket ticket) {
-
-       /// Optional<Ticket> result = Optional.empty();
-
-      //  long start = System.currentTimeMillis();
-        
+    /// Optional<Ticket> result = Optional.empty();
+    //  long start = System.currentTimeMillis();
 //        switch (ticket.getLayout()) {
 //            case FULL:
 //
@@ -1609,19 +1712,15 @@ public class Validator implements IValidator {
 //                }
 //                ticket.setStatus(TicketStatusEnum.APPROVED);
 //        }
-
-       // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-      //  return result;
-
-   // }
-    
+    // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+    //  return result;
+    // }
 //    private boolean isUpdate(Ticket ticket){
 //        
 //        
 //        
 //        
 //    }
-
 //    private void verificaCupom(List<Ticket> list, Ticket ticket) {
 //
 //        //long start = System.currentTimeMillis();
@@ -1639,19 +1738,18 @@ public class Validator implements IValidator {
 //        }
 //        //Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ verificaCupom ] -> " + ((System.currentTimeMillis() - start)) + " milesegundos");
 //    }
-    
-    private void generateNameClient(){
-        
+    private void generateNameClient() {
+
         Optional<String> consolida = Optional.ofNullable(this.ticket.getConsolidada());
         Optional<String> empresa = Optional.ofNullable(this.ticket.getEmpresa());
         String nomeEmpresa = "";
-        
-        if((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()){
-           nomeEmpresa = MessageFormat.format("{0}{1}",ticketDTO.getCodigoAgencia(), consolida.get()); 
-        }else if(empresa.isPresent()){
-            nomeEmpresa = MessageFormat.format("{0}{1}",ticketDTO.getCodigoAgencia(), empresa.get()); 
+
+        if ((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()) {
+            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), consolida.get());
+        } else if (empresa.isPresent()) {
+            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), empresa.get());
         }
-        
+
         this.ticket.setNomeCliente(nomeEmpresa);
     }
 
@@ -1742,6 +1840,12 @@ public class Validator implements IValidator {
                     .getName()).log(Level.SEVERE, "", e);
             return Optional.empty();
         }
+    }
+
+    public LocalDate dateToLocalDate(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
 }

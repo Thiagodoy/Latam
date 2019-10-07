@@ -1,9 +1,11 @@
 package com.core.behavior.io;
 
 import com.core.behavior.dto.HeaderDTO;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
+import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,11 +17,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.Message;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
 import org.beanio.InvalidRecordException;
@@ -119,11 +124,12 @@ public class BeanIoReader {
         return 0l;
     }
 
-    public boolean headerIsValid(File file, com.core.behavior.util.Stream stream) {
+    public void headerIsValid(File file, com.core.behavior.util.Stream stream) throws Exception{
 
         FileReader reader = null;
         LineNumberReader readerLine = null;
         beanErrorHandler = new BeanErrorHandler();
+        List<String> errors = null;
 
         try {
             reader = new FileReader(file);
@@ -144,16 +150,15 @@ public class BeanIoReader {
             Reader rr = new InputStreamReader(new FileInputStream(file), ENCODING);
             BeanReader beanReader = factory.createReader(stream.getStreamId(), rr);
 
-            HeaderDTO headerDto = (HeaderDTO) beanReader.read();
+            beanReader.read();
             beanReader.close();
 
             FileUtils.forceDelete(fileHeader);
-
-            return Optional.ofNullable(headerDto).isPresent();
+            
 
         } catch (InvalidRecordException ex) {
             int count = ex.getRecordCount();
-
+            errors = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 RecordContext context = ex.getRecordContext(i);
 
@@ -161,17 +166,15 @@ public class BeanIoReader {
 
                 for (String key : context.getFieldErrors().keySet()) {
                     for (String object : context.getFieldErrors(key)) {
+                        errors.add(object);
                         Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, object);
                     }
                 }
-
-            }
-
-            return false;
-        } catch (Exception ex) {
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
-            return false;
-        } finally {
+            }            
+        } catch(Exception e){
+            throw e;
+        
+        }finally {
             try {
                 readerLine.close();
                 reader.close();
@@ -180,7 +183,37 @@ public class BeanIoReader {
             }
 
         }
+        
+        if(Optional.ofNullable(errors).isPresent()){
+            this.generateFileHeaderReturn(errors);
+        }
 
+    }
+    
+    
+    private void generateFileHeaderReturn(List<String> errors) throws ApplicationException{
+        
+        
+         File fileReturnHeader = null;
+        try {
+            fileReturnHeader = File.createTempFile("fileHeaderReturn", ".txt");
+            FileWriter writerReturn  = new FileWriter(fileReturnHeader);
+            
+            for (String error : errors) {
+                writerReturn.write(error);
+            }
+            
+            writerReturn.flush();
+            writerReturn.close();
+            
+        } catch (IOException ex) {
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        throw new ApplicationException(MessageCode.FILE_HEADER_INVALID,fileReturnHeader);
+        
+        
+        
     }
 
 }

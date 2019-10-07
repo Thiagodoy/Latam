@@ -3,6 +3,7 @@ package com.core.behavior.services;
 import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.dto.TicketValidationDTO;
+import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.TicketStatusEnum;
@@ -137,12 +138,12 @@ public class TicketService {
         return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom());
     }
     
-    public List<Ticket> findtToUpdate(Ticket ticket){
-        return ticketRepository.findtToUpdate(ticket.getAgrupamentoA(),ticket.getCupom());
+    public TicketValidationShortDTO rulesShort(Ticket ticket){
+        return ticketRepository.rulesShort(ticket.getAgrupamentoC(), ticket.getCupom());
     }
     
-    public List<Ticket> findtFirstTicket (Ticket ticket){
-        return ticketRepository.findtFirstTicket(ticket.getAgrupamentoA());
+    public List<Ticket> findToUpdate(Ticket ticket){
+        return ticketRepository.findToUpdate(ticket.getAgrupamentoA(),ticket.getCupom());
     }
     
     public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end, String codigoAgencia){
@@ -151,6 +152,19 @@ public class TicketService {
     
     public TicketCountCupomDTO rulesCountCupom(Ticket ticket){
         return ticketRepository.rulesCountCupom(ticket.getAgrupamentoA(), ticket.getCupom());
+    }
+    
+    public TicketCountCupomDTO rulesCountCupomShort(Ticket ticket){
+        return ticketRepository.rulesCountCupomShort(ticket.getAgrupamentoC(), ticket.getCupom());
+    }
+    
+    
+    public List<Ticket> findByAgrupamentoC(Ticket t){
+        return ticketRepository.findByAgrupamentoC(t.getAgrupamentoC());
+    }
+    
+    public List<Ticket> findByAgrupamentoA(Ticket t){
+        return ticketRepository.findByAgrupamentoA(t.getAgrupamentoA());
     }
 
 }
