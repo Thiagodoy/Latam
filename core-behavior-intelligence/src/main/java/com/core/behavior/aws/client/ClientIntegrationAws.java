@@ -13,12 +13,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.EncryptedPutObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.Tag;
 import com.core.behavior.properties.AmazonIntegrationProperties;
 import com.core.behavior.properties.AmazonProperties;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +53,10 @@ public class ClientIntegrationAws {
 
     }
 
-    public String uploadFile(File file, String folder) throws IOException {
+    public String uploadFile(File file, String folder, List<Tag> tags) throws IOException {
         PutObjectRequest request = new EncryptedPutObjectRequest(amazonConfiguration.getBucketName(),  folder + "/" + file.getName(), file);        
+        ObjectTagging otag = new ObjectTagging(tags);
+        request.setTagging(otag);
         PutObjectResult result = this.amazonS3.putObject(request);
         return result.getETag();        
     }

@@ -4,6 +4,13 @@ server:
     
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
+    
+    
+spring:
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1    
 
 
       
@@ -19,15 +26,9 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-<<<<<<< HEAD
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: 12345678
-=======
-            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false         
             dataSourceUser: behint_hmg
             dataSourcePassword: Beh1ntHmg_App#2018
->>>>>>> 53fe7e41379bff28811e50730dd18ce2dd2eff8c
             port: 3306            
             connectionTestQuery: SELECT 1  
             
@@ -44,15 +45,9 @@ activiti:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-<<<<<<< HEAD
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: 12345678
-=======
-            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
+            dataUrl: jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false         
             dataSourceUser: behint_hmg
             dataSourcePassword: Beh1ntHmg_App#2018
->>>>>>> 53fe7e41379bff28811e50730dd18ce2dd2eff8c
             port: 3306            
             connectionTestQuery: SELECT 1 
             

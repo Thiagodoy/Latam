@@ -1,6 +1,6 @@
 package com.core.behavior.services;
 
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.activiti.model.GroupActiviti;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
@@ -54,23 +54,19 @@ public class UserActivitiService {
     private GroupActivitiRepository groupActivitiRepository;
 
     @Autowired
-    private EmailService emailService;
-
-    @Autowired
     private UserInfoService infoService;
 
     @Autowired
     private GroupMemberSevice groupMemberSevice;
-    
+
     @Autowired
     private NotificacaoService notificacaoService;
 
     @Transactional
-    public void deleteUser(String idUser) {       
-        
+    public void deleteUser(String idUser) {
         UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();        
-        userActiviti.setStatus(UserStatusEnum.DISABLED);       
-        userActivitiRepository.save(userActiviti);
+        infoService.deleteAll(userActiviti.getInfo());        
+        userActivitiRepository.deleteById(idUser);        
     }
 
     @Transactional
@@ -79,7 +75,7 @@ public class UserActivitiService {
         groupMemberSevice.deleteByUserId(user.getId());
         infoService.deleteByUserId(user.getId());
 
-        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
 
         userActiviti.merge(user);
         userActivitiRepository.save(userActiviti);
@@ -90,7 +86,7 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(id);
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         return getResponseUsers(Arrays.asList(opt.get())).get(0);
@@ -115,22 +111,20 @@ public class UserActivitiService {
 
         UserActiviti user = userActivitiRepository
                 .findById(request.getEmail())
-                .orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));       
-        
-        
-        if(user.getStatus().equals(UserStatusEnum.DISABLED)){
-              throw new ActivitiException(MessageCode.USER_DESATIVADO);
+                .orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
+
+        if (user.getStatus().equals(UserStatusEnum.DISABLED)) {
+            throw new ApplicationException(MessageCode.USER_DESATIVADO);
         }
-        
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(user, Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
@@ -140,13 +134,12 @@ public class UserActivitiService {
 
             Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime dateLastAcess = LocalDateTime.parse(lastAccess.get().getValue(), formatter);           
-            
-            
+            LocalDateTime dateLastAcess = LocalDateTime.parse(lastAccess.get().getValue(), formatter);
+
             if (time.isAfter(dateLastAcess)) {
                 UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_PASSWORD, "true");
                 infoService.save(passwordExpiration);
-                throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+                throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
             }
         }
 
@@ -159,13 +152,13 @@ public class UserActivitiService {
         if (!Utils.isMaster(user) && ld.isAfter(dateAcess)) {
             UserInfo passwordExpiration = new UserInfo(user.getId(), Constantes.EXPIRATION_ACCESS, "true");
             infoService.save(passwordExpiration);
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         if (!user.getPassword().equals(request.getPassword())) {
-            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
-        } 
-        
+            throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
+        }
+
         List<GroupResponse> listGroupsResponse = new ArrayList();
         List<GroupActiviti> listGroups = groupActivitiRepository.findAll();
 
@@ -200,7 +193,7 @@ public class UserActivitiService {
         parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));
         parameter.put(":email", user.getEmail());
         parameter.put(":password", password);
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.CONGRATS);
         notificacao.setParameters(Utils.mapToString(parameter));
@@ -210,17 +203,17 @@ public class UserActivitiService {
     @Transactional
     public void resendAccess(String id, boolean master) throws MessagingException, IOException {
 
-        UserActiviti userActiviti = userActivitiRepository.findById(id).orElseThrow(() -> new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR));
+        UserActiviti userActiviti = userActivitiRepository.findById(id).orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
 
         Optional<UserInfo> opt = userActiviti.getInfo().stream().filter(u -> u.getKey().equals(Constantes.EXPIRATION_ACCESS)).findFirst();
         Optional<UserInfo> optPass = userActiviti.getInfo().stream().filter(u -> u.getKey().equals(Constantes.EXPIRATION_PASSWORD)).findFirst();
 
         if (!master && opt.isPresent()) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         if (!master && optPass.isPresent()) {
-            throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
 
         if (master) {
@@ -235,29 +228,29 @@ public class UserActivitiService {
             }
         }
 
-        UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();                 
-        primeiroAcesso.setValue("true");        
-         
+        UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();
+        primeiroAcesso.setValue("true");
+
         UserInfo lastAccess = Utils.valueFromUserInfo(userActiviti, Constantes.LAST_ACCESS).get();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         lastAccess.setValue(formatter.format(LocalDateTime.now()));
-        
+
         String password = Utils.generatePasswordRandom();
         userActiviti.setPassword(DigestUtils.md5Hex(password));
 
         userActivitiRepository.save(userActiviti);
-         DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+        DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", Utils.replaceAccentToEntityHtml(userActiviti.getFirstName()));
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", data.format(LocalDateTime.now()));
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.FORGOT);
         notificacao.setParameters(Utils.mapToString(parameter));
-        notificacaoService.save(notificacao);       
+        notificacaoService.save(notificacao);
 
     }
 
@@ -267,17 +260,17 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(id);
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         Optional<UserInfo> expiredAccess = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_ACCESS);
         if (expiredAccess.isPresent() && expiredAccess.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_LOGIN_45_DAYS_ERROR);
         }
 
         Optional<UserInfo> expiredPassword = Utils.valueFromUserInfo(opt.get(), Constantes.EXPIRATION_PASSWORD);
         if (expiredPassword.isPresent() && expiredPassword.get().getValue().equals("true")) {
-            throw new ActivitiException(MessageCode.EXPIRED_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.EXPIRED_PASSWORD_ERROR);
         }
 
         UserActiviti userActiviti = opt.get();
@@ -297,7 +290,7 @@ public class UserActivitiService {
         parameter.put(":email", userActiviti.getEmail());
         parameter.put(":password", password);
         parameter.put(":data", formatter.format(LocalDateTime.now()));
-        
+
         Notificacao notificacao = new Notificacao();
         notificacao.setLayout(LayoutEmailEnum.FORGOT);
         notificacao.setParameters(Utils.mapToString(parameter));
@@ -331,8 +324,7 @@ public class UserActivitiService {
         }
 
         predicates.add(UserActivitiSpecification.status(UserStatusEnum.ACTIVE));
-        
-        
+
         Specification<UserActiviti> specification = predicates.stream().reduce((a, b) -> a.and(b)).orElse(null);
 
         return userActivitiRepository.findAll(specification, page);
@@ -369,11 +361,11 @@ public class UserActivitiService {
         Optional<UserActiviti> opt = userActivitiRepository.findById(request.getEmail());
 
         if (!opt.isPresent()) {
-            throw new ActivitiException(MessageCode.USER_NOT_FOUND_ERROR);
+            throw new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR);
         }
 
         if (!opt.get().getPassword().equals(request.getPassword())) {
-            throw new ActivitiException(MessageCode.USER_PASSWORD_ERROR);
+            throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
         }
 
         UserActiviti user = opt.get();
@@ -388,17 +380,14 @@ public class UserActivitiService {
                 op.get().setValue("false");
             }
         }
-        
-        
+
         // Altera o contador  da mudanca de senha
-        Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();        
-        if(op.isPresent()){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");                
+        Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();
+        if (op.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             op.get().setValue(formatter.format(LocalDateTime.now()));
         }
-        
-        
-        
+
         userActivitiRepository.save(user);
 
     }

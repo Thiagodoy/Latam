@@ -1,4 +1,4 @@
-package com.core.behavior.reader;
+package com.core.behavior.io;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

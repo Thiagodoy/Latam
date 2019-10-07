@@ -1,10 +1,15 @@
 package com.core.behavior.services;
 
+import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
+import com.core.activiti.repository.UserActivitiRepository;
 import com.core.activiti.repository.UserInfoRepository;
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.util.Constantes;
+import com.core.behavior.util.UserStatusEnum;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +23,29 @@ public class UserInfoService {
 
     @Autowired
     private UserInfoRepository infoRepository;
+    
+    @Autowired
+    private UserActivitiRepository userActivitiRepository;
+    
 
     public boolean checkCpfCnpj(String value) {
         List<UserInfo> info = infoRepository.findByKeyAndValue("cpf", value);
-        return !info.isEmpty();
+        
+        if(!info.isEmpty()){
+            List<String> ids = info.stream().map(i->i.getUserId()).collect(Collectors.toList());            
+            List<UserActiviti> users = userActivitiRepository.findAllById(ids);            
+            Optional<UserActiviti> opt = users.stream().filter(u-> u.getStatus().equals(UserStatusEnum.ACTIVE)).findFirst();
+            
+            return opt.isPresent();
+        }else{
+            return false;
+        }        
+        
+        //return !info.isEmpty();
+    }
+    
+    public void deleteByKeyAndValue(String key,String value){
+        infoRepository.deleteByKeyAndValue(key, value);
     }
 
     public List<UserInfo> findByUser(String id) {
@@ -53,7 +77,7 @@ public class UserInfoService {
     }
     
     @Transactional
-    public void expiredPassword(String id) throws ActivitiException {
+    public void expiredPassword(String id) throws ApplicationException {
         UserInfo passwordExpiration = new UserInfo(id, Constantes.EXPIRATION_PASSWORD, "true");
         infoRepository.save(passwordExpiration);
     }

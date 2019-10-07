@@ -16,11 +16,11 @@ import org.springframework.data.jpa.domain.Specification;
 public class UserActivitiSpecification {
 
     public static Specification<UserActiviti> firstName(String firstName) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(root.get(UserActiviti_.firstName), firstName + "%");
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.upper(root.get(UserActiviti_.firstName)), firstName.toUpperCase() + "%");
     }
 
     public static Specification<UserActiviti> lastName(String lastName) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(root.get(UserActiviti_.lastName), lastName + "%");
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.upper(root.get(UserActiviti_.lastName)), lastName.toUpperCase() + "%");
     }
 
     public static Specification<UserActiviti> email(String email) {

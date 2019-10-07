@@ -5,7 +5,6 @@
  */
 package com.core.behavior.dto;
 
-import com.google.common.collect.HashBiMap;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Data;
@@ -22,15 +21,16 @@ public class LineErrorDTO {
     private String lineContent;
     private Map<String, String> comments = new HashMap<>();
     private int line;
+    private Long lineNumber;
 
-    public LineErrorDTO(String content) {
+    public LineErrorDTO(String content,Long lineNumber) {
         this();
+        this.lineNumber = lineNumber;
         this.lineContent = content;
     }
 
-    public LineErrorDTO() {
-       
-        this.line = ++LineErrorDTO.rowNum;        
+    public LineErrorDTO() {       
+        //this.line = ++LineErrorDTO.rowNum;        
     }
     
     public void put(String field, String message){

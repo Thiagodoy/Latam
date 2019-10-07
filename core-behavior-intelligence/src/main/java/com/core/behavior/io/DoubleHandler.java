@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.reader;
+package com.core.behavior.io;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

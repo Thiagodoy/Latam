@@ -6,7 +6,7 @@
 package com.core.behavior.resource;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
@@ -16,6 +16,7 @@ import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +51,7 @@ public class FileResource {
 
     @Autowired
     private FileService fileService;
-    
+
     @Autowired
     private GeneratorFileReturnService fileReturnService;
 
@@ -60,16 +62,16 @@ public class FileResource {
             @PathVariable(name = "userId") String userId,
             @PathVariable(name = "uploadAws") boolean uploadAws,
             @PathVariable(name = "uploadFtp") boolean uploadFtp,
-            @PathVariable(name = "processFile") boolean processFile,            
+            @PathVariable(name = "processFile") boolean processFile,
             @RequestPart(value = "file") MultipartFile file) {
 
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
-        }catch(ActivitiException ex){
+        } catch (ApplicationException ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
-        }catch (Exception e) {
+        } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
@@ -86,7 +88,7 @@ public class FileResource {
         try {
 
             java.io.File file = fileService.downloadFile(fileName, company);
-            
+
             String mimeType = Utils.getMimeType(file);
             response.setContentType(mimeType);
             response.setHeader("Content-disposition", "attachment; filename=" + fileName);
@@ -96,47 +98,85 @@ public class FileResource {
             file.delete();
             return ResponseEntity.ok().build();
 
-        }catch(AmazonS3Exception ex){
+        } catch (AmazonS3Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), SERVER_ERROR_AWS));
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         }
 
     }
-    
-    @RequestMapping(value = "/downloadNew", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/generate/arquivo-retorno", method = RequestMethod.GET)
     @ApiOperation(value = "Download of files")
-    public ResponseEntity downloadNewFile(
-            @RequestParam(name = "id") Long id,            
+    public ResponseEntity generateFileReturn(
+            @RequestParam(name = "id") Long id,
+            @RequestParam(name = "email") String email,
             HttpServletResponse response) {
-         java.io.File file = null;
+        
         try {
 
-            file = fileReturnService.generateFileReturnFriendly(id);
-            String nameFile = fileService.findById(id).getName();
-            
-            //String mimeType = Utils.getMimeType(file);
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            response.setHeader("Content-disposition", "attachment; filename=" + nameFile + "error.xlsx");
-            InputStream in = new FileInputStream(file);
-            org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
-            response.flushBuffer(); 
+            fileReturnService.generateFileReturnFriendly(id, email);
+//            String nameFile = fileService.findById(id).getName();
+//            
+//            //String mimeType = Utils.getMimeType(file);
+//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//            response.setHeader("Content-disposition", "attachment; filename=" + nameFile + "error.xlsx");
+//            InputStream in = new FileInputStream(file);
+//            org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
+//            response.flushBuffer(); 
             return ResponseEntity.ok().build();
 
-        }catch(AmazonS3Exception ex){
+        } catch (AmazonS3Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), SERVER_ERROR_AWS));
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
-        }finally{
+        } finally {
 //             try {
 //                 FileUtils.forceDelete(file);
 //             } catch (IOException ex) {
 //                 Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, null, ex);
 //             }
+        }
+
+    }
+    
+    @RequestMapping(value = "/download/arquivo-retorno", method = RequestMethod.GET)
+    @ApiOperation(value = "Download of files")
+    public ResponseEntity downloadFileReturn(            
+            @RequestParam(name = "fileName") String fileName,
+            @RequestParam(name = "company") Long company,
+            HttpServletResponse response) {
+        
+         java.io.File file = null;
+        
+        try {
+
+            file = fileReturnService.downloadFileReturn(company, fileName);           
+
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+            InputStream in = new FileInputStream(file);
+            org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
+            response.flushBuffer(); 
+            return ResponseEntity.ok().build();
+
+        } catch (AmazonS3Exception ex) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), SERVER_ERROR_AWS));
+        } catch (Exception ex) {
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
+        } finally {
+             try {
+                 if(file != null)
+                 FileUtils.forceDelete(file);
+             } catch (IOException ex) {
+                 Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[downloadFileReturn]", ex);
+             }
         }
 
     }
@@ -161,14 +201,14 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
-    
-     @RequestMapping(value = "/errors/sintetico/{id}/{field}", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/errors/sintetico/{id}/{field}", method = RequestMethod.GET)
     public ResponseEntity downloadErrorSintetico(
             @PathVariable Long id,
             @PathVariable String field) {
 
         try {
-            
+
             return ResponseEntity.ok(fileService.generateLogStatusSintetico(id, field));
 
         } catch (Exception e) {
@@ -176,9 +216,6 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
-    
-    
-    
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public ResponseEntity list(
@@ -194,11 +231,11 @@ public class FileResource {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size,Sort.by("createdDate").ascending());
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdDate").ascending());
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 
-            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status, timeStart,timeEnd);
+            Page<File> response = fileService.list(fileName, userId, company, paam, pageRequest, status, timeStart, timeEnd);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
@@ -217,13 +254,13 @@ public class FileResource {
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));
         }
     }
-    
-     @RequestMapping(value = "/status/files", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/status/files", method = RequestMethod.GET)
     public ResponseEntity listar(@RequestParam(name = "company") Long agencia,
             @RequestParam(name = "timeStart", required = false) Long timeStart,
             @RequestParam(name = "timeEnd", required = false) Long timeEnd) {
         try {
-            return ResponseEntity.ok(fileService.statusFilesProcess(agencia,timeStart,timeEnd));
+            return ResponseEntity.ok(fileService.statusFilesProcess(agencia, timeStart, timeEnd));
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(e.getMessage(), 500l));

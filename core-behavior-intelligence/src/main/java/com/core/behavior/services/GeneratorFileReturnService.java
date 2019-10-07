@@ -5,39 +5,32 @@
  */
 package com.core.behavior.services;
 
-import com.core.behavior.dto.LineErrorDTO;
-import com.core.behavior.model.Log;
+import com.core.behavior.aws.client.ClientAws;
+import com.core.behavior.exception.ApplicationException;
+import com.core.behavior.jobs.FileReturnJob;
+import com.core.behavior.model.Agency;
+import com.core.behavior.model.Notificacao;
 import com.core.behavior.repository.AgencyRepository;
-import com.core.behavior.repository.FileRepository;
-import com.core.behavior.repository.LogRepository;
+import com.core.behavior.util.LayoutEmailEnum;
+import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.Utils;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.Comment;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.RichTextString;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import java.text.MessageFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.core.behavior.repository.FileIntegrationRepository;
-import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 /**
  *
@@ -47,145 +40,102 @@ import java.util.Comparator;
 public class GeneratorFileReturnService {
 
     @Autowired
-    private LogRepository logRepository;
-    
-    @Autowired
-    private AgencyRepository agencyRepository;
-    
+    private SchedulerFactoryBean bean;
 
     @Autowired
-    private FileRepository fileRepository;
+    private ClientAws clientAws;
 
-    public File generateFileReturnFriendly(Long id) throws IOException {
+    @Autowired
+    private FileService fileService;
 
-        final List<Log> logs = logRepository.findByFileId(id);
-        final com.core.behavior.model.File file = fileRepository.findById(id).get();
-        final String fileName = file.getName();
-        
-        final long layout = agencyRepository.findById(file.getCompany()).get().getLayoutFile();
-       Comparator lineNumber = Comparator.comparingLong(Log::getLineNumber);
-        final List<Log> logDistinct = logs.stream().distinct().collect(Collectors.toList());
-        logDistinct.sort(lineNumber);
-        List<LineErrorDTO> e = new LinkedList<LineErrorDTO>();
-        LineErrorDTO.reset();
+    @Autowired
+    private AgencyRepository agencyRepository;    
+    
+    @Autowired
+    private NotificacaoService notificacaoService;    
+    
+    @Autowired
+    private UserActivitiService userActivitiService;
 
-        logDistinct.stream().forEach(l -> {
+    public File downloadFileReturn(Long idAgencia, String fileName) throws IOException {
 
-            LineErrorDTO error = new LineErrorDTO(l.getRecordContent());
+        final Agency agency = agencyRepository.findById(idAgencia).get();
 
-            logs.stream().filter(ll -> ll.getRecordContent().equals(l.getRecordContent())).forEach(lll -> {
+        String folder = agency.getS3Path().split("\\\\")[1];
 
-                final String column = Utils.getPositionExcelColumn(lll.fieldName);
-                error.put(column, lll.getMessageError());
+        File file = clientAws.downloadFileReturn(fileName, folder);
 
-            });
-            e.add(error);
-        });
-        
-        return generateFile(e, layout);
+        return file;
     }
 
-    private File generateFile(List<LineErrorDTO> errors, long layout) throws FileNotFoundException, IOException {
+    public void generateFileReturnFriendly(Long id, String email) throws Exception {
 
-        String sheetName = "Erros";
+        //:TODO Impmentar uma verificação do arquivo caso o mesmo já foi criado não realizar o processamento
+        com.core.behavior.model.File file = fileService.findById(id);
 
-        XSSFWorkbook wb = new XSSFWorkbook();
-        XSSFSheet sheet = wb.createSheet(sheetName);
+        String fileName = file.getName().replaceAll(".(csv|CSV)", "");
 
-        CellStyle backgroundStyle = wb.createCellStyle();
+        Agency agency = agencyRepository.getOne(file.getCompany());
 
-        CellStyle cellBold = wb.createCellStyle();
+        String folder = agency.getS3Path().split("\\\\")[1];
 
-        backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
-        backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        String fileZipName = MessageFormat.format("{0}_v{1}.zip", fileName, file.getVersion());
 
-        CellStyle borderStyle = wb.createCellStyle();
-
-        XSSFFont font = wb.createFont();
-        font.setFontHeightInPoints((short) 10);
-        font.setFontName("Arial");
-        font.setColor(IndexedColors.BLACK.getIndex());
-        font.setBold(true);
-        font.setItalic(true);
-
-
-        String[] header = layout == 1 ? Utils.headerMinLayoutFile.split(";") : Utils.headerFullLayoutFile.split(";");;
-        XSSFRow rr = sheet.createRow(0);
-        cellBold.setFont(font);
-
-        for (int i = 0; i < header.length; i++) {
-            XSSFCell cell = rr.createCell(i);
-            cell.setCellValue(header[i]);
+        boolean  fileExists = clientAws.fileReturnExists(fileName, folder);
+        
+        
+        if(fileExists){            
+            this.createNotification(file.getName(), fileZipName, email, agency);
+            return;
         }
 
-        for (int r = 0; r < errors.size(); r++) {
-            XSSFRow row = sheet.createRow(r + 1);
+        JobDataMap data = new JobDataMap();
+        data.put(FileReturnJob.DATA_FILE_ID, id);
+        data.put(FileReturnJob.DATA_EMAIL_ID, email);
 
-            //iterating c number of columns
-            String[] values = errors.get(r).getLineContent().split(";");
-            for (int c = 0; c < values.length; c++) {
-                XSSFCell cell = row.createCell(c);
-                cell.setCellValue(values[c]);
+        JobDetail detail = JobBuilder
+                .newJob(FileReturnJob.class)
+                .withIdentity("FILE-RETURN-JOB-" + String.valueOf(id), "process-file-return")
+                .withDescription("Processing Return file")
+                .usingJobData(data)
+                .build();
 
-            }
+        SimpleTrigger trigger = TriggerBuilder
+                .newTrigger()
+                .withIdentity("FILE-RETURN-TRIGGER-" + String.valueOf(id), "process-file-return")
+                .startAt(new Date())
+                .withSchedule(simpleSchedule())
+                .build();
+
+        Optional<JobExecutionContext> opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
+
+        if (opt.isPresent()) {
+            throw new ApplicationException(MessageCode.JOB_IS_RUNNING);
+        } else {
+            bean.getScheduler().scheduleJob(detail, trigger);
         }
 
-        //Realiza append para comentarios da mesma Celula
-        Map<String, String> comments = new HashMap<String, String>();
-        errors.forEach(dto -> {
-            dto.getComments().forEach((key, message) -> {
-                if (comments.containsKey(key)) {
-                    String value = comments.get(key) + "\n" + message;
-                    comments.put(key, value);
-                } else {
-                    comments.put(key, message);
-                }
-            });
-        });
-
-        //Create a comments
-        comments.forEach((key, value) -> {            
-            CellReference cellReference = new CellReference(key);
-            XSSFRow row = sheet.getRow(cellReference.getRow());
-
-            XSSFCell cell = row.getCell(cellReference.getCol()) != null ? row.getCell(cellReference.getCol()) : row.createCell(cellReference.getCol());
-
-            Comment com = createCellComment(sheet, "Behavior", value, cell);
-            cell.setCellComment(com);
-            com.setAddress(cell.getAddress());
-            cell.setCellStyle(borderStyle);
-            cell.setCellStyle(backgroundStyle);
-
-        });
-
-        File temp = File.createTempFile("temp", ".xlsx");
-        FileOutputStream fileOut = new FileOutputStream(temp);
-
-        //write this workbook to an Outputstream.
-        wb.write(fileOut);
-        fileOut.flush();
-        fileOut.close();
-        return temp;
     }
+    
+     private void createNotification(String fileName, String fileNameReturn, String emailUser, Agency agency) {
+        Notificacao notificacao = new Notificacao();
+        notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
 
-    private static Comment createCellComment(XSSFSheet sheet, String author, String comment, XSSFCell cell) {
+        Map<String, String> parameter = new HashMap<String, String>();
+        parameter.put(":email", emailUser);
 
-        // comments only supported for XLSX
-        CreationHelper factory = sheet.getWorkbook().getCreationHelper();
-        Drawing drawing = sheet.createDrawingPatriarch();
+        //:FIXME Colocar o endereço no arquivo de configurações
+        String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
 
-        ClientAnchor anchor = factory.createClientAnchor();
-        anchor.setCol1(cell.getColumnIndex());
-        anchor.setCol2(cell.getColumnIndex() + 10);
-        anchor.setRow1(cell.getRowIndex());
-        anchor.setRow2(cell.getRowIndex() + 15);
+        parameter.put(":link", link);
 
-        Comment cmt = drawing.createCellComment(anchor);
+        String nameUser = userActivitiService.getUser(emailUser).getFirstName();
 
-        RichTextString str = factory.createRichTextString(comment);
-        cmt.setString(str);
-        cmt.setAuthor(author);
-        return cmt;
+        parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
+        parameter.put(":arquivo", fileName);
+
+        notificacao.setParameters(Utils.mapToString(parameter));
+        notificacaoService.save(notificacao);
 
     }
 

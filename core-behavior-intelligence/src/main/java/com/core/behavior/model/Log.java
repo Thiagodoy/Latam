@@ -5,10 +5,8 @@ import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.util.TypeErrorEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Locale;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
@@ -40,6 +38,8 @@ import lombok.EqualsAndHashCode;
         + "from behavior.log "
         + "where file_id = :fileId and field_name = :fieldName"
         + " group by message_error", resultSetMapping = "LogResult")
+
+
 
 @Entity
 @Table(schema = "behavior", name = "log")

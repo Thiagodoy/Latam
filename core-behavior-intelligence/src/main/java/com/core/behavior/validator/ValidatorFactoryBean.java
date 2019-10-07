@@ -14,11 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ValidatorFactoryBean implements ValidatorFactory {
 
-    
+    public static final int DATA_VALIDATOR = 0;
+    public static final int DATA_DUPLICITY_VALIDATOR = 1;
 
     @Override
     public IValidator getBean() {
-        return  new Validator();              
+        return new Validator();
+
     }
 
 }

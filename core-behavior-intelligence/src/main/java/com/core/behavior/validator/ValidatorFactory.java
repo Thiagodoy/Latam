@@ -5,6 +5,8 @@
  */
 package com.core.behavior.validator;
 
+import com.core.behavior.util.ValidatorEnum;
+
 /**
  *
  * @author thiag

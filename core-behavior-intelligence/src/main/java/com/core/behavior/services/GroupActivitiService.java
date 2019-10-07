@@ -1,10 +1,8 @@
 package com.core.behavior.services;
 
-import com.core.behavior.activiti.response.PageResponse;
 import com.core.activiti.model.GroupActiviti;
 import com.core.activiti.repository.GroupActivitiRepository;
 import com.core.behavior.request.GroupRequest;
-import com.core.behavior.response.GroupResponse;
 import com.core.activiti.specifications.GroupActivitiSpecification;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +57,6 @@ public class GroupActivitiService {
         Specification<GroupActiviti> specification = specifications.stream().reduce((a,b)->a.and(b)).orElse(null);
         
         return  repository.findAll(specification, page);
-        
-       
-        
-        
-        
-
     }
 
 }

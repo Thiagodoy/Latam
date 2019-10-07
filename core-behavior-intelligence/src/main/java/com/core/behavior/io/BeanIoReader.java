@@ -1,4 +1,4 @@
-package com.core.behavior.reader;
+package com.core.behavior.io;
 
 import com.core.behavior.dto.HeaderDTO;
 import com.core.behavior.jobs.ProcessFileJob;
@@ -6,17 +6,24 @@ import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.Reader;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
+import org.beanio.InvalidRecordException;
+import org.beanio.RecordContext;
 import org.beanio.StreamFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +43,8 @@ public class BeanIoReader {
     @Autowired
     private LogService logService;
 
+    private final String ENCODING = "ISO-8859-1";
+
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
@@ -50,7 +59,8 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            reader = factory.createReader(stream.getStreamId(), file);
+            Reader rr = new InputStreamReader(new FileInputStream(file), ENCODING);
+            reader = factory.createReader(stream.getStreamId(), rr);
 
             long totalLines = this.countLineNumber(file);
             f.setQtdTotalLines(totalLines);
@@ -77,7 +87,7 @@ public class BeanIoReader {
         return Optional.ofNullable(record);
     }
 
-    private long countLineNumber(File file) {
+    public static long countLineNumber(File file) {
         long count = 0;
         FileReader reader = null;
         LineNumberReader readerLine = null;
@@ -131,17 +141,35 @@ public class BeanIoReader {
 
             factory.load(str);
 
-            BeanReader beanReader = factory.createReader(stream.getStreamId(), file);
-            
+            Reader rr = new InputStreamReader(new FileInputStream(file), ENCODING);
+            BeanReader beanReader = factory.createReader(stream.getStreamId(), rr);
+
             HeaderDTO headerDto = (HeaderDTO) beanReader.read();
-            beanReader.close();          
+            beanReader.close();
 
             FileUtils.forceDelete(fileHeader);
 
             return Optional.ofNullable(headerDto).isPresent();
 
+        } catch (InvalidRecordException ex) {
+            int count = ex.getRecordCount();
+
+            for (int i = 0; i < count; i++) {
+                RecordContext context = ex.getRecordContext(i);
+
+                Map<String, Collection<String>> map = context.getFieldErrors();
+
+                for (String key : context.getFieldErrors().keySet()) {
+                    for (String object : context.getFieldErrors(key)) {
+                        Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, object);
+                    }
+                }
+
+            }
+
+            return false;
         } catch (Exception ex) {
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE,ex.getMessage());
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             return false;
         } finally {
             try {

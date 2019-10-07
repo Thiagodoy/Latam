@@ -7,12 +7,12 @@ import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
-import com.core.behavior.exception.ActivitiException;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 import com.core.behavior.model.Notificacao;
-import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;
@@ -81,6 +81,9 @@ public class FileService {
 
     @Autowired
     private FileProcessStatusService fileProcessStatusService;
+    
+    @Autowired
+    private GroupMemberSevice groupMemberSevice;
 
     @Autowired
     private LogService logService;
@@ -124,7 +127,7 @@ public class FileService {
 
         if (Utils.isEmpty(file)) {
             FileUtils.forceDelete(file);
-            throw new ActivitiException(MessageCode.FILE_EMPTY);
+            throw new ApplicationException(MessageCode.FILE_EMPTY);
         }
 
         Agency agency = agencyService.findById(id);
@@ -161,15 +164,13 @@ public class FileService {
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
             long versao = 1L;
             if (!result.getContent().isEmpty()) {
-
                 File f = result.getContent().get(0);
-                versao = f.getVersion().longValue() + 1;
-                
+                versao = f.getVersion().longValue() + 1;                
             }
 
             
             if( !Optional.ofNullable(agency.getLayoutFile()).isPresent()){
-                throw new ActivitiException(MessageCode.FILE_LAYOUT_NOT_DEFINED);
+                throw new ApplicationException(MessageCode.FILE_LAYOUT_NOT_DEFINED);
             }
             
             Stream layoutHeader = agency.getLayoutFile().equals(1L) ? Stream.HEADER_LAYOUT_SHORT : Stream.HEADER_LAYOUT_FULL;
@@ -178,7 +179,7 @@ public class FileService {
             boolean headerIsValid = beanIoReader.headerIsValid(file,layoutHeader);
 
             if (!headerIsValid) {
-                throw new ActivitiException(MessageCode.FILE_HEADER_INVALID);
+                throw new ApplicationException(MessageCode.FILE_HEADER_INVALID);
             }
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao);
@@ -187,24 +188,40 @@ public class FileService {
 
     }
 
-    private void criaNotificacaoDeUpload(Agency agency){
-         Map<String, String> parameter = new HashMap<String, String>();
-            parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
-            List<String> emails = new ArrayList<>();
-            //Notifica os usuários que estão na mesma agenica
-            userInfoRepository.findByKeyAndValue("agencia", String.valueOf(agency.getId())).forEach(info -> {
-                Optional<UserActiviti> u = userActivitiRepository.findById(info.getUserId());
+    private void criaNotificacaoDeUpload(Agency agency){         
+           
+        
+            List<String> ids = userInfoRepository
+                    .findByKeyAndValue("agencia", String.valueOf(agency.getId()))
+                    .stream()
+                    .map(u-> u.getUserId())
+                    .collect(Collectors.toList());
+            
+            
+            //Remove usuarios suporte behavior
+            List<String> emails = groupMemberSevice.findById(ids)
+                    .stream().filter(g-> !g.getGroupId().equals("suporte behavior"))
+                    .map(gg->gg.getUserId())
+                    .collect(Collectors.toList());
+            
+            
+
+            //Notifica os usuários que estão na mesma agência
+            emails.forEach(email -> {
+                Optional<UserActiviti> u = userActivitiRepository.findById(email);
                 if (u.isPresent()) {
-                    emails.add(u.get().getEmail());
+                    
+                    Map<String, String> parameter = new HashMap<String, String>();
+                    parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
+                    parameter.put(":email", u.get().getEmail());                    
+                    Notificacao notificacao = new Notificacao();
+                    notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
+                    notificacao.setParameters(Utils.mapToString(parameter));
+                    notificacaoService.save(notificacao);                    
+                    
                 }
             });
-            
-            parameter.put(":email", emails.stream().collect(Collectors.joining(";")));
-            
-            Notificacao notificacao = new Notificacao();
-            notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
-            notificacao.setParameters(Utils.mapToString(parameter));
-            notificacaoService.save(notificacao);
+          
     }
     private void uploadFile(boolean uploadAws, boolean uploadFtp, String folder, java.io.File file) throws IOException {
 
@@ -213,7 +230,7 @@ public class FileService {
                 clientAws.uploadFile(file, folder);
             } catch (AmazonS3Exception e) {
                 FileUtils.forceDelete(file);
-                throw new ActivitiException(MessageCode.SERVER_ERROR_AWS);
+                throw new ApplicationException(MessageCode.SERVER_ERROR_AWS);
             }
         }
 
@@ -222,7 +239,7 @@ public class FileService {
                 clientSftp.uploadFile(file, folder);
             } catch (Exception e) {
                 FileUtils.forceDelete(file);
-                throw new ActivitiException(MessageCode.SERVER_ERROR_SFTP);
+                throw new ApplicationException(MessageCode.SERVER_ERROR_SFTP);
             }
         }
 
@@ -277,7 +294,7 @@ public class FileService {
             return f;
         } catch (DataIntegrityViolationException e) {
             FileUtils.forceDelete(file);
-            throw new ActivitiException(MessageCode.FILE_NAME_REPETED);
+            throw new ApplicationException(MessageCode.FILE_NAME_REPETED);
         }
     }
 
@@ -305,9 +322,9 @@ public class FileService {
         String header = Utils.layoutMin.stream().collect(Collectors.joining(";"));
         buffer.append("ERRO;" + header + "\n");
 
-        logService.listByFileId(idFile).forEach(l -> {
-            buffer.append(l);
-        });
+//        logService.listByFileId(idFile).forEach(l -> {
+//            buffer.append(l);
+//        });
 
         return buffer;
     }

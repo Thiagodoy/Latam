@@ -5,10 +5,11 @@ import com.core.activiti.model.UserInfo;
 import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
-import com.core.behavior.reader.BeanIoReader;
+import com.core.behavior.io.BeanIoReader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -16,8 +17,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.LineNumberReader;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +36,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
 import org.beanio.StreamFactory;
@@ -184,7 +189,7 @@ public class Utils {
 
     }
 
-    public static String getPositionExcelColumn(String field) {
+    public synchronized static String getPositionExcelColumn(String field) {
         return positionColumnByField.get(field);
     }
 
@@ -371,9 +376,50 @@ public class Utils {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
+    
+    public static LocalDate dateToLocalDate(Date date) {
+        return Instant.ofEpochMilli(date.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
 
     public static String formatDate(Date date) {
         return formmatDate2.format(date);
+    }
+    
+    public static Date localDateToDate(LocalDate date){
+        return  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+    
+    public static File zipFiles(String name,Long versao,List<File>files) throws FileNotFoundException, IOException{
+        
+        
+        
+        String fileName = MessageFormat.format("{0}_v{1}.zip", name, versao);
+        
+        File fileZip = new File(fileName);
+        
+        FileOutputStream fos = new FileOutputStream(fileZip);
+        ZipOutputStream zipOut = new ZipOutputStream(fos);
+        for (File fileToZip : files) {
+            
+            FileInputStream fis = new FileInputStream(fileToZip);
+            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+            zipOut.putNextEntry(zipEntry);
+ 
+            byte[] bytes = new byte[1024];
+            int length;
+            while((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+            fis.close();
+        }
+        zipOut.close();
+        fos.close();
+        
+        
+       return fileZip;
+        
     }
 
 }

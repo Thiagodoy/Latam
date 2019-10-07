@@ -14,11 +14,12 @@ import java.util.Map;
  */
 public enum LayoutEmailEnum {
 
-    ATIVO_EXECUTIVO("static/ATIVO_EXECUTIVO.html", "Alerta preventivo | Upload LATAM","identifier5","identifier6","identifier1"),
-    ATIVO("static/ATIVO.html", "Alerta preventivo | Upload LATAM","identifier5","identifier6","identifier1"),
-    CONGRATS("static/CONGRAT-EMAIL.html", "Acesso", "identifier1","identifier2","identifier3","identifier4","identifier5","identifier6"),
-    FORGOT("static/FORGOT-ACESS.html", "Acesso", "identifier1","identifier2","identifier3","identifier4","identifier5","identifier6"),
-    NOTIFICACAO_UPLOAD("static/UPLOAD_FILE_NOTIFICATION.html", "Upload","identifier1","identifier2","identifier3","identifier4","identifier5","identifier6");
+    ATIVO_EXECUTIVO("static/ATIVO_EXECUTIVO.html", "Alerta preventivo | Upload LATAM", "identifier5", "identifier6", "identifier1"),
+    ATIVO("static/ATIVO.html", "Alerta preventivo | Upload LATAM", "identifier5", "identifier6", "identifier1"),
+    CONGRATS("static/CONGRAT-EMAIL.html", "Acesso", "identifier1", "identifier2", "identifier3", "identifier4", "identifier5", "identifier6"),
+    FORGOT("static/FORGOT-ACESS.html", "Acesso", "identifier1", "identifier2", "identifier3", "identifier4", "identifier5", "identifier6"),
+    NOTIFICACAO_UPLOAD("static/UPLOAD_FILE_NOTIFICATION.html", "Upload", "identifier1", "identifier2", "identifier3", "identifier4", "identifier5", "identifier6"),
+    NOTIFICACAO_FILE_RETURN("static/NOTIFICACAO_FILE_RETURN.html", "[ Download ] - Arquivo de retorno", "identifier1", "identifier2", "identifier3", "identifier4", "identifier5", "identifier6");
 
     private final String path;
     private final String subject;
@@ -39,23 +40,23 @@ public enum LayoutEmailEnum {
         this.subject = subject;
         this.images = images;
     }
-    
-    public String getSubject(){
+
+    public String getSubject() {
         return this.subject;
     }
-    
-    public String getPath(){
+
+    public String getPath() {
         return path;
     }
-    
-    public Map<String,String>getResouces(){
-        
-        Map<String,String>resources = new HashMap<>();
-        
-        for (String image : images) {            
-            resources.put(image, map.get(image));            
+
+    public Map<String, String> getResouces() {
+
+        Map<String, String> resources = new HashMap<>();
+
+        for (String image : images) {
+            resources.put(image, map.get(image));
         }
-        
+
         return resources;
     }
 

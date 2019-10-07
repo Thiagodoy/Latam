@@ -4,6 +4,7 @@ import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
+import javax.sql.DataSource;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -14,14 +15,28 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.quartz.QuartzDataSource;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @Configuration
+@EnableAutoConfiguration
 public class QuartzConfiguration {
 
+    
+    
+    
+//    @Bean
+//    @QuartzDataSource
+//    public DataSource quartzDataSource() {
+//        return DataSourceBuilder.create().build();
+//    }
+    
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
         Scheduler scheduler = bean.getScheduler();
@@ -34,7 +49,7 @@ public class QuartzConfiguration {
                 .withDescription("Sender email")
                 .build();
         CronTrigger crontrigger = TriggerBuilder.newTrigger().withIdentity("ConsumerEmailJobTrigger", "consumer-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
         scheduler.scheduleJob(detail, crontrigger);
@@ -43,7 +58,7 @@ public class QuartzConfiguration {
                 .withDescription("Agendador de notificação de email")
                 .build();
         CronTrigger crontrigger1 = TriggerBuilder.newTrigger().withIdentity("AgenciaFactoryJob", "agencia-factory-email")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 2 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
@@ -54,7 +69,7 @@ public class QuartzConfiguration {
                 .withDescription("Integrador")
                 .build();
         CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 * 1/1 * ? *")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 

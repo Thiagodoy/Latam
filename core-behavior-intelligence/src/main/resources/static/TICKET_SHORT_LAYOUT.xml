@@ -8,8 +8,7 @@
            <property name="delimiter" value=";" />
         </parser>
         
-        <typeHandler name="dateHandler" class="com.core.behavior.reader.DateHandler" />  
-        <typeHandler name="doubleHandler" class="com.core.behavior.reader.DoubleHandler" />    
+         
         <!-- record layout... -->  
         
               

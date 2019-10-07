@@ -1,4 +1,4 @@
-package com.core.behavior.reader;
+package com.core.behavior.io;
 
 import com.core.behavior.model.Log;
 import com.core.behavior.util.TypeErrorEnum;

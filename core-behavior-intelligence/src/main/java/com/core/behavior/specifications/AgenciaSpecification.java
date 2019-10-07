@@ -14,7 +14,7 @@ public class AgenciaSpecification {
     
     
     public static Specification<Agency> name(String name) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(root.get(Agency_.name), name + "%");
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.upper(root.get(Agency_.name)), name + "%");
     }
     
     public static Specification<Agency> code(String code) {

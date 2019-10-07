@@ -1,9 +1,11 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
-import com.core.behavior.dto.TicketDuplicityDTO;
+import com.core.behavior.dto.TicketCountCupomDTO;
+import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import java.io.Serializable;
 import java.text.MessageFormat;
@@ -17,47 +19,50 @@ import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedNativeQuery;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
+import org.hibernate.annotations.DynamicUpdate;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-@SqlResultSetMapping(name = "TicketDuplicity",
+@SqlResultSetMapping(name = "TicketRules",
         classes = @ConstructorResult(
-                targetClass = TicketDuplicityDTO.class,
+                targetClass = TicketValidationDTO.class,
                 columns = {
-                    @ColumnResult(name = "field_name", type = String.class)
-                    ,                    
-                    @ColumnResult(name = "qtd_erro", type = Long.class)
-                    ,
-                    @ColumnResult(name = "percentual_erro", type = Double.class)
-                    ,                    
-                    @ColumnResult(name = "percentual_acerto", type = Double.class)
-                    ,                    
-                    @ColumnResult(name = "qtd_total_lines", type = Long.class),}))
+                        @ColumnResult(name = "update", type = Long.class),
+                        @ColumnResult(name = "insert", type = Long.class),
+                        @ColumnResult(name = "count", type = Long.class),                        
+                        @ColumnResult(name = "cupom", type = Long.class),
+                        @ColumnResult(name = "backoffice", type = Long.class),
+                    }))
 
-@NamedNativeQuery(name = "Ticket.listDuplicityByFileId", resultSetMapping = "TicketDuplicity",
-        query = "select field_name,\n"
-        + " count(1) as qtd_erro,\n"
-        + " (truncate((count(1)/b.qtd_total_lines)*100,2)) as percentual_erro,\n"
-        + " (100 - (truncate((count(1)/b.qtd_total_lines)*100,2))) as percentual_acerto, \n"
-        + " b.qtd_total_lines \n"
-        + " from behavior.log a \n"
-        + " left join behavior.file b on a.file_id = b.id   \n"
-        + " where file_id = :fileId \n"
-        + " group by field_name, b.qtd_total_lines")
+
+@SqlResultSetMapping(name = "TicketRulesCountCupom",
+        classes = @ConstructorResult(
+                targetClass = TicketCountCupomDTO.class,
+                columns = {
+                        @ColumnResult(name = "count", type = Long.class)                       
+                    }))
+
+@NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
+        query = "select (select count(1)  from ticket where cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
+                "(select count(1) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR') ) as count,\n" +
+                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as cupom ,\n" +
+                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as backoffice")
+
+@NamedNativeQuery(name = "Ticket.rulesCountCupom", resultSetMapping = "TicketRulesCountCupom",
+        query = "select count(cupom) count  from ticket where agrupamento_a = :agrupa and cupom <= :cupom and type = 'INSERT'")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
-//@IdClass(Ticket.IdClass.class)
+@DynamicUpdate
 @Data
 public class Ticket {
 
@@ -247,7 +252,7 @@ public class Ticket {
 
     @PositionParameter(value = 46)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     public Long id;
 
@@ -293,6 +298,31 @@ public class Ticket {
     @Column(name = "FILE_INTEGRATION")
     public String fileIntegration;
     
+    @PositionParameter(value = 57)
+    @Column(name = "CODE_AGENCY")
+    public String codeAgencia;
+    
+    @PositionParameter(value = 58)
+    @Column(name = "AGRUPAMENTO_A")
+    public String agrupamentoA;
+    
+    @PositionParameter(value = 59)
+    @Column(name = "AGRUPAMENTO_B")
+    public String agrupamentoB;
+    
+    @PositionParameter(value = 60)
+    @Column(name = "AGRUPAMENTO_C")
+    public String agrupamentoC;
+    
+    @PositionParameter(value = 61)
+    @Column(name = "BILHETE_BEHAVIOR")
+    public String bilheteBehavior;
+    
+    @PositionParameter(value = 62)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE")
+    public TicketTypeEnum type;
+    
     
     @Transient
     private List<Log>errors;
@@ -324,7 +354,7 @@ public class Ticket {
                 this.origem,
                 this.destino,
                 this.cupom,
-                this.bilhete,
+                this.bilheteBehavior,
                 this.tipo,
                 this.cabine,
                 this.ciaVoo,
@@ -367,7 +397,7 @@ public class Ticket {
                     this.tipoPagamento,
                     this.digitoVerificadorCC,
                     this.grupoEmpresa,
-                    this.nomeCliente);
+                    this.grupoConsolidada);
         }
 
         return reg;
