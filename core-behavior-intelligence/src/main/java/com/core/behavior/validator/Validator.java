@@ -1102,13 +1102,13 @@ public class Validator implements IValidator {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
         } else {
 
-            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO, Pattern.CASE_INSENSITIVE);
-            Matcher m = p.matcher(this.ticketDTO.getClasseServico());
-            if (!m.matches()) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
-            } else {
+//            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO, Pattern.CASE_INSENSITIVE);
+//            Matcher m = p.matcher(this.ticketDTO.getClasseServico());
+//            if (!m.matches()) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
+//            } else {
                 this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
-            }
+//            }
 
         }
         return this;

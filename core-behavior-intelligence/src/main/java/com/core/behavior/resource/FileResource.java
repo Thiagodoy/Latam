@@ -71,23 +71,7 @@ public class FileResource {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
         } catch (ApplicationException ex) {
-            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
-
-            if (ex.getFileHeaderReturn() != null) {
-
-                response.setHeader("Content-disposition", "attachment; filename=header_validacao.txt");
-                InputStream in;
-                try {
-                    in = new FileInputStream(ex.getFileHeaderReturn());
-                    org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
-                    response.flushBuffer();
-                    FileUtils.forceDelete(ex.getFileHeaderReturn());
-                } catch (Exception ex1) {
-                    Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[ uploadFile ]", ex1);
-                }
-
-            }
-
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[ write file return ]", ex); 
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);

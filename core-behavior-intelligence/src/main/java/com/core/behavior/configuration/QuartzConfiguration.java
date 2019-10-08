@@ -2,9 +2,9 @@ package com.core.behavior.configuration;
 
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
+import com.core.behavior.jobs.FilePurgingJob;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
-import javax.sql.DataSource;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -16,9 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzDataSource;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.annotation.Bean;
 
 /**
  *
@@ -74,6 +71,21 @@ public class QuartzConfiguration {
                 .build();
 
         scheduler.scheduleJob(detail2, crontrigger2);
+        
+        
+        JobDetail detail3= JobBuilder.newJob(FilePurgingJob.class).withIdentity("FilePurgingJob", "purging-job")
+                .withDescription("Purging file")
+                .build();
+        CronTrigger crontrigger3 = TriggerBuilder.newTrigger().withIdentity("FilePurgingJob", "purging-job")
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? 1/1 SUN#1 *")
+                        .withMisfireHandlingInstructionFireAndProceed())
+                .build();
+
+        scheduler.scheduleJob(detail3, crontrigger3);
+        
+        
+        
+        
     }
 
 }

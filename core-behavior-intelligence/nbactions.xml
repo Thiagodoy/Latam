@@ -16,18 +16,12 @@
     </action>
     <action>
         <actionName>debug</actionName>
-        <preAction>build-with-dependencies</preAction>
         <packagings>
             <packaging>jar</packaging>
         </packagings>
         <goals>
             <goal>spring-boot:run</goal>
         </goals>
-        <properties>
-                <run.jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</run.jvmArguments>
-                
-                <jpda.listen>true</jpda.listen>
-            </properties>
     </action>
     <action>
         <actionName>profile</actionName>

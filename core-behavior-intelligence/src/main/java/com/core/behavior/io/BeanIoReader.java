@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.mail.Message;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
@@ -124,7 +126,7 @@ public class BeanIoReader {
         return 0l;
     }
 
-    public void headerIsValid(File file, com.core.behavior.util.Stream stream) throws Exception{
+    public void headerIsValid(File file, com.core.behavior.util.Stream stream) throws Exception {
 
         FileReader reader = null;
         LineNumberReader readerLine = null;
@@ -154,7 +156,6 @@ public class BeanIoReader {
             beanReader.close();
 
             FileUtils.forceDelete(fileHeader);
-            
 
         } catch (InvalidRecordException ex) {
             int count = ex.getRecordCount();
@@ -170,11 +171,11 @@ public class BeanIoReader {
                         Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, object);
                     }
                 }
-            }            
-        } catch(Exception e){
+            }
+        } catch (Exception e) {
             throw e;
-        
-        }finally {
+
+        } finally {
             try {
                 readerLine.close();
                 reader.close();
@@ -183,37 +184,19 @@ public class BeanIoReader {
             }
 
         }
-        
-        if(Optional.ofNullable(errors).isPresent()){
+
+        if (Optional.ofNullable(errors).isPresent()) {
             this.generateFileHeaderReturn(errors);
         }
 
     }
-    
-    
-    private void generateFileHeaderReturn(List<String> errors) throws ApplicationException{
-        
-        
-         File fileReturnHeader = null;
-        try {
-            fileReturnHeader = File.createTempFile("fileHeaderReturn", ".txt");
-            FileWriter writerReturn  = new FileWriter(fileReturnHeader);
-            
-            for (String error : errors) {
-                writerReturn.write(error);
-            }
-            
-            writerReturn.flush();
-            writerReturn.close();
-            
-        } catch (IOException ex) {
-            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        throw new ApplicationException(MessageCode.FILE_HEADER_INVALID,fileReturnHeader);
-        
-        
-        
+
+    private void generateFileHeaderReturn(List<String> errors) throws ApplicationException {
+
+        String message = errors.stream().map(e-> MessageFormat.format("<p style=\"font-size: 15px; font-weight: bold;\">{0}</p>", e)).collect(Collectors.joining("\n"));
+
+        throw new ApplicationException(MessageCode.FILE_HEADER_INVALID, message);
+
     }
 
 }

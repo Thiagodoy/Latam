@@ -12,14 +12,15 @@ import lombok.Data;
 @Data
 public class ApplicationException extends RuntimeException {       
     private Long codeMessage;
-    private File fileHeaderReturn;
+    
     
     public ApplicationException(Long m){
         this.codeMessage = m;
     }
     
-    public ApplicationException(Long m, File file){
+    public ApplicationException(Long m, String message){
+        super(message);
         this.codeMessage = m;
-        this.fileHeaderReturn = file;
+    
     }
 }
