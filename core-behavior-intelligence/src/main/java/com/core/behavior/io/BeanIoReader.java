@@ -172,13 +172,16 @@ public class BeanIoReader {
                     }
                 }
             }
+            
+            FileUtils.forceDelete(file);
+            
         } catch (Exception e) {
             throw e;
 
         } finally {
             try {
                 readerLine.close();
-                reader.close();
+                reader.close();                
             } catch (IOException ex) {
                 Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
