@@ -10,17 +10,18 @@ import com.amazonaws.services.s3.model.Tag;
 import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
+import com.core.behavior.io.BeanIoWriter;
+import com.core.behavior.model.File;
 import com.core.behavior.model.FileIntegration;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.FileIntegrationRepository;
+import com.core.behavior.services.FileService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.io.BeanIoWriter;
 import com.core.behavior.util.TicketTypeEnum;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -45,27 +46,31 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
  * @author thiag
  */
 @DisallowConcurrentExecution
-public class IntegrationJob extends QuartzJobBean {
+public class IntegrationJob2 extends QuartzJobBean {
 
     @Autowired
     private TicketService ticketService;
 
+    @Autowired
+    private FileService fileService;
+    
     @Autowired
     private ClientIntegrationAws clientAws;
 
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
 
-    private final int QTD_LOAD = 10000;
+    public static final String DATA_FILE_ID = "DATA_FILE_ID";
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
         
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Iniciando o processo");
         long start = System.currentTimeMillis();
 
-        File uploadFolder = new File(Constantes.DIR_UPLOAD);
-        File uploadedFolder = new File(Constantes.DIR_UPLOADED);
+        long fileId = jec.getJobDetail().getJobDataMap().getIntValue(DATA_FILE_ID);
+
+        java.io.File uploadFolder = new java.io.File(Constantes.DIR_UPLOAD);
+        java.io.File uploadedFolder = new java.io.File(Constantes.DIR_UPLOADED);
 
         if (!uploadedFolder.isDirectory()) {
             uploadedFolder.mkdir();
@@ -75,9 +80,11 @@ public class IntegrationJob extends QuartzJobBean {
             uploadFolder.mkdir();
         }
 
-        PageRequest page = PageRequest.of(0, QTD_LOAD);
+        File file = fileService.findById(fileId);
 
-        List<Ticket> tickets = ticketService.listByStatus(TicketStatusEnum.APPROVED, page);
+        PageRequest page = PageRequest.of(0, file.getQtdTotalLines().intValue());
+
+        List<Ticket> tickets = ticketService.listByStatus(TicketStatusEnum.WRITED, page);
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
         List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
@@ -109,15 +116,15 @@ public class IntegrationJob extends QuartzJobBean {
                 this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.FULL_LAYOUT_INTEGRATION);
             }
         }
-        
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+        Logger.getLogger(IntegrationJob2.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
-
-    private void generateFile(List<Ticket> list, File uploadFolder, TicketLayoutEnum layout, TicketTypeEnum type, Stream stream) {
+    
+       private void generateFile(List<Ticket> list, java.io.File uploadFolder, TicketLayoutEnum layout, TicketTypeEnum type, Stream stream) {
 
         FileIntegrationDTO dTO = mountDTO(list);
-        File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream, type);
+        java.io.File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream, type);
 
         final String fileName = file.getName();
         boolean isUploaded = this.uploadAndMoveFile(file, generateTag(layout, type));
@@ -168,7 +175,7 @@ public class IntegrationJob extends QuartzJobBean {
         return tags;
     }
 
-    private boolean uploadAndMoveFile(File f, List<Tag> tags) {
+    private boolean uploadAndMoveFile(java.io.File f, List<Tag> tags) {
 
         try {
             String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION, tags);

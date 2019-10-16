@@ -1745,9 +1745,9 @@ public class Validator implements IValidator {
         String nomeEmpresa = "";
 
         if ((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()) {
-            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), consolida.get());
+            nomeEmpresa = MessageFormat.format("{0}-{1}", ticketDTO.getCodigoAgencia(), consolida.get());
         } else if (empresa.isPresent()) {
-            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), empresa.get());
+            nomeEmpresa = MessageFormat.format("{0}-{1}", ticketDTO.getCodigoAgencia(), empresa.get());
         }
 
         this.ticket.setNomeCliente(nomeEmpresa);

@@ -132,7 +132,6 @@ public class TicketDTO {
     }
 
     public String formatStringEmpty(String value) {
-
         return (Optional.ofNullable(value).isPresent() && value.length() > 0) ? value : "[empty]";
     }
 }

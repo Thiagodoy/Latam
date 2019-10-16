@@ -1,6 +1,7 @@
 package com.core.behavior;
 
 import com.core.behavior.jobs.FileReturnJob;
+import com.core.behavior.jobs.IntegrationJob2;
 import com.core.behavior.services.TicketService;
 import java.util.Date;
 import java.util.Optional;
@@ -49,21 +50,56 @@ public class BehaviorApplicationTests {
                 .startAt(new Date())
                 .withSchedule(simpleSchedule())
                 .build();
-        
+
         bean.getScheduler().scheduleJob(detail, trigger);
-        
-        
+
         Optional<JobExecutionContext> opt = null;
-        do{
-             Thread.sleep(55000);
+        do {
+            Thread.sleep(55000);
             opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
-        }while(opt.isPresent());
-        
-       
+        } while (opt.isPresent());
+
+    }
+
+    @Test
+    public void allow() throws SchedulerException, InterruptedException {
 
         
         
+        for (int i = 0; i < 2; i++) {
+
+            JobDataMap data = new JobDataMap();
+            data.put(IntegrationJob2.DATA_FILE_ID, 1);
+            //data.put(FileReturnJob.DATA_EMAIL_ID, "thiagodoy@hotmail.com");
+
+            JobDetail detail = JobBuilder
+                    .newJob(IntegrationJob2.class)
+                    .withIdentity("FILE-RETURN-JOB-" + String.valueOf(28), "process-file-return")
+                    .withDescription("Processing Return file")
+                    .usingJobData(data)
+                    .build();
+            
+            System.out.println("JOBKEY" + detail.getKey().toString());
+
+            SimpleTrigger trigger = TriggerBuilder
+                    .newTrigger()
+                    .withIdentity("FILE-RETURN-TRIGGER-" + String.valueOf(28), "process-file-return")
+                    .startAt(new Date())
+                    .withSchedule(simpleSchedule())
+                    .build();
+
+            bean.getScheduler().scheduleJob(detail, trigger);
+
+          
+
+        }
         
+         int count = 0;
+        do {
+            Thread.sleep(55000);
+           count++ ;
+        } while (count < 0);
+
     }
 
 }
