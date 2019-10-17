@@ -60,6 +60,9 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+        
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Iniciando o processo");
+        long start = System.currentTimeMillis();
 
         File uploadFolder = new File(Constantes.DIR_UPLOAD);
         File uploadedFolder = new File(Constantes.DIR_UPLOADED);
@@ -106,6 +109,8 @@ public class IntegrationJob extends QuartzJobBean {
                 this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.FULL_LAYOUT_INTEGRATION);
             }
         }
+        
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 

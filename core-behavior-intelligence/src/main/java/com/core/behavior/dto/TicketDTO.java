@@ -3,6 +3,7 @@ package com.core.behavior.dto;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.text.MessageFormat;
 import lombok.Data;
+import org.apache.spark.api.java.Optional;
 
 /**
  *
@@ -72,61 +73,66 @@ public class TicketDTO {
     public String toString() {
 
         String reg = MessageFormat.format("{0}[col]{1}[col]{2}[col]{3}[col]{4}[col]{5}[col]{6}[col]{7}[col]{8}[col]{9}[col]{10}[col]{11}[col]{12}[col]{13}[col]{14}[col]{15}[col]{16}[col]{17}[col]{18}[col]{19}[col]{20}",
-                this.lineFile,
-                this.dataEmissao,
-                this.dataEmbarque,
-                this.horaEmbarque,
-                this.ciaBilhete,
-                this.trecho,
-                this.origem,
-                this.destino,
-                this.cupom,
-                this.bilhete,
-                this.tipo,
-                this.cabine,
-                this.ciaVoo,
-                this.valorBrl,
-                this.empresa,
-                this.cnpj,
-                this.iataAgencia,
-                this.baseVenda,
-                this.qtdPax,
-                this.numVoo,
-                this.consolidada);
+                this.formatStringEmpty(this.lineFile),
+                this.formatStringEmpty(this.dataEmissao),
+                this.formatStringEmpty(this.dataEmbarque),
+                this.formatStringEmpty(this.horaEmbarque),
+                this.formatStringEmpty(this.ciaBilhete),
+                this.formatStringEmpty(this.trecho),
+                this.formatStringEmpty(this.origem),
+                this.formatStringEmpty(this.destino),
+                this.formatStringEmpty(this.cupom),
+                this.formatStringEmpty(this.bilhete),
+                this.formatStringEmpty(this.tipo),
+                this.formatStringEmpty(this.cabine),
+                this.formatStringEmpty(this.ciaVoo),
+                this.formatStringEmpty(this.valorBrl),
+                this.formatStringEmpty(this.empresa),
+                this.formatStringEmpty(this.cnpj),
+                this.formatStringEmpty(this.iataAgencia),
+                this.formatStringEmpty(this.baseVenda),
+                this.formatStringEmpty(this.qtdPax),
+                this.formatStringEmpty(this.numVoo),
+                this.formatStringEmpty(this.consolidada));
 
         if (this.layout.equals(TicketLayoutEnum.FULL.toString())) {
             reg += MessageFormat.format("[col]{0}[col]{1}[col]{2}[col]{3}[col]{4}[col]{5}[col]{6}[col]{7}[col]{8}[col]{9}[col]{10}[col]{11}[col]{12}[col]{13}[col]{14}[col]{15}[col]{16}[col]{17}[col]{18}[col]{19}[col]{20}[col]{21}[col]{22}[col]{23}[col]{24}[col]{25}[col]{26}[col]{27}[col]{28}",
-                    this.dataExtracao,
-                    this.horaEmissao,
-                    this.dataReserva,
-                    this.horaReserva,
-                    this.horaPouso,
-                    this.baseTarifaria,
-                    this.tktDesignator,
-                    this.familiaTarifaria,
-                    this.classeTarifa,
-                    this.classeServico,
-                    this.ondDirecional,
-                    this.tourCode,
-                    this.rtOw,
-                    this.valorUs,
-                    this.tarifaPublica,
-                    this.tarifaPublicUs,
-                    this.pnrAgencia,
-                    this.pnrCiaArea,
-                    this.selfBookingOffiline,
-                    this.nomePax,
-                    this.tipoPax,
-                    this.cpfPax,
-                    this.emailPax,
-                    this.cellPax,
-                    this.tierFidelidadePax,
-                    this.tipoPagamento,
-                    this.digitoVerificadorCC,
-                    this.grupoEmpresa,
-                    this.grupoConsolidada);
+                    this.formatStringEmpty(this.dataExtracao),
+                    this.formatStringEmpty(this.horaEmissao),
+                    this.formatStringEmpty(this.dataReserva),
+                    this.formatStringEmpty(this.horaReserva),
+                    this.formatStringEmpty(this.horaPouso),
+                    this.formatStringEmpty(this.baseTarifaria),
+                    this.formatStringEmpty(this.tktDesignator),
+                    this.formatStringEmpty(this.familiaTarifaria),
+                    this.formatStringEmpty(this.classeTarifa),
+                    this.formatStringEmpty(this.classeServico),
+                    this.formatStringEmpty(this.ondDirecional),
+                    this.formatStringEmpty(this.tourCode),
+                    this.formatStringEmpty(this.rtOw),
+                    this.formatStringEmpty(this.valorUs),
+                    this.formatStringEmpty(this.tarifaPublica),
+                    this.formatStringEmpty(this.tarifaPublicUs),
+                    this.formatStringEmpty(this.pnrAgencia),
+                    this.formatStringEmpty(this.pnrCiaArea),
+                    this.formatStringEmpty(this.selfBookingOffiline),
+                    this.formatStringEmpty(this.nomePax),
+                    this.formatStringEmpty(this.tipoPax),
+                    this.formatStringEmpty(this.cpfPax),
+                    this.formatStringEmpty(this.emailPax),
+                    this.formatStringEmpty(this.cellPax),
+                    this.formatStringEmpty(this.tierFidelidadePax),
+                    this.formatStringEmpty(this.tipoPagamento),
+                    this.formatStringEmpty(this.digitoVerificadorCC),
+                    this.formatStringEmpty(this.grupoEmpresa),
+                    this.formatStringEmpty(this.grupoConsolidada));
         }
 
         return reg;
+    }
+
+    public String formatStringEmpty(String value) {
+
+        return (Optional.ofNullable(value).isPresent() && value.length() > 0) ? value : "[empty]";
     }
 }

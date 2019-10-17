@@ -6,14 +6,12 @@
 package com.core.behavior.repository;
 
 import com.core.behavior.dto.TicketCountCupomDTO;
-import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.dto.TicketValidationDTO;
+import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import javax.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,13 +32,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom);
     
     @Query(nativeQuery = true)
+    TicketValidationShortDTO rulesShort(@Param("agrupac") String agrupamentoC, @Param("cupom") Long cupom);       
+    
+    @Query(nativeQuery = true)
     TicketCountCupomDTO rulesCountCupom(@Param("agrupa") String agrupamentoA,Long cupom);
+    
+    @Query(nativeQuery = true)
+    TicketCountCupomDTO rulesCountCupomShort(@Param("agrupc") String agrupamentoC, Long cupom);
+    
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa")
-    List<Ticket> findtToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom);
-
-    @Query(nativeQuery = true, value = "select * from ticket t where t.agrupamento_a = :agrupa ")
-    List<Ticket> findtFirstTicket(@Param("agrupa") String agrupamentoA);
+    List<Ticket> findToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom);
+    
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket> findByFileId(@Param("fileId") Long fileId);
@@ -54,5 +57,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByStatus(TicketStatusEnum status, Pageable page);
 
     List<Ticket> findBydataEmissaoBetween(Date startTime, Date endTime);
+    
+    
+    List<Ticket> findByAgrupamentoC(String agrupamento);
+    List<Ticket> findByAgrupamentoA(String agrupamento);
 
 }

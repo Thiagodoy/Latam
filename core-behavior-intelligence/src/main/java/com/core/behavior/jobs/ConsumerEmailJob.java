@@ -119,21 +119,18 @@ public class ConsumerEmailJob extends QuartzJobBean {
     }
 
     
-    private void deleteResourcesCreated(List<FileSystemResource>resources){
-        
+    private void deleteResourcesCreated(List<FileSystemResource>resources){        
         
         for (FileSystemResource resource : resources) {
             
             try {
                 FileUtils.forceDelete(resource.getFile());
             } catch (IOException ex) {
-                Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.SEVERE, "[ deleteResourcesCreated ]", ex);
+                Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.SEVERE, "[ deleteResourcesCreated ] -> File :  " + resource.getFilename()  , ex);
             }
-            
-            
-        }
-        
+        }        
     }
+    
     private String getContentEmail(String path) throws IOException {
         StreamFactory factory = StreamFactory.newInstance();
         InputStream stream = factory.getClass().getClassLoader().getResourceAsStream(path);

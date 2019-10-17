@@ -14,7 +14,7 @@ public class Response <T> {
     private T result;
     private Long codeMessage;    
     
-    public static <T> Response build(T result, Long codeMEssage ){
-        return new Response(result, codeMEssage);
+    public static <T> Response build(T result, Long codeMessage ){
+        return new Response(result, codeMessage);
     }
 }

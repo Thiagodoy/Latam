@@ -377,7 +377,7 @@ public class Utils {
                 .toLocalDateTime();
     }
     
-    public static LocalDate dateToLocalDate(Date date) {
+    public static synchronized LocalDate dateToLocalDate(Date date) {
         return Instant.ofEpochMilli(date.getTime())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();

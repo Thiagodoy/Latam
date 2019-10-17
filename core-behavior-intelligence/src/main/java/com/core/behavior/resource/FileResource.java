@@ -16,6 +16,7 @@ import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -63,13 +64,14 @@ public class FileResource {
             @PathVariable(name = "uploadAws") boolean uploadAws,
             @PathVariable(name = "uploadFtp") boolean uploadFtp,
             @PathVariable(name = "processFile") boolean processFile,
-            @RequestPart(value = "file") MultipartFile file) {
+            @RequestPart(value = "file") MultipartFile file,
+            HttpServletResponse response) {
 
         try {
             fileService.persistFile(file, userId, company, uploadAws, uploadFtp, processFile);
             return ResponseEntity.ok(Response.build("Ok", MessageCode.FILE_UPLOADED_SUCCESS));
         } catch (ApplicationException ex) {
-            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[ write file return ]", ex); 
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), ex.getCodeMessage()));
         } catch (Exception e) {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, e.getMessage(), e);
@@ -114,7 +116,7 @@ public class FileResource {
             @RequestParam(name = "id") Long id,
             @RequestParam(name = "email") String email,
             HttpServletResponse response) {
-        
+
         try {
 
             fileReturnService.generateFileReturnFriendly(id, email);
@@ -143,25 +145,25 @@ public class FileResource {
         }
 
     }
-    
+
     @RequestMapping(value = "/download/arquivo-retorno", method = RequestMethod.GET)
     @ApiOperation(value = "Download of files")
-    public ResponseEntity downloadFileReturn(            
+    public ResponseEntity downloadFileReturn(
             @RequestParam(name = "fileName") String fileName,
             @RequestParam(name = "company") Long company,
             HttpServletResponse response) {
-        
-         java.io.File file = null;
-        
+
+        java.io.File file = null;
+
         try {
 
-            file = fileReturnService.downloadFileReturn(company, fileName);           
+            file = fileReturnService.downloadFileReturn(company, fileName);
 
             response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-disposition", "attachment; filename=" + fileName);
             InputStream in = new FileInputStream(file);
             org.apache.commons.io.IOUtils.copy(in, response.getOutputStream());
-            response.flushBuffer(); 
+            response.flushBuffer();
             return ResponseEntity.ok().build();
 
         } catch (AmazonS3Exception ex) {
@@ -171,12 +173,13 @@ public class FileResource {
             Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.resolve(500)).body(Response.build(ex.getMessage(), 500l));
         } finally {
-             try {
-                 if(file != null)
-                 FileUtils.forceDelete(file);
-             } catch (IOException ex) {
-                 Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[downloadFileReturn]", ex);
-             }
+            try {
+                if (file != null) {
+                    FileUtils.forceDelete(file);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(FileResource.class.getName()).log(Level.SEVERE, "[downloadFileReturn]", ex);
+            }
         }
 
     }

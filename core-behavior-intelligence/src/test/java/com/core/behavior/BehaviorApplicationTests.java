@@ -1,16 +1,22 @@
 package com.core.behavior;
 
-import com.core.behavior.model.Ticket;
+import com.core.behavior.jobs.FileReturnJob;
 import com.core.behavior.services.TicketService;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Date;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.SchedulerException;
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -19,23 +25,45 @@ public class BehaviorApplicationTests {
 
     @Autowired
     private TicketService service;
-    
-	@Test
-	public void contextLoads() {
-            
-//            List<Ticket> a = new  ArrayList<Ticket>();
-//            
-//            for (int i = 0; i < 10; i++) {
-//                Ticket t = new  Ticket();
-//                t.setFileId(400l);
-//                a.add(t);
-//            }
-//            
-//        try {
-//            service.saveBatch(a);
-//        } catch (SQLException ex) {
-//            Logger.getLogger(BehaviorApplicationTests.class.getName()).log(Level.SEVERE, null, ex);
-//        };
-	}
+
+    @Autowired
+    private SchedulerFactoryBean bean;
+
+    @Test
+    public void contextLoads() throws SchedulerException, InterruptedException {
+
+        JobDataMap data = new JobDataMap();
+        data.put(FileReturnJob.DATA_FILE_ID, 28L);
+        data.put(FileReturnJob.DATA_EMAIL_ID, "thiagodoy@hotmail.com");
+
+        JobDetail detail = JobBuilder
+                .newJob(FileReturnJob.class)
+                .withIdentity("FILE-RETURN-JOB-" + String.valueOf(28), "process-file-return")
+                .withDescription("Processing Return file")
+                .usingJobData(data)
+                .build();
+
+        SimpleTrigger trigger = TriggerBuilder
+                .newTrigger()
+                .withIdentity("FILE-RETURN-TRIGGER-" + String.valueOf(28), "process-file-return")
+                .startAt(new Date())
+                .withSchedule(simpleSchedule())
+                .build();
+        
+        bean.getScheduler().scheduleJob(detail, trigger);
+        
+        
+        Optional<JobExecutionContext> opt = null;
+        do{
+             Thread.sleep(55000);
+            opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
+        }while(opt.isPresent());
+        
+       
+
+        
+        
+        
+    }
 
 }
