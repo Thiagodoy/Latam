@@ -10,7 +10,7 @@ import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.model.File;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.FileService;
-import com.core.behavior.services.GeneratorFileReturnService;
+import com.core.behavior.services.FileReturnService;
 import com.core.behavior.util.MessageCode;
 import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
@@ -54,7 +54,7 @@ public class FileResource {
     private FileService fileService;
 
     @Autowired
-    private GeneratorFileReturnService fileReturnService;
+    private FileReturnService fileReturnService;
 
     @RequestMapping(value = "/{company}/{userId}/{uploadAws}/{uploadFtp}/{processFile}", method = RequestMethod.POST)
     @ApiOperation(value = "Upload of files")

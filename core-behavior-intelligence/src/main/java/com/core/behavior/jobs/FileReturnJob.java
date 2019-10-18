@@ -55,18 +55,14 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  *
  * @author thiag
  */
-@DisallowConcurrentExecution
-public class FileReturnJob extends QuartzJobBean {
+
+public class FileReturnJob implements Runnable {
 
     public static final String DATA_FILE_ID = "DATA_FILE_ID";
     public static final String DATA_EMAIL_ID = "DATA_EMAIL_ID";
@@ -96,12 +92,27 @@ public class FileReturnJob extends QuartzJobBean {
     private SXSSFSheet sheet;
 
     private final int LIMIT_ROWS = 10000;
+    
+    private Map<String, Object> parameters = new HashMap<>();
 
+    
+    public FileReturnJob(ClientAws clientAws,UserActivitiService userActivitiService,AgencyRepository agencyRepository,FileRepository fileRepository,NotificacaoService notificacaoService){
+        this.clientAws = clientAws;
+        this.userActivitiService = userActivitiService;
+        this.agencyRepository = agencyRepository;
+        this.fileRepository = fileRepository;
+        this.notificacaoService = notificacaoService;
+    }
+    
+    public void setParameter(String key, Object value){
+        this.parameters.put(key, value);
+    }
+    
     @Override
-    protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+    public void run()  {
 
-        Long id = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
-        String emailUser = jec.getJobDetail().getJobDataMap().getString(DATA_EMAIL_ID);
+        Long id = (Long) parameters.get(DATA_FILE_ID);
+        String emailUser = (String) parameters.get(DATA_EMAIL_ID);
 
         try {
             List<LogDTO> logsDTO = this.getData(id);

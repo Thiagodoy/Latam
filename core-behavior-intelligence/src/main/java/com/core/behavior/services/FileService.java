@@ -7,6 +7,7 @@ import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
+import com.core.behavior.dto.MoveToAnaliticsDTO;
 import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
@@ -24,6 +25,7 @@ import com.core.behavior.util.MessageCode;
 
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
+import com.core.behavior.util.ThreadPoolFileValidation;
 import com.core.behavior.util.Utils;
 import java.io.IOException;
 import java.time.Instant;
@@ -72,7 +74,7 @@ public class FileService {
     private FileRepository fileRepository;
 
     @Autowired
-    private UserInfoRepository userInfoRepository;    
+    private UserInfoRepository userInfoRepository;
 
     @Autowired
     private UserActivitiRepository userActivitiRepository;
@@ -82,7 +84,7 @@ public class FileService {
 
     @Autowired
     private FileProcessStatusService fileProcessStatusService;
-    
+
     @Autowired
     private GroupMemberSevice groupMemberSevice;
 
@@ -102,13 +104,19 @@ public class FileService {
     private ClientAws clientAws;
 
     @Autowired
-    private ClientSftp clientSftp;   
+    private ClientSftp clientSftp;
 
     @Autowired
     private BeanIoReader beanIoReader;
 
     @Autowired
     private NotificacaoService notificacaoService;
+
+    @Autowired
+    private ThreadPoolFileValidation threadPoolFileValidation;
+
+    @Autowired
+    private ProcessFileJob processFileJob;
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
@@ -136,23 +144,22 @@ public class FileService {
         Long layout = agency.getLayoutFile();
 
         if (uploadAws || uploadFtp) {
-             String[] s = new String[1];
+            String[] s = new String[1];
             s[0] = "COLLECTOR_UPLOADED";
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 10, Sort.by("createdDate").ascending()), s, null, null);
 
             if (!result.getContent().isEmpty()) {
                 File fileTemp = result.getContent().get(0);
-                this.deleteFileCascade(fileTemp);               
-            }           
-            
-            
-            this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0,0);
+                this.deleteFileCascade(fileTemp);
+            }
+
+            this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0, 0);
             this.uploadFile(uploadAws, uploadFtp, folder, file);
-           
+
             this.criaNotificacaoDeUpload(agency);
-           
+
             FileUtils.forceDelete(file);
-            
+
         } else if (processFile) {
             String[] s = new String[5];
             s[0] = "VALIDATION_UPLOADED";
@@ -160,24 +167,22 @@ public class FileService {
             s[2] = "VALIDATION_PARSE";
             s[3] = "VALIDATION_ERROR";
             s[4] = "VALIDATION_SUCCESS";
-            
 
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
             long versao = 1L;
             if (!result.getContent().isEmpty()) {
                 File f = result.getContent().get(0);
-                versao = f.getVersion().longValue() + 1;                
+                versao = f.getVersion().longValue() + 1;
             }
 
-            
-            if( !Optional.ofNullable(agency.getLayoutFile()).isPresent()){
+            if (!Optional.ofNullable(agency.getLayoutFile()).isPresent()) {
                 throw new ApplicationException(MessageCode.FILE_LAYOUT_NOT_DEFINED);
             }
-            
+
             Stream layoutHeader = agency.getLayoutFile().equals(1L) ? Stream.HEADER_LAYOUT_SHORT : Stream.HEADER_LAYOUT_FULL;
 
             //Valida o header do arquivo
-            beanIoReader.headerIsValid(file,layoutHeader);            
+            beanIoReader.headerIsValid(file, layoutHeader);
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao);
             this.processFile(userId, id, file, layout, f.getId());
@@ -185,41 +190,38 @@ public class FileService {
 
     }
 
-    private void criaNotificacaoDeUpload(Agency agency){         
-           
-        
-            List<String> ids = userInfoRepository
-                    .findByKeyAndValue("agencia", String.valueOf(agency.getId()))
-                    .stream()
-                    .map(u-> u.getUserId())
-                    .collect(Collectors.toList());
-            
-            
-            //Remove usuarios suporte behavior
-            List<String> emails = groupMemberSevice.findById(ids)
-                    .stream().filter(g-> !g.getGroupId().equals("suporte behavior"))
-                    .map(gg->gg.getUserId())
-                    .collect(Collectors.toList());
-            
-            
+    private void criaNotificacaoDeUpload(Agency agency) {
 
-            //Notifica os usuários que estão na mesma agência
-            emails.forEach(email -> {
-                Optional<UserActiviti> u = userActivitiRepository.findById(email);
-                if (u.isPresent()) {
-                    
-                    Map<String, String> parameter = new HashMap<String, String>();
-                    parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
-                    parameter.put(":email", u.get().getEmail());                    
-                    Notificacao notificacao = new Notificacao();
-                    notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
-                    notificacao.setParameters(Utils.mapToString(parameter));
-                    notificacaoService.save(notificacao);                    
-                    
-                }
-            });
-          
+        List<String> ids = userInfoRepository
+                .findByKeyAndValue("agencia", String.valueOf(agency.getId()))
+                .stream()
+                .map(u -> u.getUserId())
+                .collect(Collectors.toList());
+
+        //Remove usuarios suporte behavior
+        List<String> emails = groupMemberSevice.findById(ids)
+                .stream().filter(g -> !g.getGroupId().equals("suporte behavior"))
+                .map(gg -> gg.getUserId())
+                .collect(Collectors.toList());
+
+        //Notifica os usuários que estão na mesma agência
+        emails.forEach(email -> {
+            Optional<UserActiviti> u = userActivitiRepository.findById(email);
+            if (u.isPresent()) {
+
+                Map<String, String> parameter = new HashMap<String, String>();
+                parameter.put(":agencia", Utils.replaceAccentToEntityHtml(agency.getName()));
+                parameter.put(":email", u.get().getEmail());
+                Notificacao notificacao = new Notificacao();
+                notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_UPLOAD);
+                notificacao.setParameters(Utils.mapToString(parameter));
+                notificacaoService.save(notificacao);
+
+            }
+        });
+
     }
+
     private void uploadFile(boolean uploadAws, boolean uploadFtp, String folder, java.io.File file) throws IOException {
 
         if (uploadAws) {
@@ -244,46 +246,14 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {
 
-        JobDataMap data = new JobDataMap();
-        data.put(ProcessFileJob.DATA_USER_ID, userId);
-        data.put(ProcessFileJob.DATA_COMPANY, id);
-        data.put(ProcessFileJob.DATA_FILE, file);
-        data.put(ProcessFileJob.DATA_FILE_ID, fileId);
-        data.put(ProcessFileJob.DATA_LAYOUT_FILE, layout);
+        processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
+        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE_ID, fileId);
+        processFileJob.setParameter(ProcessFileJob.DATA_LAYOUT_FILE, layout);
 
-        
-        
-        String jobName = "WRITE-JOB-" + file.getName();
-        
-        JobDetail detail = JobBuilder
-                .newJob(ProcessFileJob.class)
-                .withIdentity(jobName, "process-file")
-                .withDescription("Processing files")
-                .usingJobData(data)
-                .build();
+        threadPoolFileValidation.getExecutor().submit(processFileJob);
 
-        SimpleTrigger trigger = TriggerBuilder
-                .newTrigger()
-                .withIdentity("trigger-" + file.getName(), "process-file")
-                .startAt(new Date())
-                .withSchedule(simpleSchedule())
-                .build();
-        
-        
-        Optional<JobExecutionContext> opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
-        
-        
-       if(opt.isPresent()){           
-           this.deleteFile(fileId);
-           throw new ApplicationException(MessageCode.JOB_IS_RUNNING);
-       }else{
-           bean.getScheduler().scheduleJob(detail, trigger);
-       }
-        
-        
-        
-
-        
     }
 
     public void deleteFileCascade(File file) {
@@ -293,7 +263,6 @@ public class FileService {
         fileRepository.delete(file);
     }
 
-    
     private com.core.behavior.model.File persist(String userId, Long id, java.io.File file, StatusEnum status, long stage, long versao) throws IOException {
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(id);
@@ -311,9 +280,8 @@ public class FileService {
             FileUtils.forceDelete(file);
             throw new ApplicationException(MessageCode.FILE_NAME_REPETED);
         }
-    }   
-    
-    
+    }
+
     @Transactional
     public com.core.behavior.model.File saveFile(com.core.behavior.model.File f) {
         return fileRepository.save(f);
@@ -341,7 +309,6 @@ public class FileService {
 //        logService.listByFileId(idFile).forEach(l -> {
 //            buffer.append(l);
 //        });
-
         return buffer;
     }
 
@@ -384,14 +351,13 @@ public class FileService {
         file.setPersistTime(time);
         fileRepository.save(file);
     }
-    
+
     @Transactional
     public void setValidationTime(Long fileId, Long time) {
         File file = fileRepository.findById(fileId).get();
         file.setValidationTime(time);
         fileRepository.save(file);
     }
-    
 
     public Page<File> list(String fileName, String userId, Long[] company, LocalDateTime createdAt, Pageable page, String[] status, Long start, Long end) {
 
@@ -430,12 +396,16 @@ public class FileService {
         LocalDateTime lend = LocalDateTime.ofInstant(Instant.ofEpochMilli(end), ZoneId.systemDefault());
         return this.fileRepository.statusProcesss(id, lstart, lend);
     }
-    
-    public boolean hasFileToday(Long idAgency){
-        
+
+    public boolean hasFileToday(Long idAgency) {
+
         LocalDateTime init = LocalDate.now().atTime(LocalTime.MIN);
-        LocalDateTime end = LocalDate.now().atTime(LocalTime.MAX);        
-        return !fileRepository.findByCompanyAndCreatedDateBetween(idAgency,init,end).isEmpty();        
+        LocalDateTime end = LocalDate.now().atTime(LocalTime.MAX);
+        return !fileRepository.findByCompanyAndCreatedDateBetween(idAgency, init, end).isEmpty();
+    }
+
+    public List<MoveToAnaliticsDTO> hasFileToMove() {
+        return fileRepository.moveToAnalitics();
     }
 
 }

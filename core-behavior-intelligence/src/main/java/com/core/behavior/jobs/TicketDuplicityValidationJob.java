@@ -42,7 +42,10 @@ public class TicketDuplicityValidationJob implements Runnable {
 
                     TicketValidationDTO rules = this.service.checkRules(ticket);
 
-                    if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
+                    if(rules.getDuplicity() > 0){
+                        ticket.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
+                        ticket.setBilheteBehavior(null);
+                    }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
                         ticket.setType(TicketTypeEnum.INSERT);
 
                         if (rules.getInsert() > 0 && rules.getUpdate() == 0) {

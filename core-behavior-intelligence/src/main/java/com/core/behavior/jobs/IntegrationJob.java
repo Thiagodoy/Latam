@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Tag;
 import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
+import com.core.behavior.dto.MoveToAnaliticsDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
 import com.core.behavior.model.FileIntegration;
 import com.core.behavior.model.Ticket;
@@ -19,6 +20,7 @@ import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.io.BeanIoWriter;
+import com.core.behavior.services.FileService;
 import com.core.behavior.util.TicketTypeEnum;
 import java.io.File;
 import java.nio.file.Files;
@@ -37,7 +39,6 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
@@ -51,17 +52,38 @@ public class IntegrationJob extends QuartzJobBean {
     private TicketService ticketService;
 
     @Autowired
+    private FileService fileService;
+
+    @Autowired
     private ClientIntegrationAws clientAws;
 
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
-
-    private final int QTD_LOAD = 10000;
+    
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
-        
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Iniciando o processo");
+
+        List<MoveToAnaliticsDTO> files = fileService.hasFileToMove();
+
+        if (files.isEmpty()) {
+            return;
+        }
+
+        for (MoveToAnaliticsDTO file : files) {
+
+            try {
+                this.getValues(file.getFile());
+            } catch (Exception e) {
+                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[executeInternal]", e);
+            }
+
+        }
+
+    }
+
+    private void getValues(Long fileId) {
+
         long start = System.currentTimeMillis();
 
         File uploadFolder = new File(Constantes.DIR_UPLOAD);
@@ -75,9 +97,7 @@ public class IntegrationJob extends QuartzJobBean {
             uploadFolder.mkdir();
         }
 
-        PageRequest page = PageRequest.of(0, QTD_LOAD);
-
-        List<Ticket> tickets = ticketService.listByStatus(TicketStatusEnum.APPROVED, page);
+        List<Ticket> tickets = ticketService.listByFileIdAndStatus(fileId, TicketStatusEnum.APPROVED);
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
         List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
@@ -109,7 +129,7 @@ public class IntegrationJob extends QuartzJobBean {
                 this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.FULL_LAYOUT_INTEGRATION);
             }
         }
-        
+
         Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
@@ -124,7 +144,6 @@ public class IntegrationJob extends QuartzJobBean {
 
         if (isUploaded) {
 
-            long start = System.currentTimeMillis();
             ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
 
             list.parallelStream()
@@ -138,10 +157,7 @@ public class IntegrationJob extends QuartzJobBean {
 
             executorService.shutdown();
             //Aguarda o termino do processamento
-            while (!executorService.isTerminated()) {
-            }
-
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ integração ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            while (!executorService.isTerminated()) {}
 
         } else {
             file.delete();

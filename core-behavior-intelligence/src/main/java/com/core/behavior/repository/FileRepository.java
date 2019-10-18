@@ -6,6 +6,7 @@
 package com.core.behavior.repository;
 
 import com.core.behavior.dto.FileStatusProcessDTO;
+import com.core.behavior.dto.MoveToAnaliticsDTO;
 import com.core.behavior.model.File;
 import com.core.behavior.util.StatusEnum;
 import java.time.LocalDateTime;
@@ -29,6 +30,10 @@ public interface FileRepository extends JpaRepository<File, Long> , JpaSpecifica
     
     @Query(nativeQuery = true)
     List<FileStatusProcessDTO> statusProcesss(@Param("agencia")Long agencia, @Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
+    
+    @Query(nativeQuery = true)
+    List<MoveToAnaliticsDTO> moveToAnalitics();   
+    
     Optional<File> findByNameAndCompany(String name, Long company);
     
     List<File>findByCompanyAndCreatedDateBetween(Long company,LocalDateTime start, LocalDateTime end);

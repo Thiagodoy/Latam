@@ -26,22 +26,28 @@ public class SequenceService {
 
     @Autowired
     private SequenceRepository sequenceRepository;
-    
+
     @PersistenceContext
     private EntityManager em;
+
+    @Transactional
+    public void resetSequence(SequenceTableEnum table) {
+
+        Sequence sequence = sequenceRepository.findByTable(table);        
+        sequence.setSequenceMin(0L);        
+        sequenceRepository.save(sequence);
+
+    }
 
     @Transactional
     public Sequence getSequence(SequenceTableEnum table, long item) throws Exception {
 
         int count = 0;
         do {
-            
-            
-            
-            try {
-                
-               //Sequence sequence =  em.find(Sequence.class, 1l, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
 
+            try {
+
+                //Sequence sequence =  em.find(Sequence.class, 1l, LockModeType.OPTIMISTIC_FORCE_INCREMENT);
                 Sequence sequence = sequenceRepository.findByTable(table);
                 Long value = sequence.getSequence() + item;
                 sequence.setSequenceMin(value);
@@ -50,7 +56,7 @@ public class SequenceService {
                 return sequence;
 
             } catch (Exception e) {
-                Logger.getLogger(SequenceService.class.getName()).log(Level.SEVERE,"[getSequence]",e);
+                Logger.getLogger(SequenceService.class.getName()).log(Level.SEVERE, "[getSequence]", e);
                 if (count > 3) {
                     throw e;
                 }

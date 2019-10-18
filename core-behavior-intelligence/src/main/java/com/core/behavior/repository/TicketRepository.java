@@ -29,7 +29,7 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(nativeQuery = true)
-    TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom);
+    TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("agrupb") String agrupamentoB, @Param("cupom") Long cupom, @Param("file") Long file);
     
     @Query(nativeQuery = true)
     TicketValidationShortDTO rulesShort(@Param("agrupac") String agrupamentoC, @Param("cupom") Long cupom);       
@@ -61,5 +61,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     
     List<Ticket> findByAgrupamentoC(String agrupamento);
     List<Ticket> findByAgrupamentoA(String agrupamento);
+    
+    List<Ticket> findByFileIdAndStatus(Long id,TicketStatusEnum status);
 
 }

@@ -18,14 +18,11 @@ import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,17 +37,14 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @DisallowConcurrentExecution
-public class ProcessFileJob extends QuartzJobBean {
+public class ProcessFileJob implements Runnable {
 
     @Autowired
     private BeanIoReader reader;
@@ -75,6 +69,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
     @Autowired
     private SequenceService sequenceService;
+
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
     public static final String DATA_COMPANY = "company";
@@ -83,18 +78,50 @@ public class ProcessFileJob extends QuartzJobBean {
 
     public static final String LIST_DATA_SUCCESS = "success";
     public static final String LIST_DATA_ERROR = "error";
-    public static final int SIZE_BILHETE_BEHAVIOR = 7; 
+    public static final int SIZE_BILHETE_BEHAVIOR = 7;
 
     private static final int THREAD_POLL = 100;
 
+    private Map<String, Object> parameters = new HashMap<>();
+
+    public void setParameter(String key, Object value) {
+        this.parameters.put(key, value);
+    }
+
+    
+        
+    public ProcessFileJob(BeanIoReader reader,LogService logService,AgencyService agencyService,FileService fileService,
+            FileProcessStatusService fileProcessStatusService,ValidatorFactoryBean factoryBean,TicketService ticketService,SequenceService sequenceService){
+        this.reader = reader;
+        this.logService = logService;
+        this.agencyService = agencyService;
+        this.fileService = fileService;
+        this.fileProcessStatusService = fileProcessStatusService;
+        this.factoryBean = factoryBean;
+        this.ticketService = ticketService;
+        this.sequenceService = sequenceService;
+                
+    }
+    
+    
     @Override
-    protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+    public void run() {
+
+        try {
+            this.validate();
+        } catch (Exception e) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[run]", e);
+        }
+
+    }
+
+    protected void validate() {
 
         long start = System.currentTimeMillis();
 
-        File file = (File) jec.getJobDetail().getJobDataMap().get(DATA_FILE);
-        Long layout = jec.getJobDetail().getJobDataMap().getLong(DATA_LAYOUT_FILE);
-        Long fileId = jec.getJobDetail().getJobDataMap().getLong(DATA_FILE_ID);
+        File file = (File) this.parameters.get(DATA_FILE);
+        Long layout = (Long) this.parameters.get(DATA_LAYOUT_FILE);
+        Long fileId = (Long) this.parameters.get(DATA_FILE_ID);
 
         com.core.behavior.model.File f = fileService.findById(fileId);
         f.setStatus(StatusEnum.VALIDATION_PROCESSING);
@@ -241,7 +268,8 @@ public class ProcessFileJob extends QuartzJobBean {
 
         executorService.shutdown();
         //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {}
+        while (!executorService.isTerminated()) {
+        }
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
@@ -296,7 +324,7 @@ public class ProcessFileJob extends QuartzJobBean {
 
                 t.setBilheteBehavior(bilheteBehavior);
             } catch (Exception e) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE,"[ generateBilheteBehavior ]", e);
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
             }
 
         });
