@@ -41,5 +41,9 @@ public class AgencyRequest {
     
     
     private String timeLimit;
+    
+    private String category;
+    
+    private String profile;
 
 }
