@@ -48,12 +48,12 @@ import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+//import org.apache.spark.SparkConf;
+//import org.apache.spark.api.java.JavaSparkContext;
+//import org.apache.spark.sql.Dataset;
+//import org.apache.spark.sql.Encoders;
+//import org.apache.spark.sql.Row;
+//import org.apache.spark.sql.SparkSession;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -73,9 +73,9 @@ public class FileReturnJob extends QuartzJobBean {
     private long line;
     private int lineWrited;
 
-    private SparkSession sparkSession;
-
-    private JavaSparkContext javaSparkContext;
+//    private SparkSession sparkSession;
+//
+//    private JavaSparkContext javaSparkContext;
 
     @Autowired
     private ClientAws clientAws;
@@ -343,47 +343,48 @@ public class FileReturnJob extends QuartzJobBean {
                 Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            javaSparkContext = new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]"));
+           // javaSparkContext = new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]"));
 
-            sparkSession = SparkSession
-                    .builder()
-                    .sparkContext(javaSparkContext.sc())
-                    .appName("Java Spark SQL basic example")
-                    .getOrCreate();
+//            sparkSession = SparkSession
+//                    .builder()
+//                    .sparkContext(javaSparkContext.sc())
+//                    .appName("Java Spark SQL basic example")
+//                    .getOrCreate();
 
-            Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
-                    .format("jdbc")
-                    .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
-                    .option("dbtable", "behavior.log")
-                    //.option("numPartitions", "10")
-                    .option("user", "behint_hmg")
-                    .option("password", "Beh1ntHmg_App#2018")
-                    .load();
+//            Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
+//                    .format("jdbc")
+//                    .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
+//                    .option("dbtable", "behavior.log")
+//                    //.option("numPartitions", "10")
+//                    .option("user", "behint_hmg")
+//                    .option("password", "Beh1ntHmg_App#2018")
+//                    .load();
+//
+//            Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
+//
+//            long start = System.currentTimeMillis();
+//            Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
+//            System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
+//            System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
 
-            Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
+//            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
+//            List<LogDTO> list = new ArrayList<>();
+//            Iterator<LogDTO> it = logsOfFile.javaRDD().toLocalIterator();
 
-            long start = System.currentTimeMillis();
-            Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
-            System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
-            System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
+//            while (it.hasNext()) {
+//                list.add(it.next());
+//            }
+//
+//            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
-            List<LogDTO> list = new ArrayList<>();
-            Iterator<LogDTO> it = logsOfFile.javaRDD().toLocalIterator();
-
-            while (it.hasNext()) {
-                list.add(it.next());
-            }
-
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-            return list;
+            //return list;
+            return null;
 
         } catch (Exception ex) {
             Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            sparkSession.close();
-            javaSparkContext.close();
+//            sparkSession.close();
+//            javaSparkContext.close();
         }
 
         return new ArrayList<LogDTO>();

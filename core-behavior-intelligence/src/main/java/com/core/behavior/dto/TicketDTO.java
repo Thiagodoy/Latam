@@ -2,8 +2,9 @@ package com.core.behavior.dto;
 
 import com.core.behavior.util.TicketLayoutEnum;
 import java.text.MessageFormat;
+import java.util.Optional;
 import lombok.Data;
-import org.apache.spark.api.java.Optional;
+
 
 /**
  *
