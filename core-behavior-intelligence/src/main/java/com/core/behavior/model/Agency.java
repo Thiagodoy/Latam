@@ -72,6 +72,12 @@ public class Agency {
     @Column(name = "time_limit")
     private String timeLimit;
     
+    @Column(name = "profile")
+    private String profile;
+    
+    @Column(name = "category")
+    private String category;
+    
     @Transient
     private List<UserResponse> users;
     
