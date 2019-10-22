@@ -1,6 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.dto.FileStatusProcessDTO;
+import com.core.behavior.dto.MoveToAnaliticsDTO;
 import com.core.behavior.util.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigInteger;
@@ -37,6 +38,20 @@ import lombok.Data;
                     @ColumnResult(name = "status", type = String.class)                    
                     
                 }))
+        
+        
+        
+@SqlResultSetMapping(name = "moveToAnalitics",
+        classes = @ConstructorResult(
+                targetClass = MoveToAnaliticsDTO.class,
+                columns = {
+                    @ColumnResult(name = "file_id",  type = Long.class),                    
+                    @ColumnResult(name = "qtd", type = Long.class),                                      
+                    
+                }))
+
+
+
 
 @NamedNativeQuery(name = "File.statusProcesss", query = "SELECT *\n" +
 "FROM   (SELECT Date(created_at) AS date,\n" +
@@ -49,7 +64,7 @@ import lombok.Data;
 
 
 
-
+@NamedNativeQuery(name = "File.moveToAnalitics",query = "select file_id, count(*) as qtd from ticket a inner join file b on a.file_id = b.id where b.status = 'VALIDATION_SUCCESS' and a.status = 'APPROVED'  group by file_id", resultSetMapping = "moveToAnalitics" )
 
 
 @Entity

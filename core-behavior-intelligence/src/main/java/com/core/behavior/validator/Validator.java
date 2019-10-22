@@ -409,8 +409,7 @@ public class Validator implements IValidator {
 
     @Override
     public IValidator checkBilhete() {
-        
-        
+
         ticket.setBilhete(ticketDTO.getBilhete());
 
 //        int countError = 0;
@@ -436,7 +435,6 @@ public class Validator implements IValidator {
 //
 //            ticket.setBilhete(bilhete);
 //        }
-
         return this;
     }
 
@@ -580,7 +578,7 @@ public class Validator implements IValidator {
         boolean hasEmpresa = Optional.ofNullable(this.ticketDTO.getEmpresa()).isPresent();
 
         if (!hasEmpresa && hasConsolidada) {
-            this.ticket.setEmpresa("");
+            this.ticket.setEmpresa(null);
         }
 
         if (hasEmpresa) {
@@ -778,7 +776,7 @@ public class Validator implements IValidator {
         boolean hasEmpresa = Optional.ofNullable(this.ticketDTO.getEmpresa()).isPresent();
 
         if (hasEmpresa && !hasConsolidada) {
-            this.ticket.setConsolidada("");
+            this.ticket.setConsolidada(null);
         }
 
         if (hasConsolidada) {
@@ -1107,7 +1105,7 @@ public class Validator implements IValidator {
 //            if (!m.matches()) {
 //                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
 //            } else {
-                this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
+            this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
 //            }
 
         }
@@ -1380,7 +1378,7 @@ public class Validator implements IValidator {
 //            if (m.matches()) {
 //                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.pnrCiaArea.type"), "pnrCiaArea");
 //            } else {
-            ticket.setPnrAgencia(pnrCiaAgencia);
+            ticket.setPnrCiaArea(pnrCiaAgencia);
             // }
         }
 
@@ -1664,93 +1662,9 @@ public class Validator implements IValidator {
         //ticket.setBilheteBehavior(bilheteBehavior);
     }
 
-//    public void validate(List<Ticketlist, Ticket ticket) {
-    /// Optional<Ticket> result = Optional.empty();
-    //  long start = System.currentTimeMillis();
-//        switch (ticket.getLayout()) {
-//            case FULL:
-//
-//                Optional<Ticket> update = list
-//                        .parallelStream()
-//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && ticket.getCupom().equals(t.getCupom()))
-//                        .findFirst();
-//                
-//                Optional<Ticket> insert = list
-//                        .parallelStream()
-//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && t.getAgrupamentoA().equals(ticket.getAgrupamentoA()) && t.getCupom().equals(ticket.getCupom()))
-//                        .findFirst();
-//                
-//                Optional<Ticket> backOffice = list
-//                        .parallelStream()
-//                        .filter(t -> !t.getId().equals(ticket.getId()) && t.getAgrupamentoB().equals(ticket.getAgrupamentoB()) && !t.getAgrupamentoA().equals(ticket.getAgrupamentoA()))
-//                        .findFirst();
-//
-//                if (update.isPresent()) {
-//                    ticket.setType(TicketTypeEnum.UPDATE);
-//                    ticket.setStatus(TicketStatusEnum.APPROVED); 
-//                    ticket.setBilheteBehavior(update.get().getBilheteBehavior());
-//                } else if (!insert.isPresent()) {
-//                    ticket.setType(TicketTypeEnum.INSERT);
-//                    ticket.setStatus(TicketStatusEnum.APPROVED);
-//                    verificaCupom(list, ticket);
-//                    //result = Optional.of(ticket);
-//                } else if (backOffice.isPresent()) {
-//                    ticket.setStatus(TicketStatusEnum.BACKOFFICE);
-//                    ticket.setBilheteBehavior(null);
-//                }              
-//                
-//                break;
-//            case SHORT:
-//                Optional<Ticket> optChaveC = list.parallelStream().filter(t -> t.getAgrupamentoC().equals(ticket.getAgrupamentoC())).findFirst();
-//
-//                if (optChaveC.isPresent()) {
-//                    ticket.setType(TicketTypeEnum.UPDATE);
-//                } else {
-//                    ticket.setType(TicketTypeEnum.INSERT);
-//                    verificaCupom(list, ticket);
-//                    //result = Optional.of(ticket);
-//                }
-//                ticket.setStatus(TicketStatusEnum.APPROVED);
-//        }
-    // Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ validate ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-    //  return result;
-    // }
-//    private boolean isUpdate(Ticket ticket){
-//        
-//        
-//        
-//        
-//    }
-//    private void verificaCupom(List<Ticket> list, Ticket ticket) {
-//
-//        //long start = System.currentTimeMillis();
-//        final long count = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).count();
-//        Optional<Ticket> opt = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).max(Comparator.comparing(Ticket::getCupom));
-//
-//        if (opt.isPresent() && !opt.get().getCupom().equals(count)) {
-//            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-//        }else if(count > 0){
-//            Optional<Ticket> optT = list.parallelStream().filter(f -> f.getAgrupamentoA().equals(ticket.getAgrupamentoA())).min(Comparator.comparing(Ticket::getCupom));
-//            
-//            if(optT.isPresent() && !ticket.getBilheteBehavior().equals(optT.get().getBilheteBehavior())){             
-//                   ticket.setBilheteBehavior(optT.get().getBilheteBehavior());
-//             } 
-//        }
-//        //Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ verificaCupom ] -> " + ((System.currentTimeMillis() - start)) + " milesegundos");
-//    }
     private void generateNameClient() {
 
-        Optional<String> consolida = Optional.ofNullable(this.ticket.getConsolidada());
-        Optional<String> empresa = Optional.ofNullable(this.ticket.getEmpresa());
-        String nomeEmpresa = "";
-
-        if ((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()) {
-            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), consolida.get());
-        } else if (empresa.isPresent()) {
-            nomeEmpresa = MessageFormat.format("{0}{1}", ticketDTO.getCodigoAgencia(), empresa.get());
-        }
-
-        this.ticket.setNomeCliente(nomeEmpresa);
+        this.ticket.setNomeCliente(ticketDTO.getCodigoAgencia());
     }
 
     @Override

@@ -130,12 +130,16 @@ public class TicketService {
         return ticketRepository.findByStatus(status,page);               
     }
     
+    public List<Ticket>listByFileIdAndStatus(Long fileId,TicketStatusEnum status){        
+        return ticketRepository.findByFileIdAndStatus(fileId,status);               
+    }
+    
     public List<TicketDuplicityDTO> listDuplicityByDateEmission(LocalDate start, LocalDate end){
         return null;//ticketRepository.listDuplicityByDateEmission(start, end);
     }
     
     public TicketValidationDTO checkRules(Ticket ticket){
-        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom());
+        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom(), ticket.getFileId());
     }
     
     public TicketValidationShortDTO rulesShort(Ticket ticket){
