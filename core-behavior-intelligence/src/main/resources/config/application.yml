@@ -56,7 +56,7 @@ email:
     host: smtp.office365.com
     port: 587
     username: latamupload@behint.net.br
-    password: behavior@2019
+    password: behavior@2020
     auth: true  
     protocol: smtp
     starttls:

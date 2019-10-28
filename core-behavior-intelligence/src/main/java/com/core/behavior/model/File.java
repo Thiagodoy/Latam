@@ -27,45 +27,49 @@ import lombok.Data;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-
-
 @SqlResultSetMapping(name = "FileStatusProcess",
         classes = @ConstructorResult(
                 targetClass = FileStatusProcessDTO.class,
                 columns = {
-                    @ColumnResult(name = "date",  type = Date.class),                    
-                    @ColumnResult(name = "qtd", type = BigInteger.class),
-                    @ColumnResult(name = "status", type = String.class)                    
-                    
+                    @ColumnResult(name = "date", type = Date.class)
+                    ,                    
+                    @ColumnResult(name = "qtd", type = BigInteger.class)
+                    ,
+                    @ColumnResult(name = "status", type = String.class)
+
                 }))
-        
-        
-        
+
 @SqlResultSetMapping(name = "moveToAnalitics",
         classes = @ConstructorResult(
                 targetClass = MoveToAnaliticsDTO.class,
                 columns = {
-                    @ColumnResult(name = "file_id",  type = Long.class),                    
-                    @ColumnResult(name = "qtd", type = Long.class),                                      
-                    
-                }))
+                    @ColumnResult(name = "file_id", type = Long.class)
+                    ,                    
+                    @ColumnResult(name = "qtd", type = Long.class),}))
 
+@NamedNativeQuery(name = "File.statusProcesss", query = "SELECT *\n"
+        + "FROM   (SELECT Date(created_at) AS date,\n"
+        + "               Count(1) as qtd,\n"
+        + "               status\n"
+        + "        FROM   behavior.file f where company = :agencia and created_at between :start and :end \n"
+        + "        GROUP  BY Date(created_at),\n"
+        + "                  status) rr\n"
+        + "ORDER  BY date ASC", resultSetMapping = "FileStatusProcess")
 
-
-
-@NamedNativeQuery(name = "File.statusProcesss", query = "SELECT *\n" +
-"FROM   (SELECT Date(created_at) AS date,\n" +
-"               Count(1) as qtd,\n" +
-"               status\n" +
-"        FROM   behavior.file f where company = :agencia and created_at between :start and :end \n" +
-"        GROUP  BY Date(created_at),\n" +
-"                  status) rr\n" +
-"ORDER  BY date ASC",resultSetMapping = "FileStatusProcess")
-
-
-
-@NamedNativeQuery(name = "File.moveToAnalitics",query = "select file_id, count(*) as qtd from ticket a inner join file b on a.file_id = b.id where b.status = 'VALIDATION_SUCCESS' and a.status = 'APPROVED'  group by file_id", resultSetMapping = "moveToAnalitics" )
-
+@NamedNativeQuery(name = "File.moveToAnalitics", query = "SELECT file_id, \n"
+        + "       Count(*) AS qtd \n"
+        + "FROM   behavior.ticket a \n"
+        + "       INNER JOIN behavior.FILE b \n"
+        + "               ON a.file_id = b.id \n"
+        + "WHERE  b.id = 1 \n"
+        + "       AND b.status = 'VALIDATION_SUCCESS' \n"
+        + "       AND a.status = 'APPROVED' \n"
+        + "       AND NOT EXISTS (SELECT 1 \n"
+        + "                       FROM   behavior.ticket tt \n"
+        + "                       WHERE  tt.file_id = b.id \n"
+        + "                              AND tt.status = 'VALIDATION') \n"
+        + "GROUP  BY file_id",
+        resultSetMapping = "moveToAnalitics")
 
 @Entity
 @Table(schema = "behavior", name = "file")
@@ -80,7 +84,6 @@ public class File {
     @Column(name = "name", unique = true)
     private String name;
 
-   
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdDate;
@@ -88,7 +91,7 @@ public class File {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "company", unique = true )
+    @Column(name = "company", unique = true)
     private Long company;
 
     @Column(name = "qtd_total_lines")
@@ -96,29 +99,28 @@ public class File {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private StatusEnum status;    
-    
+    private StatusEnum status;
+
     @Column(name = "repeated_lines")
     private Long repeatedLine;
-    
+
     @Column(name = "execution_time")
     private Long executionTime;
-    
+
     @Column(name = "parse_time")
     private Long parseTime;
-    
+
     @Column(name = "persist_time")
     private Long persistTime;
-    
+
     @Column(name = "validation_time")
     private Long validationTime;
-    
+
     @Column(name = "stage")
-    private Long stage;    
-    
+    private Long stage;
+
     @Column(name = "version")
     private Long version;
-
 
     @Transient
     private List<FileProcessStatus> statusProcess;
