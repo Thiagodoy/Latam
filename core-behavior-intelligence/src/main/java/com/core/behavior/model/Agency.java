@@ -98,6 +98,8 @@ public class Agency {
         this.sendDailyUpload =  request.getSendDailyUpload();
         this.hoursAdvance = request.getHoursAdvance();
         this.timeLimit = request.getTimeLimit();
+        this.category = request.getCategory();
+        this.profile = request.getProfile();
     }
 
 }

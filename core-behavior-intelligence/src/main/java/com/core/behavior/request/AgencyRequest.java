@@ -1,6 +1,5 @@
 package com.core.behavior.request;
 
-import javax.persistence.Column;
 import lombok.Data;
 
 /**
@@ -23,23 +22,25 @@ public class AgencyRequest {
     private String agencyCode;
 
     private Long odFlag;
+
     private String flagMonthly;
 
-    private Long flagApproved;    
-    
+    private Long flagApproved;
+
     private Long layoutFile;
-    
-    
+
     private String s3Path;
-    
+
     private String cnpj;
-    
-    private Long sendDailyUpload;   
-    
-    
+
+    private Long sendDailyUpload;
+
     private Long hoursAdvance;
-    
-    
+
     private String timeLimit;
+
+    private String category;
+
+    private String profile;
 
 }

@@ -3,7 +3,6 @@ package com.core.behavior.resource;
 import com.core.behavior.request.AgencyRequest;
 import com.core.behavior.response.Response;
 import com.core.behavior.services.AgencyService;
-import com.core.behavior.services.UserInfoService;
 import com.core.behavior.util.MessageCode;
 import java.util.logging.Level;
 import java.util.logging.Logger;

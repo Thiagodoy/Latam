@@ -1,7 +1,5 @@
 package com.core.behavior.configuration;
 
-import com.core.behavior.jobs.TicketDuplicityValidationJob;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

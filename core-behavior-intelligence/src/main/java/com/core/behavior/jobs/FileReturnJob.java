@@ -389,6 +389,7 @@ public class FileReturnJob implements Runnable {
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
             return list;
+            
 
         } catch (Exception ex) {
             Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
