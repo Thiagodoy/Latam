@@ -7,7 +7,7 @@ import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
-import com.core.behavior.dto.MoveToAnaliticsDTO;
+import com.core.behavior.dto.FileLinesApprovedDTO;
 import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
@@ -404,8 +404,8 @@ public class FileService {
         return !fileRepository.findByCompanyAndCreatedDateBetween(idAgency, init, end).isEmpty();
     }
 
-    public List<MoveToAnaliticsDTO> hasFileToMove() {
-        return fileRepository.moveToAnalitics();
+    public FileLinesApprovedDTO fileInfo(Long id) {        
+        return fileRepository.moveToAnalitics(id).stream().findFirst().get();
     }
 
 }

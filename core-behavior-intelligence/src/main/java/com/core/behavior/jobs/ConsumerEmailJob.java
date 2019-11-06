@@ -54,7 +54,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
-        PageRequest page = PageRequest.of(0,25);
+        PageRequest page = PageRequest.of(0,10);
         List<Notificacao> notificacaos = notificacaoRepository.findByStatus(NotificacaoStatusEnum.READY, page);
 
         Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.INFO, "Iniciando o envio de emails");

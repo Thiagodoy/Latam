@@ -62,6 +62,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByAgrupamentoC(String agrupamento);
     List<Ticket> findByAgrupamentoA(String agrupamento);
     
+    List<Ticket> findByFileIdAndStatus(Long id,TicketStatusEnum status,Pageable page);
     List<Ticket> findByFileIdAndStatus(Long id,TicketStatusEnum status);
 
 }

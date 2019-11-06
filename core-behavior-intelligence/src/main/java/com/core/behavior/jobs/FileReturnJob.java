@@ -346,7 +346,7 @@ public class FileReturnJob implements Runnable {
 
     private List<LogDTO> getData(Long id) {
 
-        try {
+        try{
 
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");

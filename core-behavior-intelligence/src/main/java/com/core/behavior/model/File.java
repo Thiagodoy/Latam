@@ -1,7 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.dto.FileStatusProcessDTO;
-import com.core.behavior.dto.MoveToAnaliticsDTO;
+import com.core.behavior.dto.FileLinesApprovedDTO;
 import com.core.behavior.util.StatusEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigInteger;
@@ -39,9 +39,9 @@ import lombok.Data;
 
                 }))
 
-@SqlResultSetMapping(name = "moveToAnalitics",
+@SqlResultSetMapping(name = "moveToAnalitic",
         classes = @ConstructorResult(
-                targetClass = MoveToAnaliticsDTO.class,
+                targetClass = FileLinesApprovedDTO.class,
                 columns = {
                     @ColumnResult(name = "file_id", type = Long.class)
                     ,                    
@@ -59,17 +59,13 @@ import lombok.Data;
 @NamedNativeQuery(name = "File.moveToAnalitics", query = "SELECT file_id, \n"
         + "       Count(*) AS qtd \n"
         + "FROM   behavior.ticket a \n"
-        + "       INNER JOIN behavior.FILE b \n"
+        + "       INNER JOIN behavior.file b \n"
         + "               ON a.file_id = b.id \n"
-        + "WHERE  b.id = 1 \n"
-        + "       AND b.status = 'VALIDATION_SUCCESS' \n"
+        + "WHERE b.status = 'VALIDATION_SUCCESS' \n"
         + "       AND a.status = 'APPROVED' \n"
-        + "       AND NOT EXISTS (SELECT 1 \n"
-        + "                       FROM   behavior.ticket tt \n"
-        + "                       WHERE  tt.file_id = b.id \n"
-        + "                              AND tt.status = 'VALIDATION') \n"
+        + "       AND b.id = :file  \n"        
         + "GROUP  BY file_id",
-        resultSetMapping = "moveToAnalitics")
+        resultSetMapping = "moveToAnalitic")
 
 @Entity
 @Table(schema = "behavior", name = "file")

@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class MoveToAnaliticsDTO {
+public class FileLinesApprovedDTO {
  
     private Long file;
     private Long qtd;

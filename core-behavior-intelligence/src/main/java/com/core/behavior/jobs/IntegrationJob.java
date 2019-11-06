@@ -9,7 +9,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Tag;
 import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.dto.FileIntegrationDTO;
-import com.core.behavior.dto.MoveToAnaliticsDTO;
+import com.core.behavior.dto.FileLinesApprovedDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
 import com.core.behavior.model.FileIntegration;
 import com.core.behavior.model.Ticket;
@@ -35,18 +35,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.data.domain.PageRequest;
 
 /**
  *
  * @author thiag
  */
-@DisallowConcurrentExecution
-public class IntegrationJob extends QuartzJobBean {
+@Data
+public class IntegrationJob implements Runnable {
 
     @Autowired
     private TicketService ticketService;
@@ -59,30 +57,33 @@ public class IntegrationJob extends QuartzJobBean {
 
     @Autowired
     private FileIntegrationRepository fileIntegrationRepository;
-    
+
+    private Long fileId;
+
+    public IntegrationJob(TicketService ticketService, FileService fileService, ClientIntegrationAws clientAws, FileIntegrationRepository fileIntegrationRepository) {
+        this.ticketService = ticketService;
+        this.fileService = fileService;
+        this.clientAws = clientAws;
+        this.fileIntegrationRepository = fileIntegrationRepository;
+    }
 
     @Override
-    protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
+    public void run() {
 
-        List<MoveToAnaliticsDTO> files = fileService.hasFileToMove();
+        try {
 
-        if (files.isEmpty()) {
-            return;
-        }
+            FileLinesApprovedDTO file = fileService.fileInfo(this.fileId);
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load information file -> " + this.fileId);
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load information file size -> " + file.getQtd());
+            this.getValues(file);
 
-        for (MoveToAnaliticsDTO file : files) {
-
-            try {
-                this.getValues(file.getFile());
-            } catch (Exception e) {
-                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[executeInternal]", e);
-            }
-
+        } catch (Exception e) {
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[run] -> id = " + this.fileId, e);
         }
 
     }
 
-    private void getValues(Long fileId) {
+    private void getValues(FileLinesApprovedDTO file) throws Exception {
 
         long start = System.currentTimeMillis();
 
@@ -97,7 +98,11 @@ public class IntegrationJob extends QuartzJobBean {
             uploadFolder.mkdir();
         }
 
-        List<Ticket> tickets = ticketService.listByFileIdAndStatus(fileId, TicketStatusEnum.APPROVED);
+        PageRequest page = PageRequest.of(0, file.getQtd().intValue());
+
+        List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);
+
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load data qtd -> " + tickets.size());
 
         List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
         List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
@@ -134,30 +139,37 @@ public class IntegrationJob extends QuartzJobBean {
 
     }
 
-    private void generateFile(List<Ticket> list, File uploadFolder, TicketLayoutEnum layout, TicketTypeEnum type, Stream stream) {
+    private void generateFile(List<Ticket> list, File uploadFolder, TicketLayoutEnum layout, TicketTypeEnum type, Stream stream) throws Exception {
 
         FileIntegrationDTO dTO = mountDTO(list);
         File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream, type);
 
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Writed file -> " + file.getName());
+
         final String fileName = file.getName();
         boolean isUploaded = this.uploadAndMoveFile(file, generateTag(layout, type));
 
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Upload file" + file.getName());
+
         if (isUploaded) {
 
-            ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
+            ticketService.updateStatusAndFileIntegrationBatch(TicketStatusEnum.WRITED, list, fileName);
 
-            list.parallelStream()
-                    .forEach(t -> {
-                        executorService.submit(() -> {
-                            t.setFileIntegration(fileName);
-                            t.setStatus(TicketStatusEnum.WRITED);
-                            this.ticketService.save(t);
-                        });
-                    });
-
-            executorService.shutdown();
-            //Aguarda o termino do processamento
-            while (!executorService.isTerminated()) {}
+//           // ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
+//
+//            list.parallelStream()
+//                    .forEach(t -> {
+////                        executorService.submit(() -> {
+//                            t.setFileIntegration(fileName);
+//                            t.setStatus(TicketStatusEnum.WRITED);
+//                            this.ticketService.save(t);
+////                        });
+//                    });
+//
+////            executorService.shutdown();
+////            //Aguarda o termino do processamento
+////            while (!executorService.isTerminated()) { }
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Update status");
 
         } else {
             file.delete();

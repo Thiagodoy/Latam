@@ -16,6 +16,7 @@ import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.StageEnum;
 import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
+import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.validator.ValidatorFactoryBean;
@@ -38,6 +39,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -69,6 +71,12 @@ public class ProcessFileJob implements Runnable {
 
     @Autowired
     private SequenceService sequenceService;
+    
+    @Autowired
+    private ApplicationContext context;
+    
+    @Autowired
+    private ThreadPoolFileIntegration threadPoolFileIntegration;
 
     public static final String DATA_USER_ID = "userId";
     public static final String DATA_FILE = "file";
@@ -184,6 +192,17 @@ public class ProcessFileJob implements Runnable {
 
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
+                
+                IntegrationJob job = context.getBean(IntegrationJob.class);
+                job.setFileId(idFile);
+                
+                
+                long countt = success.parallelStream().filter(ttt-> ttt.status.equals(TicketStatusEnum.WRITED)).count();
+                
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal] total approved -> " + countt);
+                threadPoolFileIntegration.submit(job);
+                
+                
 
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);

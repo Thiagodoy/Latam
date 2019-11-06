@@ -1,6 +1,7 @@
 package com.core.behavior.configuration;
 
 import com.core.behavior.aws.client.ClientAws;
+import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
@@ -10,6 +11,7 @@ import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import com.core.behavior.repository.AgencyRepository;
+import com.core.behavior.repository.FileIntegrationRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
@@ -19,9 +21,11 @@ import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.SequenceService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.services.UserActivitiService;
+import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.ThreadPoolFileReturn;
 import com.core.behavior.util.ThreadPoolFileValidation;
 import com.core.behavior.validator.ValidatorFactoryBean;
+import javax.annotation.PreDestroy;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -44,6 +48,9 @@ import org.springframework.context.annotation.Scope;
 @EnableAutoConfiguration
 public class QuartzConfiguration {
 
+//    private ThreadPoolFileIntegration threadPoolFileIntegration;
+//    private ThreadPoolFileValidation threadPoolFileValidation;
+//    private ThreadPoolFileReturn threadPoolFileReturn;
 
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
@@ -52,8 +59,6 @@ public class QuartzConfiguration {
         scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), GroupMatcher.jobGroupEquals("fg_jobgroup_01"));
 
         scheduler.start();
-        
-        
 
         JobDetail detail = JobBuilder.newJob(ConsumerEmailJob.class).withIdentity("ConsumerEmailJob", "consumer-email")
                 .withDescription("Sender email")
@@ -75,16 +80,15 @@ public class QuartzConfiguration {
         scheduler.scheduleJob(detail1, crontrigger1);
 
         //:FIXME
-        JobDetail detail2 = JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
-                .withDescription("Integrador")
-                .build();
-        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
-                        .withMisfireHandlingInstructionFireAndProceed())
-                .build();
-
-        scheduler.scheduleJob(detail2, crontrigger2);
-
+//        JobDetail detail2 = JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
+//                .withDescription("Integrador")
+//                .build();
+//        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
+//                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
+//                        .withMisfireHandlingInstructionFireAndProceed())
+//                .build();
+//
+//        scheduler.scheduleJob(detail2, crontrigger2);
         JobDetail detail3 = JobBuilder.newJob(MonthlyJob.class).withIdentity("FilePurgingJob", "purging-job")
                 .withDescription("Purging file")
                 .build();
@@ -101,23 +105,44 @@ public class QuartzConfiguration {
     @Scope("singleton")
     public ThreadPoolFileReturn threadPoolExecutor() {
         return new ThreadPoolFileReturn();
+        
     }
-    
+
     @Bean
     @Scope("singleton")
-    public ThreadPoolFileValidation threadPoolFileValidation(){
+    public ThreadPoolFileValidation threadPoolFileValidation() {
         return new ThreadPoolFileValidation();
+        
+    }
+
+    @Bean
+    @Scope("singleton")
+    public ThreadPoolFileIntegration threadPoolFileIntegration() {
+        return new ThreadPoolFileIntegration();
+        
+    }
+
+    @Bean
+    public IntegrationJob integrationJob(TicketService ticketService, FileService fileService, ClientIntegrationAws clientAws, FileIntegrationRepository fileIntegrationRepository) {
+        return new IntegrationJob(ticketService, fileService, clientAws, fileIntegrationRepository);
     }
 
     @Bean
     public FileReturnJob fileReturnJob(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
         return new FileReturnJob(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
     }
-    
+
     @Bean
-    public ProcessFileJob processFileJob(BeanIoReader reader,LogService logService,AgencyService agencyService,FileService fileService,
-            FileProcessStatusService fileProcessStatusService,ValidatorFactoryBean factoryBean,TicketService ticketService,SequenceService sequenceService){
+    public ProcessFileJob processFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+            FileProcessStatusService fileProcessStatusService, ValidatorFactoryBean factoryBean, TicketService ticketService, SequenceService sequenceService) {
         return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, factoryBean, ticketService, sequenceService);
     }
+
+//    @PreDestroy
+//    public void preDestroy() {
+//        threadPoolFileIntegration.getExecutor().shutdownNow();
+//        threadPoolFileReturn.getExecutor().shutdownNow();
+//        threadPoolFileValidation.getExecutor().shutdownNow();
+//    }
 
 }
