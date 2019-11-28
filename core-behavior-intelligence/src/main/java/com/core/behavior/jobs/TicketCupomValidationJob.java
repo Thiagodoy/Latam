@@ -10,6 +10,8 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
 import java.text.MessageFormat;
+import java.util.Comparator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,14 +35,18 @@ public class TicketCupomValidationJob implements Runnable {
 
         try {
 
-            TicketCountCupomDTO count = service.rulesCountCupom(ticket);
+            List<Ticket> tickets = service.findByAgrupamentoA(ticket);
+            final int count = tickets.size();
+            final int sumTicket = tickets.stream().map(t -> t.getCupom().intValue()).reduce(0, (a, b) -> a + b);
 
-            if (!count.getCount().equals(ticket.getCupom())) {
-                ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-            } else {
+            final Double value = count * (((count - 1) * 0.5) + 1);
+
+            if (value.intValue() == sumTicket) {
                 ticket.setStatus(TicketStatusEnum.APPROVED);
+            } else {
+                ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
             }
-            
+
             service.save(ticket);
 
         } catch (Exception e) {

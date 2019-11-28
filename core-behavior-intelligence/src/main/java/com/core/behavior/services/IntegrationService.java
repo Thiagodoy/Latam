@@ -98,7 +98,7 @@ public class IntegrationService {
             
             /*Call procedure*/
             this.callSpDataCollector();
-             file = this.makeFile();
+            file = this.makeFile();
             this.sendEmail(file);
 
         } catch (Exception ex) {
@@ -126,10 +126,10 @@ public class IntegrationService {
         
     }
     
-    private File makeFile() throws  SQLException, IOException{
+    public File makeFile() throws  SQLException, IOException{
         
         
-        String query = MessageFormat.format("select * from `ltm_stage`.`LogErroDataCollector` where Processamento = '{0}'", LocalDate.now().format(DateTimeFormatter.ISO_DATE) );
+        String query = "select * from `ltm_stage`.`LogErroDataCollector` where Processamento = '" + LocalDate.now().format(DateTimeFormatter.ISO_DATE) + "'";
         
         PreparedStatement st =  this.connection.prepareStatement(query);
         
@@ -137,8 +137,8 @@ public class IntegrationService {
         
         File file = File.createTempFile("tempStatusProcessamento", ".csv");
         
-        FileWriter writer = new FileWriter(file);
-        writer.write("erro;tipo");
+        FileWriter writer = new FileWriter(file,false);
+        writer.write("erro;tipo\n");
         
         while(result.next()){
             String line = MessageFormat.format("{0};{1}\n", result.getString("msg_erro"), result.getInt("type_err"));
@@ -154,19 +154,19 @@ public class IntegrationService {
         
     }
     
-    private void sendEmail(File attachment) throws MessagingException{
+    public void sendEmail(File attachment) throws MessagingException{
         MimeMessage message = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setSubject("[ Data Collector ] - BackOffice");
         helper.setFrom("latamupload@behint.net.br");
-        helper.setTo(new String[]{"thiagodoy@gmail.com","marcelo.rosim@bandtec.com.br"});
+        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br"});
         helper.setText("Segue em anexos os erros na validação da procedure SP_DataCollector");
         helper.addAttachment("Evidencia.csv", attachment);        
         sender.send(message);
         
     }
     
-    private void closeConnection() {
+    public void closeConnection() {
         try {
             if (!this.connection.isClosed()) {
                 this.connection.close();
@@ -177,7 +177,7 @@ public class IntegrationService {
         }
     }
 
-    private void openConnection() {
+    public void openConnection() {
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
