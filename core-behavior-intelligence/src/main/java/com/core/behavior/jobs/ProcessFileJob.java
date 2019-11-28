@@ -177,11 +177,11 @@ public class ProcessFileJob implements Runnable {
                 });
 
                 this.writeErrors(error);
-
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 this.runRules2(success);
                 this.runRules3(success);
+                this.runRules4(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -292,6 +292,24 @@ public class ProcessFileJob implements Runnable {
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
+    }
+    
+    private void runRules4(List<Ticket> success){
+        
+        long start = System.currentTimeMillis();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
+        
+        success.parallelStream().distinct().forEach(t->{        
+            executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));        
+        });
+        
+        executorService.shutdown();
+        //Aguarda o termino do processamento
+        while (!executorService.isTerminated()) {
+        }
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        
     }
 
     private void generateIds(List<Ticket> tickets) throws Exception {

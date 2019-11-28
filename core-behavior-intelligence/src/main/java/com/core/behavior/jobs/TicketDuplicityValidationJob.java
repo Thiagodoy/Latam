@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 public class TicketDuplicityValidationJob implements Runnable {
 
     private TicketService service;
-
     private Ticket ticket;
 
     public TicketDuplicityValidationJob(TicketService service, Ticket ticket) {
@@ -48,18 +47,18 @@ public class TicketDuplicityValidationJob implements Runnable {
                     }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
                         ticket.setType(TicketTypeEnum.INSERT);
 
-                        if (rules.getInsert() > 0 && rules.getUpdate() == 0) {
-                            List<Ticket> updates = this.service.findByAgrupamentoA(ticket);
-                            Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getCupom)).get();
-                            ticket.setBilheteBehavior(uo.getBilheteBehavior());
-                        }
+//                        if (rules.getInsert() > 0 && rules.getUpdate() == 0) {
+//                            List<Ticket> updates = this.service.findByAgrupamentoA(ticket);
+//                            Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getCupom)).get();
+//                            ticket.setBilheteBehavior(uo.getBilheteBehavior());
+//                        }
 
                     } else if (rules.getUpdate() > 0) {
 
                         ticket.setType(TicketTypeEnum.UPDATE);
-                        List<Ticket> updates = this.service.findToUpdate(ticket);
-                        Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getLineFile)).get();
-                        ticket.setBilheteBehavior(uo.getBilheteBehavior());
+//                        List<Ticket> updates = this.service.findToUpdate(ticket);
+//                        Ticket uo = updates.parallelStream().min(Comparator.comparing(Ticket::getLineFile)).get();
+//                        ticket.setBilheteBehavior(uo.getBilheteBehavior());
 
                     } else if (rules.getBackoffice() > 0) {
                         ticket.setStatus(TicketStatusEnum.BACKOFFICE);

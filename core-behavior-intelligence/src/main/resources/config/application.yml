@@ -32,6 +32,10 @@ behavior:
             port: 3306            
             connectionTestQuery: SELECT 1  
             
+analitics:
+    url: jdbc:mysql://pbi-db.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/ltm_stage?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false&noAccessToProcedureBodies=true         
+    user: datacollector
+    password: "@data@collector"
     
 activiti:           
     datasource:

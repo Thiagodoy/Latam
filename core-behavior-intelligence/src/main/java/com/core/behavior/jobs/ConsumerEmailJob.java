@@ -55,9 +55,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
 
         PageRequest page = PageRequest.of(0,10);
-        List<Notificacao> notificacaos = notificacaoRepository.findByStatus(NotificacaoStatusEnum.READY, page);
-
-        Logger.getLogger(ConsumerEmailJob.class.getName()).log(Level.INFO, "Iniciando o envio de emails");
+        List<Notificacao> notificacaos = notificacaoRepository.findByStatus(NotificacaoStatusEnum.READY, page);      
         
         
         List<FileSystemResource> resources = new ArrayList<>();
@@ -84,7 +82,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
                
                 content = Utils.replaceAccentToEntityHtml(content);
                 
-                helper.setText(content, true); 
+                helper.setText(content, true);                
                 
                 Map<String, String> map = n.getLayout().getResouces();
                 Set<String> keys = map.keySet();
@@ -98,6 +96,7 @@ public class ConsumerEmailJob extends QuartzJobBean {
                 }
 
                 sender.send(message);
+                
 
                 n.setStatus(NotificacaoStatusEnum.SENT);
                 notificacaoRepository.save(n);

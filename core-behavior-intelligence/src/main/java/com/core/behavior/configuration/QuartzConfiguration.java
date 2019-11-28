@@ -16,6 +16,7 @@ import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
+import com.core.behavior.services.IntegrationService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.SequenceService;
@@ -123,8 +124,8 @@ public class QuartzConfiguration {
     }
 
     @Bean
-    public IntegrationJob integrationJob(TicketService ticketService, FileService fileService, ClientIntegrationAws clientAws, FileIntegrationRepository fileIntegrationRepository) {
-        return new IntegrationJob(ticketService, fileService, clientAws, fileIntegrationRepository);
+    public IntegrationJob integrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService ) {
+        return new IntegrationJob(ticketService, fileService, integrationService);
     }
 
     @Bean

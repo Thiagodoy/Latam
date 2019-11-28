@@ -21,6 +21,7 @@ import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.io.BeanIoWriter;
 import com.core.behavior.services.FileService;
+import com.core.behavior.services.IntegrationService;
 import com.core.behavior.util.TicketTypeEnum;
 import java.io.File;
 import java.nio.file.Files;
@@ -30,11 +31,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -50,21 +48,22 @@ public class IntegrationJob implements Runnable {
     private TicketService ticketService;
 
     @Autowired
-    private FileService fileService;
-
+    private FileService fileService;    
+    
     @Autowired
-    private ClientIntegrationAws clientAws;
+    private IntegrationService integrationService;    
 
-    @Autowired
-    private FileIntegrationRepository fileIntegrationRepository;
+    
+    
 
     private Long fileId;
 
-    public IntegrationJob(TicketService ticketService, FileService fileService, ClientIntegrationAws clientAws, FileIntegrationRepository fileIntegrationRepository) {
+    public IntegrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService) {
         this.ticketService = ticketService;
         this.fileService = fileService;
-        this.clientAws = clientAws;
-        this.fileIntegrationRepository = fileIntegrationRepository;
+        this.integrationService = integrationService;
+        
+        
     }
 
     @Override
@@ -72,9 +71,7 @@ public class IntegrationJob implements Runnable {
 
         try {
 
-            FileLinesApprovedDTO file = fileService.fileInfo(this.fileId);
-            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load information file -> " + this.fileId);
-            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load information file size -> " + file.getQtd());
+            FileLinesApprovedDTO file = fileService.fileInfo(this.fileId);            
             this.getValues(file);
 
         } catch (Exception e) {
@@ -86,155 +83,18 @@ public class IntegrationJob implements Runnable {
     private void getValues(FileLinesApprovedDTO file) throws Exception {
 
         long start = System.currentTimeMillis();
-
-        File uploadFolder = new File(Constantes.DIR_UPLOAD);
-        File uploadedFolder = new File(Constantes.DIR_UPLOADED);
-
-        if (!uploadedFolder.isDirectory()) {
-            uploadedFolder.mkdir();
-        }
-
-        if (!uploadFolder.isDirectory()) {
-            uploadFolder.mkdir();
-        }
-
         PageRequest page = PageRequest.of(0, file.getQtd().intValue());
 
-        List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);
-
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Load data qtd -> " + tickets.size());
-
-        List<Ticket> shortLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.SHORT)).collect(Collectors.toList());
-        List<Ticket> fullLayout = tickets.parallelStream().filter(t -> t.getLayout().equals(TicketLayoutEnum.FULL)).collect(Collectors.toList());
-
-        if (!shortLayout.isEmpty()) {
-            List<Ticket> shortLayoutInsert = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
-            List<Ticket> shortLayoutUpdate = shortLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
-
-            if (!shortLayoutUpdate.isEmpty()) {
-                this.generateFile(shortLayoutUpdate, uploadFolder, TicketLayoutEnum.SHORT, TicketTypeEnum.UPDATE, Stream.SHORT_LAYOUT_INTEGRATION);
-            }
-
-            if (!shortLayoutInsert.isEmpty()) {
-                this.generateFile(shortLayoutInsert, uploadFolder, TicketLayoutEnum.SHORT, TicketTypeEnum.INSERT, Stream.SHORT_LAYOUT_INTEGRATION);
-            }
-
-        }
-
-        if (!fullLayout.isEmpty()) {
-
-            List<Ticket> fullLayoutInsert = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.INSERT)).collect(Collectors.toList());
-            List<Ticket> fullLayoutUpdate = fullLayout.parallelStream().filter(t -> t.getType().equals(TicketTypeEnum.UPDATE)).collect(Collectors.toList());
-
-            if (!fullLayoutUpdate.isEmpty()) {
-                this.generateFile(fullLayoutUpdate, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.UPDATE, Stream.FULL_LAYOUT_INTEGRATION);
-            }
-
-            if (!fullLayoutInsert.isEmpty()) {
-                this.generateFile(fullLayoutInsert, uploadFolder, TicketLayoutEnum.FULL, TicketTypeEnum.INSERT, Stream.FULL_LAYOUT_INTEGRATION);
-            }
-        }
-
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-    }
-
-    private void generateFile(List<Ticket> list, File uploadFolder, TicketLayoutEnum layout, TicketTypeEnum type, Stream stream) throws Exception {
-
-        FileIntegrationDTO dTO = mountDTO(list);
-        File file = BeanIoWriter.writer(uploadFolder, layout, dTO, stream, type);
-
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Writed file -> " + file.getName());
-
-        final String fileName = file.getName();
-        boolean isUploaded = this.uploadAndMoveFile(file, generateTag(layout, type));
-
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Upload file" + file.getName());
-
-        if (isUploaded) {
-
-            ticketService.updateStatusAndFileIntegrationBatch(TicketStatusEnum.WRITED, list, fileName);
-
-//           // ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(50);
-//
-//            list.parallelStream()
-//                    .forEach(t -> {
-////                        executorService.submit(() -> {
-//                            t.setFileIntegration(fileName);
-//                            t.setStatus(TicketStatusEnum.WRITED);
-//                            this.ticketService.save(t);
-////                        });
-//                    });
-//
-////            executorService.shutdown();
-////            //Aguarda o termino do processamento
-////            while (!executorService.isTerminated()) { }
-            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Update status");
-
-        } else {
-            file.delete();
-        }
-
-    }
-
-    private List<Tag> generateTag(TicketLayoutEnum layout, TicketTypeEnum type) {
-
-        List<Tag> tags = new ArrayList<>();
-
-        if (layout.equals(TicketLayoutEnum.SHORT)) {
-            tags.add(new Tag("model", "20"));
-        } else {
-            tags.add(new Tag("model", "50"));
-        }
-
-        if (type.equals(TicketTypeEnum.INSERT)) {
-            tags.add(new Tag("action", "insert"));
-        } else {
-            tags.add(new Tag("action", "update"));
-        }
-
-        return tags;
-    }
-
-    private boolean uploadAndMoveFile(File f, List<Tag> tags) {
+        List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);       
 
         try {
-            String hash = clientAws.uploadFile(f, Constantes.PATH_INTEGRATION, tags);
+            integrationService.integrate(tickets);
+            ticketService.updateStatusAndFileIntegrationBatch(TicketStatusEnum.WRITED, tickets, "");
+        } catch (Exception e) {
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[ integrate ] -> id = " + this.fileId, e);
+        }       
 
-            if (Optional.ofNullable(hash).isPresent()) {
-                Files.move(f.toPath(), Paths.get(Constantes.DIR_UPLOADED).resolve(f.getName()), StandardCopyOption.REPLACE_EXISTING);
-                FileIntegration integration = new FileIntegration(hash, f.getName());
-                fileIntegrationRepository.save(integration);
-            }
-            return true;
-        } catch (AmazonS3Exception e) {
-            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[uploadAndMoveFile]", e);
-            return false;
-        } catch (Exception ex) {
-            Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[uploadAndMoveFile]", ex);
-            return false;
-        }
-    }
-
-    private FileIntegrationDTO mountDTO(List<Ticket> list) {
-        FileIntegrationDTO dTO = new FileIntegrationDTO();
-        List<TicketIntegrationDTO> l = Collections.synchronizedList(new ArrayList<TicketIntegrationDTO>());
-        list.parallelStream().forEach(t -> {
-
-            try {
-                synchronized (l) {
-                    l.add(new TicketIntegrationDTO((t)));
-                }
-
-            } catch (Exception e) {
-                Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[mountDTO] id -> " + t.getId(), e);
-            }
-
-        });
-
-        dTO.setIntegrationDTOs(l);
-
-        return dTO;
-    }
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
+    }      
 
 }

@@ -26,6 +26,7 @@ import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
@@ -84,6 +85,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @Table(schema = "behavior", name = "ticket")
 @DynamicUpdate
 @Data
+@EqualsAndHashCode(of = {"agrupamentoA", "agrupamentoC"})
 public class Ticket {
 
     @PositionParameter(value = 0)

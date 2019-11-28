@@ -779,8 +779,10 @@ public class Validator implements IValidator {
             this.ticket.setConsolidada(null);
         }
 
-        if (hasConsolidada) {
+        if (hasConsolidada && this.ticketDTO.getConsolidada().length() > 0 ) {
             this.ticket.setConsolidada(ticketDTO.getConsolidada());
+        }else{
+            this.ticket.setConsolidada(null);
         }
 
         if (!hasEmpresa && !hasConsolidada) {
@@ -872,52 +874,52 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkDataReserva() {
 
-        int countError = 0;
-
-        Date dataReserva = null;
-
-        if (Optional.ofNullable(ticketDTO.getDataReserva()).isPresent() && ticketDTO.getDataReserva().length() > 0) {
-
-            try {
-                dataReserva = formatter4.parse(ticketDTO.getDataReserva());
-            } catch (ParseException e3) {
-                countError++;
-            }
-
-            if (countError == 0 && dataReserva != null) {
-
-                try {
-                    LocalDateTime emissao = this.dateToLocalDateTime(this.ticket.getDataEmissao());
-                    LocalDateTime extracao = this.dateToLocalDateTime(this.ticket.getDataExtracao());
-                    LocalDateTime embarque = this.dateToLocalDateTime(this.ticket.getDataEmbarque());
-                    LocalDateTime reserva = this.dateToLocalDateTime(dataReserva);
-
-                    if (reserva.isAfter(emissao)) {
-                        countError++;
-                    }
-
-                    if (reserva.isAfter(embarque)) {
-                        countError++;
-                    }
-
-                    if (reserva.isAfter(extracao)) {
-                        countError++;
-                    }
-                } catch (Exception e3) {
-                    countError++;
-                }
-
-            }
-
-            if (countError > 0) {
-                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataReserva.type"), "dataReserva");
-            } else {
-                ticket.setDataReserva(dataReserva);
-            }
-
-        } else {
-            ticket.setDataReserva(null);
-        }
+//        int countError = 0;
+//
+//        Date dataReserva = null;
+//
+//        if (Optional.ofNullable(ticketDTO.getDataReserva()).isPresent() && ticketDTO.getDataReserva().length() > 0) {
+//
+//            try {
+//                dataReserva = formatter4.parse(ticketDTO.getDataReserva());
+//            } catch (ParseException e3) {
+//                countError++;
+//            }
+//
+//            if (countError == 0 && dataReserva != null) {
+//
+//                try {
+//                    LocalDateTime emissao = this.dateToLocalDateTime(this.ticket.getDataEmissao());
+//                    LocalDateTime extracao = this.dateToLocalDateTime(this.ticket.getDataExtracao());
+//                    LocalDateTime embarque = this.dateToLocalDateTime(this.ticket.getDataEmbarque());
+//                    LocalDateTime reserva = this.dateToLocalDateTime(dataReserva);
+//
+//                    if (reserva.isAfter(emissao)) {
+//                        countError++;
+//                    }
+//
+//                    if (reserva.isAfter(embarque)) {
+//                        countError++;
+//                    }
+//
+//                    if (reserva.isAfter(extracao)) {
+//                        countError++;
+//                    }
+//                } catch (Exception e3) {
+//                    countError++;
+//                }
+//
+//            }
+//
+//            if (countError > 0) {
+//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.dataReserva.type"), "dataReserva");
+//            } else {
+//                ticket.setDataReserva(dataReserva);
+//            }
+//
+//        } else {
+//            ticket.setDataReserva(null);
+//        }
 
         return this;
     }
@@ -1664,7 +1666,19 @@ public class Validator implements IValidator {
 
     private void generateNameClient() {
 
-        this.ticket.setNomeCliente(ticketDTO.getCodigoAgencia());
+        Optional<String> consolida = Optional.ofNullable(this.ticket.getConsolidada());
+        Optional<String> empresa = Optional.ofNullable(this.ticket.getEmpresa());
+        String nomeEmpresa = "";
+
+        if ((consolida.isPresent() && empresa.isPresent()) || consolida.isPresent()) {
+            nomeEmpresa = MessageFormat.format("{0} - {1}", ticketDTO.getCodigoAgencia(), consolida.get());
+        } else if (empresa.isPresent()) {
+            nomeEmpresa = MessageFormat.format("{0} - {1}", ticketDTO.getCodigoAgencia(), empresa.get());
+        }else{
+            nomeEmpresa = ticketDTO.getCodigoAgencia();
+        }
+
+        this.ticket.setNomeCliente(nomeEmpresa);
     }
 
     @Override
@@ -1751,7 +1765,7 @@ public class Validator implements IValidator {
 
         } catch (Exception e) {
             Logger.getLogger(com.core.behavior.validator.Validator.class
-                    .getName()).log(Level.SEVERE, "", e);
+                    .getName()).log(Level.SEVERE, "[ validate ]", e);
             return Optional.empty();
         }
     }

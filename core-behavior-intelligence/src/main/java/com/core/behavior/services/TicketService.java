@@ -70,10 +70,7 @@ public class TicketService {
                     String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     Statement ps = con.createStatement();
                     ps.clearBatch();
-                    
-                    
-                    
-                    
+
                     ps.addBatch(query);
                     int[] ids = ps.executeBatch();
                     con.commit();
@@ -84,8 +81,12 @@ public class TicketService {
             }
 
             String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.execute();
+            Statement ps = con.createStatement();
+            ps.clearBatch();
+
+            ps.addBatch(query);
+            int[] ids = ps.executeBatch();
+            
             con.commit();
 
         } catch (SQLException ex) {
@@ -103,14 +104,13 @@ public class TicketService {
             return;
         }
 
-        
         filename = "'" + filename + "'";
         String sstatus = "'" + status.toString() + "'";
-        
+
         Logger.getLogger(TicketService.class.getName()).log(Level.INFO, "[ updateStatusAndFileIntegrationBatch ] -> status = " + status + ", ticket size = " + tickets.size() + " fileNae = " + filename);
-        
+
         boolean log = true;
-        
+
         try {
 
             Connection con = dataSource.getConnection();
@@ -121,20 +121,20 @@ public class TicketService {
                 count++;
                 if (count == 1000) {
                     String ids = update.stream().parallel().map((i) -> {
-                        return i.toString(); 
+                        return i.toString();
                     }).collect(Collectors.joining(","));
 
-                    String query = MessageFormat.format("UPDATE `behavior`.`ticket` SET status = {0}, file_integration = {1} WHERE id IN({2})", sstatus,filename, ids);
+                    String query = MessageFormat.format("UPDATE `behavior`.`ticket` SET status = {0}, file_integration = {1} WHERE id IN({2})", sstatus, filename, ids);
                     Statement ps = con.createStatement();
                     ps.clearBatch();
-                    
+
                     ps.addBatch(query);
-                    
+
                     ps.executeLargeBatch();
                     con.commit();
                     count = 0;
                     update.clear();
-                    
+
                 }
 
             }
@@ -143,12 +143,12 @@ public class TicketService {
                 return i.toString(); //To change body of generated lambdas, choose Tools | Templates.
             }).collect(Collectors.joining(","));
 
-            String query = MessageFormat.format("UPDATE `behavior`.`ticket` SET status = {0}, file_integration = {1} WHERE id IN({2})", sstatus,filename, ids);
-            
+            String query = MessageFormat.format("UPDATE `behavior`.`ticket` SET status = {0}, file_integration = {1} WHERE id IN({2})", sstatus, filename, ids);
+
             Statement ps = con.createStatement();
             ps.clearBatch();
             ps.addBatch(query);
-            ps.executeLargeBatch();;
+            ps.executeLargeBatch();
             con.commit();
             update.clear();
 
@@ -196,7 +196,7 @@ public class TicketService {
     public List<Ticket> listByFileIdAndStatus(Long fileId, TicketStatusEnum status, PageRequest page) {
         return ticketRepository.findByFileIdAndStatus(fileId, status, page);
     }
-    
+
     public List<Ticket> listByFileIdAndStatus(Long fileId, TicketStatusEnum status) {
         return ticketRepository.findByFileIdAndStatus(fileId, status);
     }
