@@ -16,7 +16,6 @@ import static com.core.behavior.util.MessageCode.SERVER_ERROR_AWS;
 import com.core.behavior.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -85,11 +84,12 @@ public class FileResource {
     public ResponseEntity downloadFile(
             @RequestParam(name = "fileName") String fileName,
             @RequestParam(name = "company") Long company,
+            @RequestParam(name = "original",defaultValue = "false") boolean original,
             HttpServletResponse response) {
 
         try {
 
-            java.io.File file = fileService.downloadFile(fileName, company);
+            java.io.File file = fileService.downloadFile(fileName, company, original);
 
             String mimeType = Utils.getMimeType(file);
             response.setContentType(mimeType);
@@ -234,7 +234,7 @@ public class FileResource {
             @RequestParam(name = "size", defaultValue = "10") int size) {
 
         try {
-            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdDate").ascending());
+            PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
             LocalDateTime paam = dateCreated != null ? Utils.convertDateToLOcalDateTime(dateCreated) : null;
 

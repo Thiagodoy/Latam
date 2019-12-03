@@ -103,17 +103,13 @@ public class IntegrationService {
 
         } catch (Exception ex) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);
-            throw ex;
+           // throw ex;
         } finally {
             this.closeConnection();
             
             if(file != null){
                FileUtils.forceDelete(file);     
             }
-            
-            
-            
-            
         }
     }
 
@@ -159,7 +155,7 @@ public class IntegrationService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setSubject("[ Data Collector ] - BackOffice");
         helper.setFrom("latamupload@behint.net.br");
-        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br"});
+        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br","deniz.sanchez@behint.net.br"});
         helper.setText("Segue em anexos os erros na validação da procedure SP_DataCollector");
         helper.addAttachment("Evidencia.csv", attachment);        
         sender.send(message);

@@ -10,6 +10,7 @@ import com.core.behavior.dto.LineErrorDTO;
 import com.core.behavior.dto.LogDTO;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.Notificacao;
+import com.core.behavior.properties.BehaviorProperties;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.NotificacaoService;
@@ -72,6 +73,9 @@ public class FileReturnJob implements Runnable {
     private SparkSession sparkSession;
 
     private JavaSparkContext javaSparkContext;
+    
+    @Autowired
+    private BehaviorProperties behaviorProperties;
 
     @Autowired
     private ClientAws clientAws;
@@ -330,7 +334,7 @@ public class FileReturnJob implements Runnable {
         parameter.put(":email", emailUser);
 
         //:FIXME Colocar o endereço no arquivo de configurações
-        String link = "http://10.91.0.146:8001/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
+        String link = "https://api.dataquality.behaviorintelligence.com.br/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
 
         parameter.put(":link", link);
 
@@ -364,11 +368,11 @@ public class FileReturnJob implements Runnable {
 
             Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
                     .format("jdbc")
-                    .option("url", "jdbc:mysql://hmg-application.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=UTC&useLegacyDatetimeCode=false")
+                    .option("url", behaviorProperties.getDatasource().getSqlserver().getDataUrl())
                     .option("dbtable", "behavior.log")
                     //.option("numPartitions", "10")
-                    .option("user", "behint_hmg")
-                    .option("password", "Beh1ntHmg_App#2018")
+                    .option("user", behaviorProperties.getDatasource().getSqlserver().getDataSourceUser())
+                    .option("password", behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword())
                     .load();
 
             Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));

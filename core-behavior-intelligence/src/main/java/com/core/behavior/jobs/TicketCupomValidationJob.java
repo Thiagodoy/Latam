@@ -35,6 +35,8 @@ public class TicketCupomValidationJob implements Runnable {
 
         try {
 
+            //Validação para ticket de 49 colunas
+            
             List<Ticket> tickets = service.findByAgrupamentoA(ticket);
             final int count = tickets.size();
             final int sumTicket = tickets.stream().map(t -> t.getCupom().intValue()).reduce(0, (a, b) -> a + b);
@@ -50,7 +52,7 @@ public class TicketCupomValidationJob implements Runnable {
             service.save(ticket);
 
         } catch (Exception e) {
-            Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.INFO, MessageFormat.format("id -> {0}", ticket.getId()));
+            Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));
             Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.SEVERE, "[ TicketCupomValidationJob ]", e);
             ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
             service.save(ticket);

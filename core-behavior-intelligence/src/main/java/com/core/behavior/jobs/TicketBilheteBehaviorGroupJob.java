@@ -8,11 +8,9 @@ package com.core.behavior.jobs;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketLayoutEnum;
-import com.core.behavior.util.TicketTypeEnum;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.springframework.context.ApplicationContext;
 
 /**

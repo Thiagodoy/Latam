@@ -35,7 +35,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,14 +43,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -120,12 +112,12 @@ public class FileService {
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
-    }
-
-    public java.io.File downloadFile(String fileName, Long companyId) throws IOException {
+    }   
+    
+    public java.io.File downloadFile(String fileName, Long companyId, boolean  original) throws IOException {
 
         Agency agency = agencyService.findById(companyId);
-        String folder = agency.getS3Path().split("\\\\")[1];
+        String folder = original ? agency.getS3Path().split("\\\\")[1] + "\\" + "original" : agency.getS3Path().split("\\\\")[1];
 
         return clientAws.downloadFile(fileName, folder);
     }
@@ -167,6 +159,10 @@ public class FileService {
             s[2] = "VALIDATION_PARSE";
             s[3] = "VALIDATION_ERROR";
             s[4] = "VALIDATION_SUCCESS";
+            
+            
+            final String pathOriginal = folder + "\\" + "original";
+            this.uploadFile(true, false, pathOriginal, file);
 
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
             long versao = 1L;

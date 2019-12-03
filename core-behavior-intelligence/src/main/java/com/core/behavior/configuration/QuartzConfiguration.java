@@ -1,17 +1,14 @@
 package com.core.behavior.configuration;
 
 import com.core.behavior.aws.client.ClientAws;
-import com.core.behavior.aws.client.ClientIntegrationAws;
 import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.FileReturnJob;
-import com.core.behavior.jobs.MonthlyJob;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import com.core.behavior.repository.AgencyRepository;
-import com.core.behavior.repository.FileIntegrationRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
@@ -26,7 +23,6 @@ import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.ThreadPoolFileReturn;
 import com.core.behavior.util.ThreadPoolFileValidation;
 import com.core.behavior.validator.ValidatorFactoryBean;
-import javax.annotation.PreDestroy;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -90,15 +86,15 @@ public class QuartzConfiguration {
 //                .build();
 //
 //        scheduler.scheduleJob(detail2, crontrigger2);
-        JobDetail detail3 = JobBuilder.newJob(MonthlyJob.class).withIdentity("FilePurgingJob", "purging-job")
-                .withDescription("Purging file")
-                .build();
-        CronTrigger crontrigger3 = TriggerBuilder.newTrigger().withIdentity("FilePurgingJob", "purging-job")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? 1/1 SUN#1 *")
-                        .withMisfireHandlingInstructionFireAndProceed())
-                .build();
-
-        scheduler.scheduleJob(detail3, crontrigger3);
+//        JobDetail detail3 = JobBuilder.newJob(MonthlyJob.class).withIdentity("FilePurgingJob", "purging-job")
+//                .withDescription("Purging file")
+//                .build();
+//        CronTrigger crontrigger3 = TriggerBuilder.newTrigger().withIdentity("FilePurgingJob", "purging-job")
+//                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? 1/1 SUN#1 *")
+//                        .withMisfireHandlingInstructionFireAndProceed())
+//                .build();
+//
+//        scheduler.scheduleJob(detail3, crontrigger3);
 
     }
 

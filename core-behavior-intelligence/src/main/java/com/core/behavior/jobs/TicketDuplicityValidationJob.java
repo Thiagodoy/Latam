@@ -83,7 +83,7 @@ public class TicketDuplicityValidationJob implements Runnable {
             service.save(ticket);
 
         } catch (Exception e) {
-            Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.INFO, MessageFormat.format("id -> {0}", ticket.getId()));
+            Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, "[ EXECUTOR ]", e);
             ticket.setStatus(TicketStatusEnum.ERROR_EXECUTOR);
             service.save(ticket);

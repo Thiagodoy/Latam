@@ -5,32 +5,13 @@
  */
 package com.core.behavior.jobs;
 
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.Tag;
-import com.core.behavior.aws.client.ClientIntegrationAws;
-import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.FileLinesApprovedDTO;
-import com.core.behavior.dto.TicketIntegrationDTO;
-import com.core.behavior.model.FileIntegration;
 import com.core.behavior.model.Ticket;
-import com.core.behavior.repository.FileIntegrationRepository;
 import com.core.behavior.services.TicketService;
-import com.core.behavior.util.Constantes;
-import com.core.behavior.util.Stream;
-import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.io.BeanIoWriter;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.IntegrationService;
-import com.core.behavior.util.TicketTypeEnum;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Data;

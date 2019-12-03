@@ -44,18 +44,9 @@ public class MonthlyJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
         
-        this.resetSequences();
-        this.clearFiles();
-        
+        this.resetSequences();            
 
-    }
-
-    private void clearDataBase(){
-        
-        
-        
-        
-    }
+    }    
     
     private void resetSequences(){        
         sequenceService.resetSequence(SequenceTableEnum.TICKET);        
@@ -63,29 +54,6 @@ public class MonthlyJob extends QuartzJobBean {
     
     
     
-    private void clearFiles() {
-
-        File uploadedFolder = new File(Constantes.DIR_UPLOADED);
-
-        List<File> files = Arrays.asList(uploadedFolder.listFiles());
-
-        LocalDate limitDate = LocalDate.now().minus(DATA_LIMIT, ChronoUnit.DAYS);
-
-        files.parallelStream().filter(f -> {
-
-            final LocalDate lastModification = Utils.dateToLocalDate(new Date(f.lastModified()));
-            return limitDate.isAfter(lastModification);
-
-        }).forEach(f -> {
-
-            try {
-                FileUtils.forceDelete(f);
-            } catch (Exception e) {
-                Logger.getLogger(MonthlyJob.class.getName()).log(Level.WARNING, " file -> " + f.getName(), e);
-            }
-
-        });
-
-    }
+   
 
 }
