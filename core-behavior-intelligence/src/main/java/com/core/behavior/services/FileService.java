@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -106,9 +107,11 @@ public class FileService {
 
     @Autowired
     private ThreadPoolFileValidation threadPoolFileValidation;
-
+    
     @Autowired
-    private ProcessFileJob processFileJob;
+    private ApplicationContext context;
+
+   
 
     public File findById(Long id) {
         return fileRepository.findById(id).get();
@@ -145,7 +148,7 @@ public class FileService {
                 this.deleteFileCascade(fileTemp);
             }
 
-            this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0, 0);
+            this.persist(userId, id, file, StatusEnum.COLLECTOR_UPLOADED, 0, 0, 0L);
             this.uploadFile(uploadAws, uploadFtp, folder, file);
 
             this.criaNotificacaoDeUpload(agency);
@@ -180,7 +183,7 @@ public class FileService {
             //Valida o header do arquivo
             beanIoReader.headerIsValid(file, layoutHeader);
 
-            com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao);
+            com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao,1L);
             this.processFile(userId, id, file, layout, f.getId());
         }
 
@@ -240,8 +243,9 @@ public class FileService {
 
     }
 
-    private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {
-
+    private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {        
+         
+        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
         processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
         processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
@@ -259,7 +263,7 @@ public class FileService {
         fileRepository.delete(file);
     }
 
-    private com.core.behavior.model.File persist(String userId, Long id, java.io.File file, StatusEnum status, long stage, long versao) throws IOException {
+    private com.core.behavior.model.File persist(String userId, Long id, java.io.File file, StatusEnum status, long stage, long versao, long original) throws IOException {
         com.core.behavior.model.File f = new com.core.behavior.model.File();
         f.setCompany(id);
         f.setName(file.getName());
@@ -268,6 +272,7 @@ public class FileService {
         f.setStage(stage);
         f.setCreatedDate(LocalDateTime.now());
         f.setVersion(versao);
+        f.setOriginal(original);
 
         try {
             f = this.saveFile(f);
@@ -301,10 +306,7 @@ public class FileService {
         StringBuilder buffer = new StringBuilder();
         String header = Utils.layoutMin.stream().collect(Collectors.joining(";"));
         buffer.append("ERRO;" + header + "\n");
-
-//        logService.listByFileId(idFile).forEach(l -> {
-//            buffer.append(l);
-//        });
+        
         return buffer;
     }
 

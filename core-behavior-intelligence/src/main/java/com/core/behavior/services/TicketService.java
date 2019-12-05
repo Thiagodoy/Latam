@@ -236,5 +236,9 @@ public class TicketService {
     public List<Ticket> findByAgrupamentoA(Ticket t) {
         return ticketRepository.findByAgrupamentoA(t.getAgrupamentoA());
     }
+    
+    public boolean checkCupom(Ticket ticket){        
+        return this.ticketRepository.checkCupom(ticket.getAgrupamentoA()).longValue() == 1L;
+    }
 
 }

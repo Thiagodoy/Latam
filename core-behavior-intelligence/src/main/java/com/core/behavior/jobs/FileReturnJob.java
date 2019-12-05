@@ -358,19 +358,23 @@ public class FileReturnJob implements Runnable {
                 Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            javaSparkContext = new JavaSparkContext(new SparkConf().setAppName("SparkJdbcDs").setMaster("local[*]"));
+            javaSparkContext = new JavaSparkContext(new SparkConf()
+                    .setAppName("SparkJdbcDs")
+                    .setMaster("local[*]")
+                    .set("spark.memory.fraction", "0.25")
+            );
 
+            
             sparkSession = SparkSession
                     .builder()
-                    .sparkContext(javaSparkContext.sc())
+                    .sparkContext(javaSparkContext.sc())                    
                     .appName("Java Spark SQL basic example")
                     .getOrCreate();
 
             Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
                     .format("jdbc")
                     .option("url", behaviorProperties.getDatasource().getSqlserver().getDataUrl())
-                    .option("dbtable", "behavior.log")
-                    //.option("numPartitions", "10")
+                    .option("dbtable", "behavior.log")                    
                     .option("user", behaviorProperties.getDatasource().getSqlserver().getDataSourceUser())
                     .option("password", behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword())
                     .load();

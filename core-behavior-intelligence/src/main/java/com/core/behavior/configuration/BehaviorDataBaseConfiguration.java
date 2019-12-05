@@ -74,7 +74,7 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         hikariConfig.setAutoCommit((behaviorProperties.getDatasource().isAutoCommit()));        
         hikariConfig.setJdbcUrl(behaviorProperties.getDatasource().getSqlserver().getDataUrl());
         hikariConfig.setUsername(behaviorProperties.getDatasource().getSqlserver().getDataSourceUser());
-        hikariConfig.setPassword(behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword());
+        hikariConfig.setPassword(behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword());        
         hikariConfig.setPoolName("BehaviorPool");
         hikariConfig.setConnectionTestQuery(behaviorProperties.getDatasource().getSqlserver().getConnectionTestQuery());
 

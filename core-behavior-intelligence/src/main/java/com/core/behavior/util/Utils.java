@@ -200,6 +200,13 @@ public class Utils {
         return positionColumnByField.get(field);
     }
 
+    
+    public static String formatDateSqlToString(java.sql.Date date){
+        return formmatDate2.format(date);
+    }
+    
+    
+    
     public static File convertToFile(MultipartFile file) throws FileNotFoundException, IOException {
 
         File convFile = new File(file.getOriginalFilename());

@@ -117,6 +117,9 @@ public class File {
 
     @Column(name = "version")
     private Long version;
+    
+    @Column(name = "original")
+    private Long original;
 
     @Transient
     private List<FileProcessStatus> statusProcess;

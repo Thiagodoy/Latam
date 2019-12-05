@@ -44,6 +44,7 @@ public class Validator implements IValidator {
     private final SimpleDateFormat formatter4 = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"));
     private final SimpleDateFormat formatter5 = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
     private final SimpleDateFormat formatter6 = new SimpleDateFormat("y", new Locale("pt", "BR"));
+    private final SimpleDateFormat formatter7 = new SimpleDateFormat("dd/MM/yy", new Locale("pt", "BR"));
 
     private final static int DATA_VOO_LIMITE_DIAS = 365;
     private final static String REGEX_HORA_VOO = "([01]?[0-9]|2[0-3]):([0-5][0-9]):?([0-5][0-9])?";
@@ -182,8 +183,13 @@ public class Validator implements IValidator {
         }
 
         try {
-            dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
-            dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+            /**
+             * Solicitante : Mauricelio
+             * Data : 05/12/2019
+             * Descrição : Para contemplar datas com layout ddd/MM/yy
+             * */            
+            dataEmbarque = ticketDTO.getDataEmbarque().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()): formatter7.parse(ticketDTO.getDataEmbarque());
+            dataEmissao = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmissao()) : formatter7.parse(ticketDTO.getDataEmissao());
 
             LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
             LocalDate date2025 = LocalDate.ofYearDay(2025, 1);
@@ -1713,7 +1719,7 @@ public class Validator implements IValidator {
             if (ticketDTO.getLayout().equals(TicketLayoutEnum.FULL.toString())) {
                 this.checkDataExtracao()
                         .checkHoraEmissao()
-                        .checkDataReserva()
+                        //.checkDataReserva()
                         .checkHoraReserva()
                         .checkHoraPouso()
                         //.checkBaseTarifaria() Cancelado a pedido do Mauricelio 22/09/2019
@@ -1756,9 +1762,6 @@ public class Validator implements IValidator {
                 }
 
                 this.generateNameClient();
-                // gerar o bilhete behavior
-                //this.generateBilheteBehavior();
-
             }
 
             return Optional.of(this.ticket);

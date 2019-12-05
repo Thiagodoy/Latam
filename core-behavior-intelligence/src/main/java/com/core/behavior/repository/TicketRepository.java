@@ -47,11 +47,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket> findByFileId(@Param("fileId") Long fileId);
+    
+    
+    @Query(nativeQuery = true, value = "select  sum(cupom) = truncate(count(1)*(((count(1)-1) * 0.5)+1),0)  from  behavior.ticket where agrupamento_a = :agrup and type = 'INSERT'")
+    Long checkCupom(@Param("agrup") String agrupamento);
 
     @Modifying
     @Transactional
     @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
     void deleteByFileId(@Param("fileId") Long fileId);
+    
+    
+    
 
     //@Query(nativeQuery = true,countQuery = "select count(*) from ticket where status= :status" ,value = "select * from ticket where status= :status")
     List<Ticket> findByStatus(TicketStatusEnum status, Pageable page);

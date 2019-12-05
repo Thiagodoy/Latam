@@ -36,19 +36,9 @@ public class TicketCupomValidationJob implements Runnable {
         try {
 
             //Validação para ticket de 49 colunas
-            
-            List<Ticket> tickets = service.findByAgrupamentoA(ticket);
-            final int count = tickets.size();
-            final int sumTicket = tickets.stream().map(t -> t.getCupom().intValue()).reduce(0, (a, b) -> a + b);
-
-            final Double value = count * (((count - 1) * 0.5) + 1);
-
-            if (value.intValue() == sumTicket) {
-                ticket.setStatus(TicketStatusEnum.APPROVED);
-            } else {
-                ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-            }
-
+            boolean isOk = service.checkCupom(ticket);
+            TicketStatusEnum status = isOk ? TicketStatusEnum.APPROVED : TicketStatusEnum.BACKOFFICE_CUPOM;
+            ticket.setStatus(status);
             service.save(ticket);
 
         } catch (Exception e) {

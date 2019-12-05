@@ -14,9 +14,11 @@ import org.beanio.types.TypeHandler;
 public class DateHandler implements TypeHandler {
 
     static SimpleDateFormat formatter4 = new SimpleDateFormat("dd/MM/yyyy", new Locale("pt", "BR"));
+    static SimpleDateFormat formatter5 = new SimpleDateFormat("dd/MM/yy", new Locale("pt", "BR"));
 
     static {
         formatter4.setLenient(false);
+        formatter5.setLenient(false);
     }
 
     @Override
@@ -25,12 +27,12 @@ public class DateHandler implements TypeHandler {
         Object result = null;
 
         
-        if(string.length()!= 10){
+        if(string.length()!= 10 || string.length()!= 8){
              throw new TypeConversionException("Data inválida!");
         }
         
         try {
-            result = formatter4.parse(string);
+            result = string.length() == 10 ? formatter4.parse(string) : formatter5.parse(string);
         } catch (ParseException e3) {
             throw new TypeConversionException("Data inválida!");
         }
