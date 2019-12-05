@@ -6,8 +6,17 @@
 package com.core.behavior.services;
 
 import com.core.behavior.dto.AirMovimentDTO;
+import com.core.behavior.dto.FileIntegrationDTO;
+import com.core.behavior.dto.TicketIntegrationDTO;
+import com.core.behavior.io.BeanIoWriter;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.properties.AnaliticsProperties;
+import com.core.behavior.repository.FileRepository;
+import com.core.behavior.repository.TicketRepository;
+import com.core.behavior.util.Stream;
+import com.core.behavior.util.TicketLayoutEnum;
+import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import static com.core.behavior.util.Utils.mountBatchInsert;
 import java.io.File;
@@ -49,24 +58,101 @@ public class IntegrationService {
     private AnaliticsProperties properties;
 
     @Autowired
+    private TicketRepository ticketRepository;
+    
+    @Autowired
+    private FileRepository fileRepository;
+
+    @Autowired
     private JavaMailSender sender;
 
     private Connection connection;
 
     public void integrate(List<Ticket> tickets) throws Exception {
 
-        
         try {
 
             this.move(tickets);
             this.callSpDataCollector();
-            this.makeFile();
+            this.makeFileResultIntegration();
+            
+            if(tickets.size() > 0){
+                Long id  = tickets.stream().findFirst().get().getFileId();
+                this.makeFileResultDataCollector(id);              
+            }
+            
 
         } catch (Exception ex) {
-            Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);            
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);
         } finally {
-            this.closeConnection();        
+            this.closeConnection();
         }
+    }
+
+    public  void makeFileResultDataCollector(Long idfile) {
+
+        File tempFileCupom = null;
+        File tempFileDuplicity = null;
+        File fileDuplicity = null;
+        File fileCupom = null;
+        File zip = null;
+
+        try {
+            List<Ticket> listticketDuplicity = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_DUPLICITY);
+            List<Ticket> listticketCupom = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_CUPOM);
+            List<File> files = new ArrayList();
+
+            if (listticketDuplicity.size() > 0) {
+                FileIntegrationDTO fileIntegrationDTODuplicity = mountDto(listticketDuplicity);
+                tempFileDuplicity = new File("Duplicity.csv");
+                fileDuplicity = BeanIoWriter.writer(tempFileDuplicity, TicketLayoutEnum.FULL, fileIntegrationDTODuplicity, Stream.FULL_LAYOUT_INTEGRATION);
+                files.add(fileDuplicity);
+            }
+
+            if (listticketCupom.size() > 0) {
+                FileIntegrationDTO fileIntegrationDTOCupom = mountDto(listticketCupom);
+                tempFileCupom = new File("Cupom.csv");
+                fileCupom = BeanIoWriter.writer(tempFileCupom, TicketLayoutEnum.FULL, fileIntegrationDTOCupom, Stream.FULL_LAYOUT_INTEGRATION);
+                files.add(fileCupom);
+            }
+
+            if(files.isEmpty())return;
+            
+            String nameFile = fileRepository.findById(idfile).get().getName();
+            zip = Utils.zipFiles("Evidencia.zip", 1L, files);
+
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setSubject("[ Data Collector ] - BackOffice (Cupom/Duplicidade)");
+            helper.setFrom("latamupload@behint.net.br");
+            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com"});
+            helper.setText("Segue em anexos os tickets que não foram processados, por estarem com erros de cupom ou duplicidade.\n Referente ao arquivo : " + nameFile);
+            helper.addAttachment("Evidencia.zip", zip);
+            sender.send(message);
+
+        } catch (Exception e) {
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ makeFileResultDataCollector ]", e);
+        } finally {
+            Utils.forceDeleteFile(zip);
+            Utils.forceDeleteFile(fileCupom);
+            Utils.forceDeleteFile(fileDuplicity);
+            Utils.forceDeleteFile(tempFileCupom);
+            Utils.forceDeleteFile(tempFileDuplicity);
+        }
+
+    }
+
+    private FileIntegrationDTO mountDto(List<Ticket> list) {
+
+        FileIntegrationDTO fileIntegrationDTO = new FileIntegrationDTO();
+
+        List<TicketIntegrationDTO> dtos = list.parallelStream()
+                .map(t -> new TicketIntegrationDTO(t))
+                .collect(Collectors.toList());
+
+        fileIntegrationDTO.setIntegrationDTOs(dtos);
+        return fileIntegrationDTO;
+
     }
 
     private void move(List<Ticket> tickets) {
@@ -132,10 +218,10 @@ public class IntegrationService {
 
     }
 
-    public void makeFile() throws SQLException, IOException {
+    public void makeFileResultIntegration() throws SQLException, IOException {
 
-           File file = null;
-        
+        File file = null;
+
         try {
             this.openConnection();
 
@@ -149,8 +235,6 @@ public class IntegrationService {
 
             FileWriter writer = new FileWriter(file, false);
             writer.write("Data;Erro;Tipo\n");
-
-            SimpleDateFormat format = new SimpleDateFormat("");
 
             while (result.next()) {
                 String line = MessageFormat.format("{0};{1};{2}\n", Utils.formatDateSqlToString(result.getDate("Processamento")), result.getString("msg_erro"), result.getInt("type_err"));

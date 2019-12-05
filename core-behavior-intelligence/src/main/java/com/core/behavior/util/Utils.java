@@ -206,6 +206,16 @@ public class Utils {
     }
     
     
+    public static void forceDeleteFile(File file){
+        try {
+            
+            if(file == null)return;            
+            FileUtils.forceDelete(file);
+        } catch (Exception e) {
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, "forceDeleteFile", e);
+        }
+    }
+    
     
     public static File convertToFile(MultipartFile file) throws FileNotFoundException, IOException {
 

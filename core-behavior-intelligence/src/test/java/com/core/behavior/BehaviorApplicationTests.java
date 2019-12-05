@@ -1,8 +1,10 @@
 package com.core.behavior;
 
+import com.core.behavior.services.IntegrationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -10,8 +12,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class BehaviorApplicationTests {
 
-
+    
+    
+    @Autowired
+    private IntegrationService service;
+    
     @Test
+    public void testFileResult(){
+        service.makeFileResultDataCollector(122L);
+    }
+
+//    @Test
     public void contextLoads() throws SchedulerException, InterruptedException {
 
 //        JobDataMap data = new JobDataMap();

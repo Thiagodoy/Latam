@@ -33,16 +33,14 @@ import org.beanio.StreamFactory;
 public class BeanIoWriter {
 
     
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_hh_mm_ss");
     
     
-    public static <T> File writer(File directory,TicketLayoutEnum layout, T object,  Stream stream, TicketTypeEnum type) {
+    
+    public static <T> File writer(File file,TicketLayoutEnum layout, T object,  Stream stream) {
 
         BeanWriter writer = null;
-        Writer out = null;
-        String dateNow = dateTimeFormatter.format(LocalDateTime.now());
-        String nameFile = MessageFormat.format("integration_{0}_{1}_{2}.csv",dateNow, layout.toString(), type);
-        File file = new File(directory,nameFile);
+        Writer out = null;      
+      
 
         try {
             StreamFactory factory = StreamFactory.newInstance();
