@@ -212,7 +212,7 @@ public class Utils {
             if(file == null)return;            
             FileUtils.forceDelete(file);
         } catch (Exception e) {
-            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, "forceDeleteFile", e);
+            Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, "forceDeleteFile -> name : " + file.getName(), e);
         }
     }
     

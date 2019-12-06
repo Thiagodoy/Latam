@@ -10,6 +10,7 @@ import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
@@ -56,6 +57,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Transactional
     @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
     void deleteByFileId(@Param("fileId") Long fileId);
+    
+    @Modifying 
+    @Query(value = "delete from ticket  where created_at between :start and :end", nativeQuery = true)
+    void deleteByDateBetween(@Param("start") LocalDate start,@Param("end") LocalDate end);        
     
     
     

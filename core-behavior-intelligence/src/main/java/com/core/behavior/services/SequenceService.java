@@ -11,7 +11,6 @@ import com.core.behavior.util.SequenceTableEnum;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +24,15 @@ import org.springframework.stereotype.Service;
 public class SequenceService {
 
     @Autowired
-    private SequenceRepository sequenceRepository;
-
-    @PersistenceContext
-    private EntityManager em;
+    private SequenceRepository sequenceRepository;   
 
     @Transactional
     public void resetSequence(SequenceTableEnum table) {
 
         Sequence sequence = sequenceRepository.findByTable(table);        
-        sequence.setSequenceMin(0L);        
+        sequence.setSequenceMin(0L);
+        sequence.setVersion(0L);
+        
         sequenceRepository.save(sequence);
 
     }

@@ -197,9 +197,7 @@ public class ProcessFileJob implements Runnable {
                 job.setFileId(idFile);
                 
                 
-                long countt = success.parallelStream().filter(ttt-> ttt.status.equals(TicketStatusEnum.WRITED)).count();
-                
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal] total approved -> " + countt);
+               
                 threadPoolFileIntegration.submit(job);
                 
                 

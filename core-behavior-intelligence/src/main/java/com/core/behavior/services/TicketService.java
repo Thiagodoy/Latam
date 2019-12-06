@@ -240,5 +240,10 @@ public class TicketService {
     public boolean checkCupom(Ticket ticket){        
         return this.ticketRepository.checkCupom(ticket.getAgrupamentoA()).longValue() == 1L;
     }
+    
+    @Transactional
+    public void deleteByDateBetween(LocalDate start, LocalDate end){
+        this.ticketRepository.deleteByDateBetween(start, end);
+    }
 
 }

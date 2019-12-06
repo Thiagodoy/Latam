@@ -6,6 +6,7 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.services.SequenceService;
+import com.core.behavior.services.TicketService;
 import com.core.behavior.util.Constantes;
 import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.Utils;
@@ -37,16 +38,27 @@ public class MonthlyJob extends QuartzJobBean {
     
     @Autowired
     private SequenceService sequenceService;
+    
+    @Autowired
+    private TicketService ticketService;
 
-    private final int DATA_LIMIT = 30;
-    private final int MONTH_LIMIT = 3; 
+     
 
     @Override
     protected void executeInternal(JobExecutionContext jec) throws JobExecutionException {
         
-        this.resetSequences();            
+                    
 
     }    
+    
+    private void clearTicket(){
+        
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusMonths(3);
+        
+        this.ticketService.deleteByDateBetween(start, end);       
+        
+    }
     
     private void resetSequences(){        
         sequenceService.resetSequence(SequenceTableEnum.TICKET);        
