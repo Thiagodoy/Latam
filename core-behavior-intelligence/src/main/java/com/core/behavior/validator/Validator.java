@@ -129,13 +129,13 @@ public class Validator implements IValidator {
             countError++;
         }
 
-        if (countError == 0 && ticketDTO.getDataEmissao().length() != 10) {
+        if (countError == 0 && (ticketDTO.getDataEmissao().length() != 10 || ticketDTO.getDataEmissao().length() != 8)) {
             countError++;
         }
 
         try {
-            dataEmbarque = formatter4.parse(ticketDTO.getDataEmbarque());
-            dataEmissao = formatter4.parse(ticketDTO.getDataEmissao());
+            dataEmbarque = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()): formatter7.parse(ticketDTO.getDataEmbarque());
+            dataEmissao = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmissao()) : formatter7.parse(ticketDTO.getDataEmissao());
 
             LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
             LocalDate date2025 = LocalDate.ofYearDay(2025, 1);

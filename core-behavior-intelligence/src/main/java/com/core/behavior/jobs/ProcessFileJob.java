@@ -19,6 +19,7 @@ import com.core.behavior.util.Stream;
 import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
 import java.io.IOException;
@@ -210,11 +211,9 @@ public class ProcessFileJob implements Runnable {
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
-            try {
-                FileUtils.forceDelete(file);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "Erro ao deletar o arquivo -> " + fileId, ex);
-            }
+            
+            
+            Utils.forceDeleteFile(file);
 
             if (f != null) {
                 fileProcessStatusService.generateProcessStatus(f.getId());

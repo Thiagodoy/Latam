@@ -42,8 +42,7 @@ public class IntegrationJob implements Runnable {
     public IntegrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService) {
         this.ticketService = ticketService;
         this.fileService = fileService;
-        this.integrationService = integrationService;
-        
+        this.integrationService = integrationService;        
         
     }
 

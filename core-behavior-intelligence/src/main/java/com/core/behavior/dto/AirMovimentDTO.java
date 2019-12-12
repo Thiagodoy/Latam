@@ -174,6 +174,9 @@ public class AirMovimentDTO {
 
     @PositionParameter(value = 51)
     public Long status;
+    
+    @PositionParameter(value = 52)
+    public String bilheteAgencia;
 
     public AirMovimentDTO(Ticket ticket) {
         this.status = 0L;
@@ -198,6 +201,8 @@ public class AirMovimentDTO {
         this.qtdPax = ticket.getQtdPax();
         this.numVoo = Optional.ofNullable(ticket.getNumVoo()).isPresent() ? String.valueOf(ticket.getNumVoo()) : "";
         this.consolidada = Optional.ofNullable(ticket.getConsolidada()).isPresent() ? ticket.getConsolidada() : "";
+        
+        this.bilheteAgencia = Optional.ofNullable(ticket.getBilhete()).isPresent() ? ticket.getBilhete() : "";
 
         if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
             this.dataExtracao = ticket.getDataExtracao();
@@ -230,7 +235,6 @@ public class AirMovimentDTO {
             this.grupoEmpresa = Optional.ofNullable(ticket.getGrupoEmpresa()).isPresent() ? ticket.getGrupoEmpresa() : "";
             this.nomeCliente = ticket.getNomeCliente();
             this.grupoConsolidada = Optional.ofNullable(ticket.getGrupoConsolidada()).isPresent() ? ticket.getGrupoConsolidada() : "";
-
         }
 
     }

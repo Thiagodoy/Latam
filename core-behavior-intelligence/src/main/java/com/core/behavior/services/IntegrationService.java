@@ -96,11 +96,13 @@ public class IntegrationService {
         File fileDuplicity = null;
         File fileCupom = null;
         File zip = null;
+        
+        List<File> files = new ArrayList();
 
         try {
             List<Ticket> listticketDuplicity = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_DUPLICITY);
             List<Ticket> listticketCupom = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_CUPOM);
-            List<File> files = new ArrayList();
+            
 
             if (listticketDuplicity.size() > 0) {
                 FileIntegrationDTO fileIntegrationDTODuplicity = mountDto(listticketDuplicity);
@@ -251,10 +253,8 @@ public class IntegrationService {
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ makeFile ]", e);
         } finally {
-            this.closeConnection();
-            if (file != null) {
-                FileUtils.forceDelete(file);
-            }
+            this.closeConnection();            
+            Utils.forceDeleteFile(file);            
         }
 
     }
