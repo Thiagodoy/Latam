@@ -5,8 +5,12 @@ server:
 activitiproxy:
     url:  http://localhost:8080/activiti-rest/service
 
-
-      
+spring:
+    servlet:
+        multipart:
+            max-file-size: -1
+            max-request-size: -1
+ 
 behavior:           
     datasource:
         socketTimeout: 30000
@@ -19,12 +23,16 @@ behavior:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://dataquality.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/behavior?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Cuiaba&autoReconnect=true          
+            dataSourceUser: behint
+            dataSourcePassword: Beh1ntDQ#2018
             port: 3306            
             connectionTestQuery: SELECT 1  
             
+analitics:
+    url: jdbc:mysql://behint-dw.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/ltm_stage?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Cuiaba&useLegacyDatetimeCode=false&noAccessToProcedureBodies=true         
+    user: datacollector
+    password: "behint@2019"
     
 activiti:           
     datasource:
@@ -38,42 +46,40 @@ activiti:
         autoCommit: false
         initializationFailFast: false        
         sqlserver:
-            dataUrl: jdbc:mysql://127.0.0.1:3306,localhost:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Sao_Paulo&useLegacyDatetimeCode=false         
-            dataSourceUser: root
-            dataSourcePassword: root
+            dataUrl: jdbc:mysql://dataquality.csczqq5ovcud.us-east-1.rds.amazonaws.com:3306/activiti?rewriteBatchedStatements=true&useTimezone=true&serverTimezone=America/Cuiaba&autoReconnect=true         
+            dataSourceUser: behint
+            dataSourcePassword: Beh1ntDQ#2018
             port: 3306            
-            connectionTestQuery: SELECT 1 
-            
-            
+            connectionTestQuery: SELECT 1    
+
 email:
-    host: smtp.gmail.com
+    host: smtp.office365.com
     port: 587
-    username: behavior47@gmail.com
-    password: beh@vior2019
+    username: latamupload@behint.net.br
+    password: behavior@2020
     auth: true  
     protocol: smtp
     starttls:
            enable: true
-           required: true
-           
+           required: true          
            
            
 amazonproperties:
         endpointUrl: https://s3.us-east-2.amazonaws.com
         accessKey: AKIAT4PQFE4EX2R5KXTK
         secretKey: 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
-        bucketName: behint-files   
-        
+        bucketName: behint-files      
+
 amazonairmovement:
         endpointUrl: https://s3.us-east-2.amazonaws.com.teste.teste
         accessKey: AKIAT4PQFE4EX2R5KXTK
         secretKey: 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
-        bucketName: behint-sources 
-        
+        bucketName: behint-sources         
+
 sftp:
     user: ftp_upload_files
     password: iP9w5tux
     host: 10.93.1.139
     port: 22
     protocol: sftp
-    basePath : /uploads
+    basePath : /uploads   
