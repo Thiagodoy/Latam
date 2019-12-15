@@ -120,7 +120,7 @@ public class FileService {
     public java.io.File downloadFile(String fileName, Long companyId, boolean  original) throws IOException {
 
         Agency agency = agencyService.findById(companyId);
-        String folder = original ? agency.getS3Path().split("\\\\")[1] + "\\" + "original" : agency.getS3Path().split("\\\\")[1];
+        String folder = original ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL/" : agency.getS3Path().split("\\\\")[1];
 
         return clientAws.downloadFile(fileName, folder);
     }
