@@ -35,6 +35,7 @@ public class ClientAws {
     private AmazonS3 amazonS3;
     private static final String REGION = "sa-east-1";
     private static final String FOLDER_RETURN = "/RETORNO/";
+    private static final String FOLDER_ORIGINAL = "/ORIGINAL/";
 
     @Autowired
     private AmazonProperties amazonConfiguration;

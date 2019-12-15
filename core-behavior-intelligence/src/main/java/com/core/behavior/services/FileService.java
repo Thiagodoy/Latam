@@ -164,7 +164,7 @@ public class FileService {
             s[4] = "VALIDATION_SUCCESS";
             
             
-            final String pathOriginal = folder + "\\" + "original";
+            final String pathOriginal = folder + "/ORIGINAL/";
             this.uploadFile(true, false, pathOriginal, file);
 
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
