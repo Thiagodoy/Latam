@@ -120,7 +120,7 @@ public class FileService {
     public java.io.File downloadFile(String fileName, Long companyId, boolean  original) throws IOException {
 
         Agency agency = agencyService.findById(companyId);
-        String folder = original ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL/" : agency.getS3Path().split("\\\\")[1];
+        String folder = original ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
         return clientAws.downloadFile(fileName, folder);
     }
@@ -164,7 +164,7 @@ public class FileService {
             s[4] = "VALIDATION_SUCCESS";
             
             
-            final String pathOriginal = folder + "/ORIGINAL/";
+            final String pathOriginal = folder + "/ORIGINAL";
             this.uploadFile(true, false, pathOriginal, file);
 
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
