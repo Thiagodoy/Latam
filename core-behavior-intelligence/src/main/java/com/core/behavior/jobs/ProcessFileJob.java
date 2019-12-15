@@ -1,16 +1,16 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
-import com.core.behavior.dto.TicketDTO;
-import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.model.Sequence;
+import com.core.behavior.model.TicketError;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.SequenceService;
+import com.core.behavior.services.TicketErrorService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.StageEnum;
@@ -20,23 +20,19 @@ import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
-import com.core.behavior.validator.ValidatorFactoryBean;
+import com.core.behavior.validator.Validator;
 import java.io.File;
-import java.io.IOException;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,26 +52,23 @@ public class ProcessFileJob implements Runnable {
     private LogService logService;
 
     @Autowired
+    private TicketErrorService ticketErrorService;
+
+    @Autowired
     private AgencyService agencyService;
 
     @Autowired
     private FileService fileService;
 
     @Autowired
-    private FileProcessStatusService fileProcessStatusService;
-
-    @Autowired
-    private ValidatorFactoryBean factoryBean;
-
-    @Autowired
-    private TicketService ticketService;
+    private FileProcessStatusService fileProcessStatusService;    
 
     @Autowired
     private SequenceService sequenceService;
-    
+
     @Autowired
     private ApplicationContext context;
-    
+
     @Autowired
     private ThreadPoolFileIntegration threadPoolFileIntegration;
 
@@ -89,7 +82,7 @@ public class ProcessFileJob implements Runnable {
     public static final String LIST_DATA_ERROR = "error";
     public static final int SIZE_BILHETE_BEHAVIOR = 7;
 
-    private static final int THREAD_POLL = 100;
+    private static final int THREAD_POLL = 50;
 
     private Map<String, Object> parameters = new HashMap<>();
 
@@ -97,22 +90,17 @@ public class ProcessFileJob implements Runnable {
         this.parameters.put(key, value);
     }
 
-    
-        
-    public ProcessFileJob(BeanIoReader reader,LogService logService,AgencyService agencyService,FileService fileService,
-            FileProcessStatusService fileProcessStatusService,ValidatorFactoryBean factoryBean,TicketService ticketService,SequenceService sequenceService){
+    public ProcessFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+            FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
         this.reader = reader;
         this.logService = logService;
         this.agencyService = agencyService;
         this.fileService = fileService;
         this.fileProcessStatusService = fileProcessStatusService;
-        this.factoryBean = factoryBean;
-        this.ticketService = ticketService;
         this.sequenceService = sequenceService;
-                
+
     }
-    
-    
+
     @Override
     public void run() {
 
@@ -160,18 +148,13 @@ public class ProcessFileJob implements Runnable {
                     t.setCodigoAgencia(codigoAgencia);
                 });
 
-                long count = 2;
-                for (TicketDTO t : dto.getTicket()) {
-                    t.setLineFile(String.valueOf(count++));
-                }
-
                 fileService.setStage(idFile, StageEnum.VALIDATION_CONTENT.getCode());
 
                 long startValidation = System.currentTimeMillis();
                 Map<String, Object> resul = this.runRule1(dto);
 
                 List<Ticket> success = (List<Ticket>) resul.get(LIST_DATA_SUCCESS);
-                List<Log> error = (List<Log>) resul.get(LIST_DATA_ERROR);
+                List<TicketError> error = (List<TicketError>) resul.get(LIST_DATA_ERROR);
 
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
@@ -186,22 +169,16 @@ public class ProcessFileJob implements Runnable {
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
-                fileService.setValidationTime(idFile, timeValidation);
-
+                f.setValidationTime(timeValidation);
                 f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
+                f.setStatus(StatusEnum.VALIDATION_SUCCESS);
+                f.setStage(StageEnum.FINISHED.getCode());
                 f = fileService.saveFile(f);
 
-                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
-                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
-                
                 IntegrationJob job = context.getBean(IntegrationJob.class);
                 job.setFileId(idFile);
-                
-                
-               
+
                 threadPoolFileIntegration.submit(job);
-                
-                
 
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
@@ -211,8 +188,7 @@ public class ProcessFileJob implements Runnable {
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
-            
-            
+
             Utils.forceDeleteFile(file);
 
             if (f != null) {
@@ -229,20 +205,18 @@ public class ProcessFileJob implements Runnable {
 
         Map<String, Object> map = new HashMap<>();
         List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
-        List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
+        List<TicketError> error = Collections.synchronizedList(new ArrayList<TicketError>());
 
         long start = System.currentTimeMillis();
 
         dto.getTicket().parallelStream().forEach(t -> {
-            Optional<Ticket> op = factoryBean.getBean().validate(t);
+            final Validator validator = new Validator();
+            validator.validate(t);
 
-            synchronized (success) {
-
-                if (op.isPresent() && op.get().getErrors().isEmpty()) {
-                    success.add(op.get());
-                } else if (op.isPresent()) {
-                    error.addAll(op.get().getErrors());
-                }
+            if (!validator.getTicketError().hasError()) {
+                success.add(validator.getTicket());
+            } else if (validator.getTicketError().hasError()) {
+                error.add(validator.getTicketError());
             }
 
         });
@@ -260,7 +234,7 @@ public class ProcessFileJob implements Runnable {
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
         success.parallelStream().forEach(t -> {
-            executorService.submit(new TicketDuplicityValidationJob(ticketService, t));
+            executorService.submit(new TicketDuplicityValidationJob(context, t));
         });
 
         executorService.shutdown();
@@ -279,7 +253,8 @@ public class ProcessFileJob implements Runnable {
         success.parallelStream()
                 .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
                 .forEach(t -> {
-                    executorService.submit(new TicketCupomValidationJob(ticketService, t));
+
+                    executorService.submit(new TicketCupomValidationJob(context, t));
                 });
 
         executorService.shutdown();
@@ -290,23 +265,23 @@ public class ProcessFileJob implements Runnable {
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
-    
-    private void runRules4(List<Ticket> success){
-        
+
+    private void runRules4(List<Ticket> success) {
+
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
-        
-        success.parallelStream().distinct().forEach(t->{        
-            executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));        
+
+        success.parallelStream().distinct().forEach(t -> {
+            executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
         });
-        
+
         executorService.shutdown();
         //Aguarda o termino do processamento
         while (!executorService.isTerminated()) {
         }
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-        
+
     }
 
     private void generateIds(List<Ticket> tickets) throws Exception {
@@ -325,11 +300,11 @@ public class ProcessFileJob implements Runnable {
 
     }
 
-    private void writeErrors(List<Log> error) {
+    private void writeErrors(List<TicketError> error) {
 
         if (!error.isEmpty()) {
             long start = System.currentTimeMillis();
-            logService.saveBatch(error);
+            ticketErrorService.saveBatch(error);
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
     }
@@ -340,22 +315,15 @@ public class ProcessFileJob implements Runnable {
 
             try {
                 String bilheteBehavior = "";
-                final SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
-                String dataEmissao = formmaterDate.format(t.getDataEmissao());
-                String ano = dataEmissao.substring(dataEmissao.length() - 1);
-                String mes = dataEmissao.substring(2, 4);
-
                 String sequencial = "";
-                String id = String.valueOf(t.getId());
 
-                if (id.length() < SIZE_BILHETE_BEHAVIOR) {
-                    sequencial = StringUtils.leftPad(id, SIZE_BILHETE_BEHAVIOR, "0");
-                } else {
-                    sequencial = id.substring(0, SIZE_BILHETE_BEHAVIOR);
-                }
+                String ano = String.valueOf(t.getDataEmissao().getYear() >= 2020 ? t.getDataEmissao().getYear() - 2020 : t.getDataEmissao().getYear() - 110);
+                String mes = StringUtils.leftPad(String.valueOf(t.getDataEmissao().getMonth() + 1), 2, "0");
+                String id = String.valueOf(t.getId());
+                
+                sequencial = (id.length() < SIZE_BILHETE_BEHAVIOR) ? StringUtils.leftPad(id, SIZE_BILHETE_BEHAVIOR, "0") : id.substring(0, SIZE_BILHETE_BEHAVIOR);
 
                 bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
-
                 t.setBilheteBehavior(bilheteBehavior);
             } catch (Exception e) {
                 Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);

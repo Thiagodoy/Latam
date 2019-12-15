@@ -5,27 +5,34 @@
  */
 package com.core.behavior.jobs;
 
+import com.core.behavior.annotations.PositionColumnExcel;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.dto.LineErrorDTO;
 import com.core.behavior.dto.LogDTO;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.Notificacao;
+import com.core.behavior.model.TicketError;
 import com.core.behavior.properties.BehaviorProperties;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.NotificacaoService;
+import com.core.behavior.services.TicketErrorService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
+import com.core.behavior.util.MessageErrors;
 import com.core.behavior.util.Utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -49,12 +56,10 @@ import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+
+
+
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,14 +74,6 @@ public class FileReturnJob implements Runnable {
     public static final String DATA_EMAIL_ID = "DATA_EMAIL_ID";
     private long line;
     private int lineWrited;
-
-    private SparkSession sparkSession;
-
-    private JavaSparkContext javaSparkContext;
-    
-    @Autowired
-    private BehaviorProperties behaviorProperties;
-
     @Autowired
     private ClientAws clientAws;
 
@@ -91,6 +88,9 @@ public class FileReturnJob implements Runnable {
 
     @Autowired
     private NotificacaoService notificacaoService;
+    
+    @Autowired
+    private TicketErrorService ticketErrorService;
 
     private SXSSFWorkbook wb;
     private SXSSFSheet sheet;
@@ -119,12 +119,15 @@ public class FileReturnJob implements Runnable {
         String emailUser = (String) parameters.get(DATA_EMAIL_ID);
 
         try {
-            List<LogDTO> logsDTO = this.getData(id);
+            //List<LogDTO> logsDTO = this.getData(id);
+            
+            List<TicketError> errors = ticketErrorService.findByFileId(id);
+            
             final com.core.behavior.model.File file = fileRepository.findById(id).get();
             final Agency agency = agencyRepository.findById(file.getCompany()).get();
 
-            List<LineErrorDTO> errors = this.prepareData(logsDTO);
-            logsDTO = null;
+           // List<LineErrorDTO> errors = this.prepareData(logsDTO);
+           // logsDTO = null;
 
             List<List<LineErrorDTO>> patitions = ListUtils.partition(errors, LIMIT_ROWS);
             List<File> filesCreated = new ArrayList<>();
@@ -210,7 +213,7 @@ public class FileReturnJob implements Runnable {
 
     }
 
-    private void writeLote(List<LineErrorDTO> errors) {
+    private void writeLote(List<TicketError> errors) {
 
         long start = System.currentTimeMillis();
         CellStyle backgroundStyle = wb.createCellStyle();
@@ -222,8 +225,7 @@ public class FileReturnJob implements Runnable {
 
         CellStyle style = wb.createCellStyle();
         style.setFont(fontRecord);
-
-        Map<String, String> comments = this.appendComments(errors);
+        
 
         this.lineWrited = sheet.getLastRowNum();
 
@@ -231,7 +233,7 @@ public class FileReturnJob implements Runnable {
             SXSSFRow row = sheet.createRow(++this.lineWrited);
 
             //iterating c number of columns
-            String[] values = errors.get(r).getLineContent().split("\\[col\\]");
+            String[] values = errors.get(r).getContent().split("\\[col\\]");
             for (int c = 0; c < values.length; c++) {
                 SXSSFCell cell = row.createCell(c);
                 cell.setCellStyle(style);
@@ -259,21 +261,38 @@ public class FileReturnJob implements Runnable {
 
     }
 
-    private List<LineErrorDTO> prepareData(List<LogDTO> logs) {
+    private List<LineErrorDTO> prepareData(List<TicketError> logs) {
 
-        long start = System.currentTimeMillis();
-
-        final List<LogDTO> logDistinct = logs.parallelStream().distinct().collect(Collectors.toList());
+        long start = System.currentTimeMillis();        
 
         List<LineErrorDTO> e = new ArrayList<LineErrorDTO>();
         LineErrorDTO.reset();
+        
+        List<Field> fields = Arrays.asList(TicketError.class.getDeclaredFields()).stream().filter(f -> f.isAnnotationPresent(PositionColumnExcel.class)).collect(Collectors.toList());
+        
 
-        logDistinct.parallelStream().forEach(l -> {
-            LineErrorDTO error = new LineErrorDTO(l.getRecord_content(), l.getLine_number());
+        logs.parallelStream().forEach(l -> {
+            LineErrorDTO error = new LineErrorDTO(l.getContent(), l.getLine());
+            ConcurrentHashMap<String,String> messages = MessageErrors.getMessages();
+              fields.stream().forEach(f->{
+              
+                  try {
+                    Long value = f.getLong(l);
+                    
+                    if(value.equals(1L)){
+                        String colum = f.getAnnotation(PositionColumnExcel.class).column();
+                        error.
+                    }
+                    
+                  } catch (Exception ex) {
+                  }
+                  
+                  
+              });
+            
             synchronized (e) {
                 e.add(error);
             }
-
         });
 
         List<LineErrorDTO> eSorted = e.parallelStream().sorted(Comparator.comparing(LineErrorDTO::getLineNumber)).collect(Collectors.toList());
@@ -288,38 +307,13 @@ public class FileReturnJob implements Runnable {
             lineErrorDTO.setLine(++possition);           
         }
 
-        Map<String, Map<String, String>> messages = new HashMap<>();
+        Map<String, Map<String, String>> messages = new HashMap<>();    
+      
+        
 
-        logs.forEach(mm -> {
-            if (messages.containsKey(mm.getRecord_content())) {
-                Map<String, String> mapfield = messages.get(mm.getRecord_content());
+        
 
-                if (mapfield.containsKey(mm.getField_name())) {
-                    String m = mapfield.get(mm.getField_name()) + "\n" + mm.getMessage_error();
-                    mapfield.put(mm.getField_name(), m);
-                } else {
-                    mapfield.put(mm.getField_name(), mm.getMessage_error());
-                }
-
-            } else {
-                Map<String, String> mapfield = new HashMap<String, String>();
-                mapfield.put(mm.getField_name(), mm.getMessage_error());
-                messages.put(mm.getRecord_content(), mapfield);
-            }
-        });
-
-        eSorted.forEach(ee -> {
-            if (messages.containsKey(ee.getLineContent())) {
-                Map<String, String> mapfield = messages.get(ee.getLineContent());
-
-                mapfield.forEach((field, value) -> {
-                    final String column = Utils.getPositionExcelColumn(field);
-                    ee.put(column, value);
-                });
-            }
-
-            messages.remove(ee.getLineContent());
-        });
+       
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ prepareData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
@@ -347,69 +341,7 @@ public class FileReturnJob implements Runnable {
         notificacaoService.save(notificacao);
 
     }
-
-    private List<LogDTO> getData(Long id) {
-
-        try{
-
-            try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            javaSparkContext = new JavaSparkContext(new SparkConf()
-                    .setAppName("SparkJdbcDs")
-                    .setMaster("local[*]")
-                    .set("spark.memory.fraction", "0.25")
-            );
-
-            
-            sparkSession = SparkSession
-                    .builder()
-                    .sparkContext(javaSparkContext.sc())                    
-                    .appName("Java Spark SQL basic example")
-                    .getOrCreate();
-
-            Dataset<Row> jdbcDF = sparkSession.sqlContext().read()
-                    .format("jdbc")
-                    .option("url", behaviorProperties.getDatasource().getSqlserver().getDataUrl())
-                    .option("dbtable", "behavior.log")                    
-                    .option("user", behaviorProperties.getDatasource().getSqlserver().getDataSourceUser())
-                    .option("password", behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword())
-                    .load();
-
-            Dataset<LogDTO> logs = jdbcDF.as(Encoders.bean(LogDTO.class));
-
-            long start = System.currentTimeMillis();
-            Dataset<LogDTO> logsOfFile = logs.where("file_id = " + String.valueOf(id));
-            System.out.println("[ Buscando ] QTD -> " + logsOfFile.count());
-            System.out.println("[ Buscando ] Tempo -> " + (System.currentTimeMillis() - start) / 1000);
-
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Start parse ]");
-            List<LogDTO> list = new ArrayList<>();
-            Iterator<LogDTO> it = logsOfFile.javaRDD().toLocalIterator();
-
-            while (it.hasNext()) {
-                list.add(it.next());
-            }
-
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ End parse ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-            return list;
-            
-
-        } catch (Exception ex) {
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            sparkSession.close();
-            javaSparkContext.close();
-        }
-
-        return new ArrayList<LogDTO>();
-
-    }
-
+    
     private void deleteFiles(List<File> files) {
 
         for (File file : files) {

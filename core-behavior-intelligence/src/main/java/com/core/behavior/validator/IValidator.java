@@ -66,8 +66,7 @@ public interface IValidator {
     IValidator checkGrupoEmpresa();
     IValidator checkGrupoConsolida(); 
     
-    Optional<Ticket> validate(TicketDTO ticketDto);
-   // void validate(TicketService service, Ticket ticket);
+    void validate(TicketDTO ticketDto);   
     
     
 }

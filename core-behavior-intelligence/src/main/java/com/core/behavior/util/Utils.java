@@ -7,6 +7,7 @@ import com.core.behavior.dto.AirMovimentDTO;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
+import com.core.behavior.model.TicketError;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -53,6 +54,7 @@ public class Utils {
     private static List<Field> fieldsTicket;
     private static List<Field> fieldsLog;
     private static List<Field> fieldsAirMoviments;
+    private static List<Field> fieldsTicketError;
     private static List<Field> fields;
     private static DateTimeFormatter dateTimeFormatter;
     private static SimpleDateFormat formmatDate;
@@ -67,7 +69,7 @@ public class Utils {
     public static String headerFullLayoutFile = "LINHA;DATA_EMISSAO;DATA_EMBARQUE;HORA_EMBARQUE;CIA_BILHETE;TRECHO;ORIGEM;DESTINO;CUPOM;BILHETE;TIPO;CABINE;CIA_VOO;VALOR_BRL;EMPRESA;CNPJ;IATA_AGENCIA;BASE_VENDA;QTD_PAX;NUM_VOO;CONSOLIDADA;DATA_EXTRACAO;HORA_EMISSAO;DATA_RESERVA;HORA_RESERVA;HORA_POUSO;BASE_TARIFARIA;TKT_DESIG;FAMILIA_TARIFARIA;CLASSE_TARIFA;CLASSE_SERVIÇO;OnD_DIRECIONAL;TOUR_CODE;RT_OW;VALOR_US$;TARIFA_PUBLICA_R$;TARIFA_PUBLICA_US$;PNR_AGENCIA;PNR_CIA_AEREA;SELFBOOKING_OFFLINE;NOME_PAX;TIPO_PAX;CPF_PAX;E-MAIL_PAX;CELULAR_PAX;TIER_FIDELIDADE_PAX;TIPO_PAGAMENTO;06_DIGITOS_CC;GRUPO_EMPRESA;GRUPO_CONSOLIDADA";
 
     public static enum TypeField {
-        TICKET, LOG, AIR
+        TICKET,TICKET_ERROR, LOG, AIR
     };
 
     static {
@@ -77,6 +79,11 @@ public class Utils {
         formmatDate2 = new SimpleDateFormat("dd/MM/yyyy");
 
         fieldsTicket = Arrays.asList(Ticket.class.getDeclaredFields())
+                .stream()
+                .filter(f -> f.isAnnotationPresent(PositionParameter.class))
+                .collect(Collectors.toList());
+        
+        fieldsTicketError = Arrays.asList(TicketError.class.getDeclaredFields())
                 .stream()
                 .filter(f -> f.isAnnotationPresent(PositionParameter.class))
                 .collect(Collectors.toList());
@@ -246,7 +253,9 @@ public class Utils {
             case AIR:
                 fields = fieldsAirMoviments;
                 break;
-                
+            case TICKET_ERROR:
+                fields = fieldsTicketError;
+                break;                
         }
 
         fields.forEach(f -> {

@@ -1,6 +1,8 @@
 package com.core.behavior.io;
 
+import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.HeaderDTO;
+import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.services.FileService;
@@ -91,6 +93,16 @@ public class BeanIoReader {
 
         reader.close();
 
+        if (record instanceof FileParsedDTO) {
+            FileParsedDTO pa = (FileParsedDTO) record;
+
+            long count = 2;
+            for (TicketDTO t : pa.getTicket()) {
+                t.setLineFile(String.valueOf(count++));
+            }
+
+        }
+
         return Optional.ofNullable(record);
     }
 
@@ -172,16 +184,16 @@ public class BeanIoReader {
                     }
                 }
             }
-            
+
             FileUtils.forceDelete(file);
-            
+
         } catch (Exception e) {
             throw e;
 
         } finally {
             try {
                 readerLine.close();
-                reader.close();                
+                reader.close();
             } catch (IOException ex) {
                 Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
@@ -196,7 +208,7 @@ public class BeanIoReader {
 
     private void generateFileHeaderReturn(List<String> errors) throws ApplicationException {
 
-        String message = errors.stream().map(e-> MessageFormat.format("<p style=\"font-size: 15px; font-weight: bold;\">{0}</p>", e)).collect(Collectors.joining("\n"));
+        String message = errors.stream().map(e -> MessageFormat.format("<p style=\"font-size: 15px; font-weight: bold;\">{0}</p>", e)).collect(Collectors.joining("\n"));
 
         throw new ApplicationException(MessageCode.FILE_HEADER_INVALID, message);
 

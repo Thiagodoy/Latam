@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -26,9 +27,9 @@ public class TicketDuplicityValidationJob implements Runnable {
     private TicketService service;
     private Ticket ticket;
 
-    public TicketDuplicityValidationJob(TicketService service, Ticket ticket) {
+    public TicketDuplicityValidationJob(ApplicationContext context, Ticket ticket) {
         this.ticket = ticket;
-        this.service = service;
+        this.service = context.getBean(TicketService.class);
     }
 
     @Override

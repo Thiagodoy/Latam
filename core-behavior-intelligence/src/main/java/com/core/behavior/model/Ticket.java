@@ -344,10 +344,6 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     @Column(name = "TYPE")
     public TicketTypeEnum type;
-    
-    
-    @Transient
-    private List<Log>errors;
 
     public Ticket() {
         this.createdAt = LocalDateTime.now();

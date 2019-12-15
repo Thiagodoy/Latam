@@ -5,15 +5,13 @@
  */
 package com.core.behavior.jobs;
 
-import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
 import java.text.MessageFormat;
-import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -25,9 +23,9 @@ public class TicketCupomValidationJob implements Runnable {
 
     private Ticket ticket;
 
-    public TicketCupomValidationJob(TicketService service, Ticket ticket) {
+    public TicketCupomValidationJob(ApplicationContext context, Ticket ticket) {
         this.ticket = ticket;
-        this.service = service;
+        this.service = context.getBean(TicketService.class);
     }
 
     @Override

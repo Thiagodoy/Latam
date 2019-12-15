@@ -22,7 +22,6 @@ import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.ThreadPoolFileReturn;
 import com.core.behavior.util.ThreadPoolFileValidation;
-import com.core.behavior.validator.ValidatorFactoryBean;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -131,8 +130,8 @@ public class QuartzConfiguration {
 
     @Bean
     public ProcessFileJob processFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
-            FileProcessStatusService fileProcessStatusService, ValidatorFactoryBean factoryBean, TicketService ticketService, SequenceService sequenceService) {
-        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, factoryBean, ticketService, sequenceService);
+            FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
+        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, sequenceService);
     }
 
 //    @PreDestroy
