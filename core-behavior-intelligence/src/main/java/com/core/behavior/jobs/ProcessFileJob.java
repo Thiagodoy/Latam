@@ -276,17 +276,17 @@ public class ProcessFileJob implements Runnable {
 
         long start = System.currentTimeMillis();
 
-        CopyOnWriteArrayList<Ticket> storeTicket = new CopyOnWriteArrayList<Ticket>(success);
+        
         List<Ticket>syncList = Collections.synchronizedList(success);
 
         success.parallelStream().forEach(t -> {
 
-            long countDuplicity = storeTicket
+            long countDuplicity = syncList
                     .parallelStream()
                     .filter(d -> d.getCupom().equals(t.getCupom()) && d.getAgrupamentoA().equals(t.getAgrupamentoA()))
                     .count();
 
-            long countBackoffice = storeTicket
+            long countBackoffice = syncList
                     .parallelStream()
                     .filter(d -> d.getAgrupamentoA().equals(t.getAgrupamentoB()) && !d.getAgrupamentoA().equals(t.getAgrupamentoA()))
                     .count();
