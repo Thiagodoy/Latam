@@ -129,7 +129,7 @@ public class Validator implements IValidator {
             countError++;
         }
 
-        if (countError == 0 && (ticketDTO.getDataEmissao().length() != 10 || ticketDTO.getDataEmissao().length() != 8)) {
+        if (countError == 0 && !(ticketDTO.getDataEmissao().length() == 10 || ticketDTO.getDataEmissao().length() == 8)) {
             countError++;
         }
 

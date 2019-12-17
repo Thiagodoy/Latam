@@ -26,7 +26,7 @@ public class TesteDownloadS3 {
     @Autowired
     private FileService fileService;
     
-    @Test
+   // @Test
     public void download(){
         try {
             fileService.downloadFile("Confianca_201812.csv", 43L, true);

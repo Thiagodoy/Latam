@@ -45,7 +45,7 @@ public class IntegrationTest {
 //        
 //    }
     
-    @Test
+    //@Test
     public void verifyCupom() throws SchedulerException, InterruptedException, Exception {
         
         Ticket ticket = new Ticket();

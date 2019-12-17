@@ -345,6 +345,10 @@ public class Ticket {
     @Column(name = "TYPE")
     public TicketTypeEnum type;
     
+    @PositionParameter(value = 63)    
+    @Column(name = "KEY")
+    public String key;
+    
     
     @Transient
     private List<Log>errors;

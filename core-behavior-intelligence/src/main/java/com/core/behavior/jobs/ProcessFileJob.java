@@ -2,6 +2,7 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.dto.FileParsedDTO;
 import com.core.behavior.dto.TicketDTO;
+import com.core.behavior.model.TicketKey;
 import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
@@ -11,6 +12,7 @@ import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.SequenceService;
+import com.core.behavior.services.TicketKeyService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.StageEnum;
@@ -19,23 +21,28 @@ import com.core.behavior.util.Stream;
 import com.core.behavior.util.ThreadPoolFileIntegration;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
+import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import com.core.behavior.validator.ValidatorFactoryBean;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.DisallowConcurrentExecution;
@@ -68,14 +75,14 @@ public class ProcessFileJob implements Runnable {
     private ValidatorFactoryBean factoryBean;
 
     @Autowired
-    private TicketService ticketService;
+    private TicketKeyService ticketKeyService;
 
     @Autowired
     private SequenceService sequenceService;
-    
+
     @Autowired
     private ApplicationContext context;
-    
+
     @Autowired
     private ThreadPoolFileIntegration threadPoolFileIntegration;
 
@@ -97,22 +104,19 @@ public class ProcessFileJob implements Runnable {
         this.parameters.put(key, value);
     }
 
-    
-        
-    public ProcessFileJob(BeanIoReader reader,LogService logService,AgencyService agencyService,FileService fileService,
-            FileProcessStatusService fileProcessStatusService,ValidatorFactoryBean factoryBean,TicketService ticketService,SequenceService sequenceService){
+    public ProcessFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+            FileProcessStatusService fileProcessStatusService, ValidatorFactoryBean factoryBean, TicketService ticketService, SequenceService sequenceService) {
         this.reader = reader;
         this.logService = logService;
         this.agencyService = agencyService;
         this.fileService = fileService;
         this.fileProcessStatusService = fileProcessStatusService;
         this.factoryBean = factoryBean;
-        this.ticketService = ticketService;
+        // this.ticketService = ticketService;
         this.sequenceService = sequenceService;
-                
+
     }
-    
-    
+
     @Override
     public void run() {
 
@@ -158,7 +162,17 @@ public class ProcessFileJob implements Runnable {
                     t.setFileId(String.valueOf(idFile));
                     t.setLayout(ticketLayout.toString());
                     t.setCodigoAgencia(codigoAgencia);
+                    t.setKey(t.getCodigoAgencia() + t.getDataEmissao());
+
                 });
+
+                List<TicketKey> keys = dto.getTicket()
+                        .stream()
+                        .distinct()
+                        .map(t -> new TicketKey(t.getKey()))
+                        .collect(Collectors.toList());
+
+                this.truncateData(keys);
 
                 long count = 2;
                 for (TicketDTO t : dto.getTicket()) {
@@ -177,31 +191,27 @@ public class ProcessFileJob implements Runnable {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });
 
-                this.writeErrors(error);
+               // this.writeErrors(error);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 this.runRules2(success);
-                this.runRules3(success);
-                this.runRules4(success);
+             //   this.runRules3(success);
+               // this.runRules4(success);
 
-                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
-
-                fileService.setValidationTime(idFile, timeValidation);
-
-                f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
-                f = fileService.saveFile(f);
-
-                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
-                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
-                
-                IntegrationJob job = context.getBean(IntegrationJob.class);
-                job.setFileId(idFile);
-                
-                
-               
-                threadPoolFileIntegration.submit(job);
-                
-                
+//                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
+//
+//                fileService.setValidationTime(idFile, timeValidation);
+//
+//                f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
+//                f = fileService.saveFile(f);
+//
+//                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
+//                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
+//
+//                IntegrationJob job = context.getBean(IntegrationJob.class);
+//                job.setFileId(idFile);
+//
+//                threadPoolFileIntegration.submit(job);
 
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
@@ -211,8 +221,7 @@ public class ProcessFileJob implements Runnable {
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
-            
-            
+
             Utils.forceDeleteFile(file);
 
             if (f != null) {
@@ -223,6 +232,16 @@ public class ProcessFileJob implements Runnable {
             fileService.setExecutionTime(idFile, time);
 
         }
+    }
+
+    private void truncateData(List<TicketKey> keys) throws SQLException {
+
+        long start = System.currentTimeMillis();
+
+        ticketKeyService.saveBatch(keys);
+        ticketKeyService.callProcDeleteTickets();
+        
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ truncateData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
 
     private Map<String, Object> runRule1(FileParsedDTO dto) {
@@ -237,7 +256,6 @@ public class ProcessFileJob implements Runnable {
             Optional<Ticket> op = factoryBean.getBean().validate(t);
 
             synchronized (success) {
-
                 if (op.isPresent() && op.get().getErrors().isEmpty()) {
                     success.add(op.get());
                 } else if (op.isPresent()) {
@@ -257,15 +275,33 @@ public class ProcessFileJob implements Runnable {
     private void runRules2(List<Ticket> success) {
 
         long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
+
+        CopyOnWriteArrayList<Ticket> storeTicket = new CopyOnWriteArrayList<Ticket>(success);
+        List<Ticket>syncList = Collections.synchronizedList(success);
 
         success.parallelStream().forEach(t -> {
-            executorService.submit(new TicketDuplicityValidationJob(ticketService, t));
-        });
 
-        executorService.shutdown();
-        while (!executorService.isTerminated()) {
-        }
+            long countDuplicity = storeTicket
+                    .parallelStream()
+                    .filter(d -> d.getCupom().equals(t.getCupom()) && d.getAgrupamentoA().equals(t.getAgrupamentoA()))
+                    .count();
+
+            long countBackoffice = storeTicket
+                    .parallelStream()
+                    .filter(d -> d.getAgrupamentoA().equals(t.getAgrupamentoB()) && !d.getAgrupamentoA().equals(t.getAgrupamentoA()))
+                    .count();
+
+            if (countDuplicity > 1) {
+                t.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
+                t.setBilheteBehavior(null);
+            } else if (countBackoffice > 0) {
+                t.setStatus(TicketStatusEnum.BACKOFFICE);
+                t.setBilheteBehavior(null);
+            } else {
+                t.setType(TicketTypeEnum.INSERT);
+            }
+
+        });
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
@@ -274,39 +310,66 @@ public class ProcessFileJob implements Runnable {
     private void runRules3(List<Ticket> success) {
 
         long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream()
-                .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
-                .forEach(t -> {
-                    executorService.submit(new TicketCupomValidationJob(ticketService, t));
-                });
+        CopyOnWriteArrayList<Ticket> storeTicket = new CopyOnWriteArrayList<Ticket>(success);
 
-        executorService.shutdown();
-        //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {
-        }
+        success.parallelStream().forEach(t -> {
+            long sumCupons = storeTicket
+                    .stream()
+                    .filter(d -> d.getAgrupamentoA().equals(t.getAgrupamentoA()))
+                    .mapToLong(Ticket::getCupom)
+                    .reduce(0, (a, b) -> a + b);
+
+            long countTickets = storeTicket
+                    .stream()
+                    .filter(d -> d.getAgrupamentoA().equals(t.getAgrupamentoA()))
+                    .count();
+
+            final Double checkValue = countTickets * (((countTickets - 1) * 0.5) + 1);
+
+            boolean isOk = checkValue.longValue() == sumCupons;
+            TicketStatusEnum status = isOk ? TicketStatusEnum.APPROVED : TicketStatusEnum.BACKOFFICE_CUPOM;
+            t.setStatus(status);
+        });
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
-    
-    private void runRules4(List<Ticket> success){
-        
+
+    private void runRules4(List<Ticket> success) {
+
         long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
-        
-        success.parallelStream().distinct().forEach(t->{        
-            executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));        
+
+        CopyOnWriteArrayList<Ticket> storeTicket = new CopyOnWriteArrayList<Ticket>(success);
+
+        success.stream().forEach(t -> {
+
+            final List<Ticket> tickets = storeTicket
+                    .parallelStream()
+                    .filter(d -> d.getAgrupamentoA().equals(t.getAgrupamentoA()))
+                    .collect(Collectors.toList());
+
+            Optional<Ticket> first = tickets.parallelStream().min(Comparator.comparing(Ticket::getCupom));
+
+            if (first.isPresent() && tickets.size() > 1) {
+
+                // Certifica que existe bilhete behavior diferente do primeiro cupom
+                long count = tickets
+                        .parallelStream()
+                        .filter(tt -> !tt.getBilheteBehavior().equals(first.get().getBilheteBehavior()))
+                        .count();
+
+                if (count > 0) {
+                    tickets.parallelStream().filter(tt -> !tt.getBilheteBehavior().equals(first.get().getBilheteBehavior())).forEach(ttt -> {
+                        ttt.setBilheteBehavior(first.get().getBilheteBehavior());
+                    });
+                }
+            }
+
         });
-        
-        executorService.shutdown();
-        //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {
-        }
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-        
+
     }
 
     private void generateIds(List<Ticket> tickets) throws Exception {
@@ -330,7 +393,9 @@ public class ProcessFileJob implements Runnable {
         if (!error.isEmpty()) {
             long start = System.currentTimeMillis();
             logService.saveBatch(error);
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            Logger
+                    .getLogger(ProcessFileJob.class
+                            .getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
     }
 
@@ -357,8 +422,10 @@ public class ProcessFileJob implements Runnable {
                 bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
 
                 t.setBilheteBehavior(bilheteBehavior);
+
             } catch (Exception e) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
+                Logger.getLogger(ProcessFileJob.class
+                        .getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
             }
 
         });

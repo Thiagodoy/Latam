@@ -37,7 +37,7 @@ public class SparkTest {
     private BehaviorProperties behaviorProperties;
     
     
-    @Test
+   // @Test
     public void verifyCupom() throws SchedulerException, InterruptedException, Exception {
         
         javaSparkContext = new JavaSparkContext(new SparkConf()
