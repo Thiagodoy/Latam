@@ -199,17 +199,20 @@ public class ProcessFileJob1 implements Runnable {
                 this.runRules2(success);
                 this.runRules3(success);
                 this.runRules4(success);
-//
-//                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
-//
-//                fileService.setValidationTime(idFile, timeValidation);
-//
-//                f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
-//                f = fileService.saveFile(f);
-//
-//                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
-//                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
-//
+
+                
+                ticketService.saveAll(success);
+                
+                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
+
+                fileService.setValidationTime(idFile, timeValidation);
+
+                f.setRepeatedLine(Integer.valueOf(error.size()).longValue());
+                f = fileService.saveFile(f);
+
+                fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
+                fileService.setStage(idFile, StageEnum.FINISHED.getCode());
+
 //                IntegrationJob job = context.getBean(IntegrationJob.class);
 //                job.setFileId(idFile);
 //
