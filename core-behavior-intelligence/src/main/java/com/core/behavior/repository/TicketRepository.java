@@ -50,7 +50,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByFileId(@Param("fileId") Long fileId);
     
     
-    @Query(nativeQuery = true, value = "select  sum(cupom) = truncate(count(1)*(((count(1)-1) * 0.5)+1),0)  from  behavior.ticket where agrupamento_a = :agrup and type = 'INSERT'")
+    @Query(nativeQuery = true, value = "select  sum(cupom) = truncate(count(1)*(((count(1)-1) * 0.5)+1),0)  from  behavior.ticket_stage where agrupamento_a = :agrup ")
     Long checkCupom(@Param("agrup") String agrupamento);
 
     @Modifying
