@@ -758,11 +758,18 @@ public class Validator implements IValidator {
         }
 
         if (countError == 0) {
+            //Alterar a regex. Ilegivel
             Pattern p = Pattern.compile(REGEX_NUM_VOO);
             Matcher m = p.matcher(numVoo);
 
             if (!m.matches()) {
                 countError++;
+            }else{
+                try {
+                    Long.parseLong(numVoo);
+                } catch (Exception e) {
+                    countError++;
+                }
             }
         }
 
