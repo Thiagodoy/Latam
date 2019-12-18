@@ -206,7 +206,7 @@ public class TicketService {
     }
 
     public TicketValidationDTO checkRules(Ticket ticket) {
-        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom());
+        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getCupom());
     }
 
     public TicketValidationShortDTO rulesShort(Ticket ticket) {
