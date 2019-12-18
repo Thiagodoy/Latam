@@ -1693,6 +1693,7 @@ public class Validator implements IValidator {
         this.ticket.setErrors(new ArrayList<>());
         this.ticket.setCodeAgencia(this.ticketDTO.getCodigoAgencia());
         this.ticket.setLineFile(Long.valueOf(this.ticketDTO.getLineFile()));
+        this.ticket.setKey(ticketDTO.getKey());
         try {
 
             this.checkDataEmissao().
