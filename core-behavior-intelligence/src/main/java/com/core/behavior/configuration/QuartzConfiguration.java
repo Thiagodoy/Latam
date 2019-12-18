@@ -65,7 +65,7 @@ public class QuartzConfiguration {
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
                         .withMisfireHandlingInstructionFireAndProceed())
                 .build();
-       // scheduler.scheduleJob(detail, crontrigger);
+        scheduler.scheduleJob(detail, crontrigger);
 
         JobDetail detail1 = JobBuilder.newJob(AgenciaFactoryJob.class).withIdentity("AgenciaFactoryJob", "agencia-factory-email")
                 .withDescription("Agendador de notificação de email")

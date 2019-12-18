@@ -210,10 +210,10 @@ public class ProcessFileJob1 implements Runnable {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
 
-//                IntegrationJob job = context.getBean(IntegrationJob.class);
-//                job.setFileId(idFile);
-//
-//                threadPoolFileIntegration.submit(job);
+                IntegrationJob job = context.getBean(IntegrationJob.class);
+                job.setFileId(idFile);
+                threadPoolFileIntegration.submit(job);
+                
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
