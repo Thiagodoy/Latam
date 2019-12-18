@@ -22,28 +22,29 @@ import lombok.Data;
 @Entity
 @Data
 @AllArgsConstructor
-@Table (name = "ticket_stage")
+@Table(name = "ticket_stage")
 public class TicketStage {
-    
-     
+
     @Id
     @Column(name = "id")
     @PositionParameter(value = 0)
     @GeneratedValue(strategy = GenerationType.AUTO)
     public Long id;
-    
+
     @PositionParameter(value = 1)
     @Column(name = "cupom")
-    public Long cupom; 
-    
+    public Long cupom;
+
     @PositionParameter(value = 2)
     @Column(name = "agrupamento_a")
-    public String agrupamentoA; 
-    
-     @PositionParameter(value = 3)
+    public String agrupamentoA;
+
+    @PositionParameter(value = 3)
     @Column(name = "agrupamento_b")
     public String agrupamentoB;
     
-    
-    
+    @PositionParameter(value = 4)
+    @Column(name = "bilhete_behavior")
+    public String bilhetBehavior;
+
 }

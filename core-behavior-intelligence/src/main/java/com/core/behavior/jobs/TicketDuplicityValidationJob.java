@@ -6,14 +6,11 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.TicketValidationDTO;
-import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
 import java.text.MessageFormat;
-import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,9 +32,6 @@ public class TicketDuplicityValidationJob implements Runnable {
     public void run() {
 
         try {
-            
-            
-            
             
             TicketValidationDTO rules = this.service.checkRules(ticket);
             

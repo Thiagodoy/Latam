@@ -8,6 +8,7 @@ package com.core.behavior.services;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketStage;
+import com.core.behavior.repository.TicketStageRepository;
 import com.core.behavior.util.Utils;
 import static com.core.behavior.util.Utils.mountBatchInsert;
 import java.sql.CallableStatement;
@@ -29,21 +30,26 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TicketStageService {
-    
-    
+
     @Autowired
     private DataSource dataSource;
-    
-     
-    
-     public void saveBatch(List<TicketStage> ticket) throws SQLException {
+
+    @Autowired
+    private TicketStageRepository repository;
+
+    public TicketStage getByAgrupamentoAAndCupom(String agrupamentoA) {
+
+        return repository.findByAgrupamentoAAndCupom(agrupamentoA, 1L);
+    }
+
+    public void saveBatch(List<TicketStage> ticket) throws SQLException {
 
         if (ticket.isEmpty()) {
             return;
         }
-        
+
         this.callProctruncateTicketStage();
-              
+
         try {
 
             Connection con = dataSource.getConnection();
@@ -71,7 +77,7 @@ public class TicketStageService {
             ps.clearBatch();
 
             ps.addBatch(query);
-            ps.executeBatch();            
+            ps.executeBatch();
             con.commit();
 
         } catch (SQLException ex) {
@@ -79,25 +85,18 @@ public class TicketStageService {
             throw ex;
         }
 
-        
-        
     }
-     
-     
-             
-    private void callProctruncateTicketStage(){
-        
-          try {           
+
+    private void callProctruncateTicketStage() {
+
+        try {
             CallableStatement c = dataSource.getConnection().prepareCall("{call behavior.truncateTicketStage}");
             c.execute();
             this.dataSource.getConnection().commit();
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ callProcDeleteTickets ]", e);
-        }        
-        
+        }
+
     }
-    
-    
-    
-    
+
 }

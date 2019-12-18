@@ -46,10 +46,10 @@ public class ProcessFileJobTest {
     public void process() throws IOException{
         
         
-         Agency agency = agencyService.findById(26l);
+         Agency agency = agencyService.findById(34l);
         String folder = true ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
-        File file =  clientAws.downloadFile("Skyteam fev19_jun19.csv", folder);
+        File file =  clientAws.downloadFile("latam_movimento_aereo_FTG_20190601_20190630.csv", folder);
         
         
         
@@ -63,7 +63,7 @@ public class ProcessFileJobTest {
           
         ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, "thiagodoy@hotmail.com");
-        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 26L);
+        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 43L);
         
         
         
