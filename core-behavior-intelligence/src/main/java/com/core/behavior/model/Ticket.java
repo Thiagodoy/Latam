@@ -62,12 +62,12 @@ import org.hibernate.annotations.DynamicUpdate;
                     }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select (select count(1)  from ticket where file_id <> :file and cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update',\n" +
-                "(select count(1)  from ticket where file_id = :file and cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'duplicity',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR') ) as count,\n" +
-                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as cupom ,\n" +
-                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb  and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as backoffice")
+        query = "select (select count(1)  from ticket_stage where  cupom = :cupom and agrupamento_a = :agrupa ) as 'update',\n" +
+                "(select count(1)  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa ) as 'duplicity',\n" +
+                "(select count(1) as value from ticket_stage where agrupamento_a = :agrupa and agrupamento_b = :agrupb ) as 'insert',\n" +
+                "(select count(1) as value from ticket_stage where agrupamento_a = :agrupa ) as count,\n" +
+                "(select ifnull(max(cupom),0) as value from ticket_stage where agrupamento_a = :agrupa ) as cupom ,\n" +
+                "(select count(1) as value from ticket_stage where agrupamento_a <> :agrupa and agrupamento_b = :agrupb ) as backoffice")
 
 @NamedNativeQuery(name = "Ticket.rulesShort", resultSetMapping = "TicketRulesShort",
         query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +

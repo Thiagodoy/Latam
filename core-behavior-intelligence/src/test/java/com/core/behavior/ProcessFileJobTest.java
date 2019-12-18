@@ -8,6 +8,7 @@ package com.core.behavior;
 
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.ProcessFileJob;
+import com.core.behavior.jobs.ProcessFileJob1;
 import com.core.behavior.model.Agency;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.util.ThreadPoolFileValidation;
@@ -18,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 /**
@@ -61,7 +61,7 @@ public class ProcessFileJobTest {
 //        writer.flush();
 //        writer.close();
           
-        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
+        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, "thiagodoy@hotmail.com");
         processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 43L);
         

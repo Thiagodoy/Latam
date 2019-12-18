@@ -46,8 +46,6 @@ public class TicketDuplicityValidationJob implements Runnable {
                         ticket.setBilheteBehavior(null);
                     }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
                         ticket.setType(TicketTypeEnum.INSERT);
-                    } else if (rules.getUpdate() > 0) {
-                        ticket.setType(TicketTypeEnum.UPDATE);
                     } else if (rules.getBackoffice() > 0) {
                         ticket.setStatus(TicketStatusEnum.BACKOFFICE);
                         ticket.setBilheteBehavior(null);
@@ -68,13 +66,13 @@ public class TicketDuplicityValidationJob implements Runnable {
                     break;
             }
 
-            service.save(ticket);
+           // service.save(ticket);
 
         } catch (Exception e) {
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, "[ EXECUTOR ]", e);
             ticket.setStatus(TicketStatusEnum.ERROR_EXECUTOR);
-            service.save(ticket);
+           // service.save(ticket);
         }
 
     }
