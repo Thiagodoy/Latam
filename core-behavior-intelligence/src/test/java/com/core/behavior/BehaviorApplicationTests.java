@@ -17,7 +17,7 @@ public class BehaviorApplicationTests {
     @Autowired
     private IntegrationService service;
     
-    @Test
+    //@Test
     public void testFileResult(){
         service.makeFileResultDataCollector(122L);
     }

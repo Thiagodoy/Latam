@@ -68,7 +68,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author thiag
  */
 
-public class FileReturnJob implements Runnable {
+public class FileReturnJob1 implements Runnable {
 
     public static final String DATA_FILE_ID = "DATA_FILE_ID";
     public static final String DATA_EMAIL_ID = "DATA_EMAIL_ID";
@@ -100,7 +100,7 @@ public class FileReturnJob implements Runnable {
     private Map<String, Object> parameters = new HashMap<>();
 
     
-    public FileReturnJob(ClientAws clientAws,UserActivitiService userActivitiService,AgencyRepository agencyRepository,FileRepository fileRepository,NotificacaoService notificacaoService){
+    public FileReturnJob1(ClientAws clientAws,UserActivitiService userActivitiService,AgencyRepository agencyRepository,FileRepository fileRepository,NotificacaoService notificacaoService){
         this.clientAws = clientAws;
         this.userActivitiService = userActivitiService;
         this.agencyRepository = agencyRepository;
@@ -132,13 +132,13 @@ public class FileReturnJob implements Runnable {
            List<List<LineErrorDTO>> patitions = ListUtils.partition(null, LIMIT_ROWS);
             List<File> filesCreated = new ArrayList<>();
 
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.INFO, "[ Files parttions -> ]" + patitions.size());
+            Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Files parttions -> ]" + patitions.size());
 
             int count = 0;
 
             for (List<LineErrorDTO> partition : patitions) {
 
-                Logger.getLogger(FileReturnJob.class.getName()).log(Level.INFO, "[ Create File -> ] " + (1 + count));
+                Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Create File -> ] " + (1 + count));
                 long startFile = System.currentTimeMillis();
                 this.createFile(agency.getLayoutFile());
                 this.writeLote(null);
@@ -162,7 +162,7 @@ public class FileReturnJob implements Runnable {
             
             File zipedFile = Utils.zipFiles(file.getName().replaceAll(".(csv|CSV)", ""), file.getVersion(), filesCreated);
 
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.INFO, "[ File ZIP  -> ]" + zipedFile.getName());
+            Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ File ZIP  -> ]" + zipedFile.getName());
 
             uploadFileReturn(zipedFile, agency);
             this.createNotification(file.getName(), zipedFile.getName(), emailUser, agency);
@@ -171,7 +171,7 @@ public class FileReturnJob implements Runnable {
             this.deleteFiles(filesCreated);
 
         } catch (Exception ex) {
-            Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[ executeInternal ]", ex);
+            Logger.getLogger(FileReturnJob1.class.getName()).log(Level.SEVERE, "[ executeInternal ]", ex);
         }
     }
 
@@ -348,7 +348,7 @@ public class FileReturnJob implements Runnable {
             try {
                 FileUtils.forceDelete(file);
             } catch (IOException ex) {
-                Logger.getLogger(FileReturnJob.class.getName()).log(Level.SEVERE, "[ deleteFiles ]", ex);
+                Logger.getLogger(FileReturnJob1.class.getName()).log(Level.SEVERE, "[ deleteFiles ]", ex);
             }
         }
     }

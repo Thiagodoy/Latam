@@ -6,14 +6,11 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.dto.TicketValidationDTO;
-import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
 import java.text.MessageFormat;
-import java.util.Comparator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.context.ApplicationContext;
@@ -36,46 +33,56 @@ public class TicketDuplicityValidationJob implements Runnable {
     public void run() {
 
         try {
-
-            switch (this.ticket.getLayout()) {
-                case FULL:
-
-                    TicketValidationDTO rules = this.service.checkRules(ticket);
-
-                    if(rules.getDuplicity() > 0){
-                        ticket.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
-                        ticket.setBilheteBehavior(null);
-                    }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
-                        ticket.setType(TicketTypeEnum.INSERT);
-                    } else if (rules.getUpdate() > 0) {
-                        ticket.setType(TicketTypeEnum.UPDATE);
-                    } else if (rules.getBackoffice() > 0) {
-                        ticket.setStatus(TicketStatusEnum.BACKOFFICE);
-                        ticket.setBilheteBehavior(null);
-                    }
-
-                    break;
-                case SHORT:                   
-                    TicketValidationShortDTO rulesShort = this.service.rulesShort(ticket);
-                    
-                    if(rulesShort.getInsert() == 0){
-                        ticket.setType(TicketTypeEnum.INSERT);
-                    }else if(rulesShort.getUpdate() > 0){
-                        ticket.setType(TicketTypeEnum.UPDATE);      
-                        List<Ticket> listUpdates = service.findByAgrupamentoC(ticket);
-                        Ticket tOld = listUpdates.parallelStream().sorted(Comparator.comparing(Ticket::getCreatedAt)).findFirst().get();                        
-                        ticket.setBilheteBehavior(tOld.getBilheteBehavior());
-                    }
-                    break;
+            
+            TicketValidationDTO rules = this.service.checkRules(ticket);
+            
+             if (rules.getDuplicity() > 1) {
+                ticket.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
+                ticket.setBilheteBehavior(null);
+            } else{
+                ticket.setType(TicketTypeEnum.INSERT);
             }
+            
+            
+//            
+//
+//            switch (this.ticket.getLayout()) {
+//                case FULL:
+//
+//                    TicketValidationDTO rules = this.service.checkRules(ticket);
+//
+//                    if(rules.getDuplicity() > 0){
+//                        ticket.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
+//                        ticket.setBilheteBehavior(null);
+//                    }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
+//                        ticket.setType(TicketTypeEnum.INSERT);
+//                    } else if (rules.getBackoffice() > 0) {
+//                        ticket.setStatus(TicketStatusEnum.BACKOFFICE);
+//                        ticket.setBilheteBehavior(null);
+//                    }
+//
+//                    break;
+//                case SHORT:                   
+//                    TicketValidationShortDTO rulesShort = this.service.rulesShort(ticket);
+//                    
+//                    if(rulesShort.getInsert() == 0){
+//                        ticket.setType(TicketTypeEnum.INSERT);
+//                    }else if(rulesShort.getUpdate() > 0){
+//                        ticket.setType(TicketTypeEnum.UPDATE);      
+//                        List<Ticket> listUpdates = service.findByAgrupamentoC(ticket);
+//                        Ticket tOld = listUpdates.parallelStream().sorted(Comparator.comparing(Ticket::getCreatedAt)).findFirst().get();                        
+//                        ticket.setBilheteBehavior(tOld.getBilheteBehavior());
+//                    }
+//                    break;
+//            }
 
-            service.save(ticket);
+           // service.save(ticket);
 
         } catch (Exception e) {
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, "[ EXECUTOR ]", e);
             ticket.setStatus(TicketStatusEnum.ERROR_EXECUTOR);
-            service.save(ticket);
+           // service.save(ticket);
         }
 
     }

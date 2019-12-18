@@ -6,6 +6,7 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketError;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.Utils;
+
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -82,7 +83,7 @@ public class Validator implements IValidator {
             countError++;
         }
 
-        if (countError == 0 && (ticketDTO.getDataEmissao().length() != 10 || ticketDTO.getDataEmissao().length() != 8)) {
+        if (countError == 0 && !(ticketDTO.getDataEmissao().length() == 10 || ticketDTO.getDataEmissao().length() == 8)) {
             countError++;
         }
 
@@ -1177,7 +1178,8 @@ public class Validator implements IValidator {
         
         this.ticket.setCodeAgencia(this.ticketDTO.getCodigoAgencia());
         this.ticket.setLineFile(Long.valueOf(this.ticketDTO.getLineFile()));
-        
+        this.ticket.setKey(ticketDTO.getKey());
+
         try {
 
             this.checkDataEmissao().

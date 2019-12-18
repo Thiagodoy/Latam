@@ -14,6 +14,7 @@ import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.io.BeanIoReader;
+import com.core.behavior.jobs.ProcessFileJob1;
 import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;
@@ -52,7 +53,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -88,10 +88,7 @@ public class FileService {
     private LogRepository logRepository;
 
     @Autowired
-    private AgencyService agencyService;
-
-    @Autowired
-    private SchedulerFactoryBean bean;
+    private AgencyService agencyService;    
 
     @Autowired
     private ClientAws clientAws;
@@ -120,7 +117,7 @@ public class FileService {
     public java.io.File downloadFile(String fileName, Long companyId, boolean  original) throws IOException {
 
         Agency agency = agencyService.findById(companyId);
-        String folder = original ? agency.getS3Path().split("\\\\")[1] + "\\" + "original" : agency.getS3Path().split("\\\\")[1];
+        String folder = original ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
         return clientAws.downloadFile(fileName, folder);
     }
@@ -164,7 +161,7 @@ public class FileService {
             s[4] = "VALIDATION_SUCCESS";
             
             
-            final String pathOriginal = folder + "\\" + "original";
+            final String pathOriginal = folder + "/ORIGINAL";
             this.uploadFile(true, false, pathOriginal, file);
 
             Page<File> result = this.list(file.getName(), null, new Long[]{id}, null, PageRequest.of(0, 100, Sort.by("createdDate").descending()), s, null, null);
@@ -245,7 +242,7 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {        
          
-        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
+        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
         processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
         processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);

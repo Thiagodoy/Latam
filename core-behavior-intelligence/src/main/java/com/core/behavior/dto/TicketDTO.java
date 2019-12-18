@@ -4,6 +4,7 @@ import com.core.behavior.util.TicketLayoutEnum;
 import java.text.MessageFormat;
 import java.util.Optional;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -11,6 +12,7 @@ import lombok.Data;
  * @author thiag
  */
 @Data
+@EqualsAndHashCode(of = {"key"})
 public class TicketDTO {
 
     public String ondDirecional;
@@ -70,6 +72,8 @@ public class TicketDTO {
     public String grupoEmpresa;
     public String grupoConsolidada;
     public String codigoAgencia;
+    public String key;
+   
 
     public String toString() {
 

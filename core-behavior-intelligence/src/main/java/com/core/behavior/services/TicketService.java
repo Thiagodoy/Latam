@@ -70,9 +70,8 @@ public class TicketService {
                     String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     Statement ps = con.createStatement();
                     ps.clearBatch();
-
                     ps.addBatch(query);
-                    int[] ids = ps.executeBatch();
+                    ps.executeBatch();
                     con.commit();
                     count = 0;
                     inserts.clear();
@@ -83,10 +82,8 @@ public class TicketService {
             String query = "INSERT INTO `behavior`.`ticket` VALUES " + inserts.stream().collect(Collectors.joining(","));
             Statement ps = con.createStatement();
             ps.clearBatch();
-
             ps.addBatch(query);
-            int[] ids = ps.executeBatch();
-            
+            ps.executeBatch();
             con.commit();
 
         } catch (SQLException ex) {
@@ -206,7 +203,7 @@ public class TicketService {
     }
 
     public TicketValidationDTO checkRules(Ticket ticket) {
-        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getAgrupamentoB(), ticket.getCupom(), ticket.getFileId());
+        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getCupom());
     }
 
     public TicketValidationShortDTO rulesShort(Ticket ticket) {

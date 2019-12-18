@@ -1,11 +1,9 @@
 package com.core.behavior;
 
 import com.core.behavior.jobs.TicketCupomValidationJob;
-import com.core.behavior.model.File;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.IntegrationService;
 import com.core.behavior.services.TicketService;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,17 +43,17 @@ public class IntegrationTest {
 //        
 //    }
     
-    @Test
+    //@Test
     public void verifyCupom() throws SchedulerException, InterruptedException, Exception {
         
         Ticket ticket = new Ticket();
         ticket.setAgrupamentoA("0006AZBPZDD16012019RIBEIRO/AMAND");
         
-         Thread t = new Thread(new TicketCupomValidationJob(service,ticket));
+         //Thread t = new Thread(new TicketCupomValidationJob(service,ticket));
         
-         t.start();
-         
-         while(t.isAlive()){}
+//         t.start();
+//         
+//         while(t.isAlive()){}
          
          
     }

@@ -42,7 +42,7 @@ import org.springframework.context.ApplicationContext;
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
 @DisallowConcurrentExecution
-public class ProcessFileJob implements Runnable {
+public class ProcessFileJob2 implements Runnable {
 
     @Autowired
     private BeanIoReader reader;
@@ -89,7 +89,7 @@ public class ProcessFileJob implements Runnable {
         this.parameters.put(key, value);
     }
 
-    public ProcessFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+    public ProcessFileJob2(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
             FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
         this.reader = reader;
         this.logService = logService;
@@ -106,7 +106,7 @@ public class ProcessFileJob implements Runnable {
         try {
             this.validate();
         } catch (Exception e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[run]", e);
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, "[run]", e);
         }
 
     }
@@ -133,7 +133,7 @@ public class ProcessFileJob implements Runnable {
 
             start = System.currentTimeMillis();
             Optional<FileParsedDTO> fileParsed = reader.<FileParsedDTO>parse(file, f, stream);
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ PARSER ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ PARSER ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
             fileService.setStage(idFile, StageEnum.VALIDATION_LAYOUT.getCode());
 
@@ -183,7 +183,7 @@ public class ProcessFileJob implements Runnable {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
         } catch (Exception e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[executeInternal] file -> " + fileId, e);
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, "[executeInternal] file -> " + fileId, e);
             fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
 
         } finally {
@@ -222,7 +222,7 @@ public class ProcessFileJob implements Runnable {
 
         map.put(LIST_DATA_SUCCESS, success);
         map.put(LIST_DATA_ERROR, error);
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRule1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ runRule1 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
         return map;
     }
@@ -240,7 +240,7 @@ public class ProcessFileJob implements Runnable {
         while (!executorService.isTerminated()) {
         }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 
@@ -261,7 +261,7 @@ public class ProcessFileJob implements Runnable {
         while (!executorService.isTerminated()) {
         }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 
@@ -279,7 +279,7 @@ public class ProcessFileJob implements Runnable {
         while (!executorService.isTerminated()) {
         }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 
@@ -294,7 +294,7 @@ public class ProcessFileJob implements Runnable {
                 t.setId(sequence.getSequence());
             });
 
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ GERANDO IDS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ GERANDO IDS ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
 
     }
@@ -304,7 +304,7 @@ public class ProcessFileJob implements Runnable {
         if (!error.isEmpty()) {
             long start = System.currentTimeMillis();
             ticketErrorService.saveBatch(error);
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
     }
 
@@ -325,7 +325,7 @@ public class ProcessFileJob implements Runnable {
                 bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
                 t.setBilheteBehavior(bilheteBehavior);
             } catch (Exception e) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
+                Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
             }
 
         });

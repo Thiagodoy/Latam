@@ -4,6 +4,8 @@ import com.core.behavior.properties.BehaviorProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
@@ -30,6 +32,9 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
     private BehaviorProperties behaviorProperties;
 
     private Environment environment;
+    
+    @org.springframework.beans.factory.annotation.Value("${spring.profiles.active}")
+    private String activeProfile;
 
     @Override
     public void setEnvironment(Environment e) {
@@ -79,6 +84,8 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         hikariConfig.setConnectionTestQuery(behaviorProperties.getDatasource().getSqlserver().getConnectionTestQuery());
 
         dataSource = new HikariDataSource(hikariConfig);
+        
+        Logger.getLogger(BehaviorDataBaseConfiguration.class.getName()).log(Level.INFO, "Profile -> " + activeProfile );
 
         return dataSource;
     }

@@ -6,10 +6,10 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.model.Ticket;
-import com.core.behavior.services.TicketService;
+import com.core.behavior.model.TicketStage;
+import com.core.behavior.services.TicketStageService;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.context.ApplicationContext;
 
@@ -19,36 +19,20 @@ import org.springframework.context.ApplicationContext;
  */
 public class TicketBilheteBehaviorGroupJob implements Runnable {
 
-    private TicketService service;
+    private TicketStageService service;
     private Ticket ticket;
 
     public TicketBilheteBehaviorGroupJob(ApplicationContext context, Ticket ticket) {
         this.ticket = ticket;
-        this.service = context.getBean(TicketService.class);
+        this.service = context.getBean(TicketStageService.class);
     }
 
     @Override
     public void run() {
 
         if (this.ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
-
-            List<Ticket> tickets = this.service.findByAgrupamentoA(ticket);
-//                    .stream()
-//                    .filter(t -> !t.type.equals(TicketTypeEnum.UPDATE))
-//                    .collect(Collectors.toList());
-
-            Optional<Ticket> uo = tickets.parallelStream().min(Comparator.comparing(Ticket::getCupom));
-
-            if (uo.isPresent() && tickets.size() > 1) {
-                tickets.stream()
-                        .filter(r -> !r.getId().equals(uo.get().getId()))
-                        .forEach(t -> {
-                            t.setBilheteBehavior(uo.get().getBilheteBehavior());
-                            this.service.save(t);
-                        });
-
-            }
-
+            TicketStage ticketStage = this.service.getByAgrupamentoAAndCupom(ticket.getAgrupamentoA());
+            ticket.setBilheteBehavior(ticketStage.getBilhetBehavior());
         } else {
             // TODO implmentar para o Layout 20 Colunas
         }

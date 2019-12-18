@@ -7,6 +7,7 @@ import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.FileReturnJob;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
+import com.core.behavior.jobs.ProcessFileJob1;
 import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
@@ -122,6 +123,8 @@ public class QuartzConfiguration {
     public IntegrationJob integrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService ) {
         return new IntegrationJob(ticketService, fileService, integrationService);
     }
+    
+    
 
     @Bean
     public FileReturnJob fileReturnJob(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
@@ -134,6 +137,11 @@ public class QuartzConfiguration {
         return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, sequenceService);
     }
 
+    @Bean
+    public ProcessFileJob1 processFileJob1(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+            FileProcessStatusService fileProcessStatusService, TicketService ticketService, SequenceService sequenceService) {
+        return new ProcessFileJob1(reader, logService, agencyService, fileService, fileProcessStatusService, ticketService, sequenceService);
+    }
 //    @PreDestroy
 //    public void preDestroy() {
 //        threadPoolFileIntegration.getExecutor().shutdownNow();

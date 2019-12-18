@@ -36,14 +36,12 @@ public class TicketCupomValidationJob implements Runnable {
             //Validação para ticket de 49 colunas
             boolean isOk = service.checkCupom(ticket);
             TicketStatusEnum status = isOk ? TicketStatusEnum.APPROVED : TicketStatusEnum.BACKOFFICE_CUPOM;
-            ticket.setStatus(status);
-            service.save(ticket);
+            ticket.setStatus(status);            
 
         } catch (Exception e) {
             Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));
             Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.SEVERE, "[ TicketCupomValidationJob ]", e);
-            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);
-            service.save(ticket);
+            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);            
         }
 
     }

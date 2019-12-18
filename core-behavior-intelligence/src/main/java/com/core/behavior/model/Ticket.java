@@ -37,12 +37,7 @@ import org.hibernate.annotations.DynamicUpdate;
         classes = @ConstructorResult(
                 targetClass = TicketValidationDTO.class,
                 columns = {
-                        @ColumnResult(name = "duplicity", type = Long.class),
-                        @ColumnResult(name = "insert", type = Long.class),
-                        @ColumnResult(name = "count", type = Long.class),                        
-                        @ColumnResult(name = "cupom", type = Long.class),
-                        @ColumnResult(name = "backoffice", type = Long.class),
-                        @ColumnResult(name = "update", type = Long.class)
+                        @ColumnResult(name = "duplicity", type = Long.class)                        
                     }))
 
 @SqlResultSetMapping(name = "TicketRulesShort",
@@ -62,12 +57,7 @@ import org.hibernate.annotations.DynamicUpdate;
                     }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select (select count(1)  from ticket where file_id <> :file and cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update',\n" +
-                "(select count(1)  from ticket where file_id = :file and cupom = :cupom and agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'duplicity',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa and agrupamento_b = :agrupb and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
-                "(select count(1) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR') ) as count,\n" +
-                "(select ifnull(max(cupom),0) as value from ticket where agrupamento_a = :agrupa and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as cupom ,\n" +
-                "(select count(1) as value from ticket where agrupamento_a <> :agrupa and agrupamento_b = :agrupb  and status not in ('BACKOFFICE_DUPLICITY','BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as backoffice")
+        query = "select count(1) as duplicity  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa " )
 
 @NamedNativeQuery(name = "Ticket.rulesShort", resultSetMapping = "TicketRulesShort",
         query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
@@ -344,6 +334,14 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     @Column(name = "TYPE")
     public TicketTypeEnum type;
+    
+    @PositionParameter(value = 63)    
+    @Column(name = "KEY")
+    public String key;
+    
+    
+    @Transient
+    private List<Log>errors;
 
     public Ticket() {
         this.createdAt = LocalDateTime.now();
