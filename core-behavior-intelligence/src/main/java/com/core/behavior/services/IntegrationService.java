@@ -127,7 +127,7 @@ public class IntegrationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("[ Data Collector ] - BackOffice (Cupom/Duplicidade)");
             helper.setFrom("latamupload@behint.net.br");
-            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com"});
+            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br"});
             helper.setText("Segue em anexos os tickets que não foram processados, por estarem com erros de cupom ou duplicidade.\n Referente ao arquivo : " + nameFile);
             helper.addAttachment("Evidencia.zip", zip);
             sender.send(message);
