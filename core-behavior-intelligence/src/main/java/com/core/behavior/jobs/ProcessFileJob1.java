@@ -253,7 +253,7 @@ public class ProcessFileJob1 implements Runnable {
         List<TicketStage> stage = success
                 .stream()
                 .parallel()
-                .map(s-> new TicketStage(null,s.getCupom(),s.getAgrupamentoA(), s.getAgrupamentoB(),""))
+                .map(s-> new TicketStage(null,s.getCupom(),s.getAgrupamentoA(), s.getAgrupamentoB(),s.getBilheteBehavior()))
                 .collect(Collectors.toList());
         
         
