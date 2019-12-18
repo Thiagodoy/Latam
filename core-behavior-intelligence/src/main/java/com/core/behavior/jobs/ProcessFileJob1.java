@@ -71,7 +71,7 @@ public class ProcessFileJob1 implements Runnable {
 
     @Autowired
     private TicketService ticketService;
-    
+
     @Autowired
     private TicketStageService ticketStageService;
 
@@ -172,7 +172,6 @@ public class ProcessFileJob1 implements Runnable {
                         .collect(Collectors.toList());
 
                 this.truncateData(keys);
-                
 
                 long count = 2;
                 for (TicketDTO t : dto.getTicket()) {
@@ -190,8 +189,7 @@ public class ProcessFileJob1 implements Runnable {
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });
-                
-                
+
                 this.writeErrors(error);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
@@ -199,10 +197,8 @@ public class ProcessFileJob1 implements Runnable {
                 this.runRules2(success);
                 this.runRules3(success);
                 this.runRules4(success);
+                this.saveTickets(success);
 
-                
-                ticketService.saveBatch(success);
-                
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
                 fileService.setValidationTime(idFile, timeValidation);
@@ -217,7 +213,6 @@ public class ProcessFileJob1 implements Runnable {
 //                job.setFileId(idFile);
 //
 //                threadPoolFileIntegration.submit(job);
-
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }
@@ -239,6 +234,12 @@ public class ProcessFileJob1 implements Runnable {
         }
     }
 
+    private void saveTickets(List<Ticket> success) throws SQLException {
+        long start = System.currentTimeMillis();
+        ticketService.saveBatch(success);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ saveTickets ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+    }
+
     private void truncateData(List<TicketKey> keys) throws SQLException {
 
         long start = System.currentTimeMillis();
@@ -248,22 +249,20 @@ public class ProcessFileJob1 implements Runnable {
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ truncateData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
-    
-    private void mountStage(List<Ticket> success) throws SQLException{
-        
+
+    private void mountStage(List<Ticket> success) throws SQLException {
+
         long start = System.currentTimeMillis();
-        
+
         List<TicketStage> stage = success
                 .stream()
                 .parallel()
-                .map(s-> new TicketStage(null,s.getCupom(),s.getAgrupamentoA(), s.getAgrupamentoB(),s.getBilheteBehavior()))
+                .map(s -> new TicketStage(null, s.getCupom(), s.getAgrupamentoA(), s.getAgrupamentoB(), s.getBilheteBehavior()))
                 .collect(Collectors.toList());
-        
-        
-        this.ticketStageService.saveBatch(stage);        
+
+        this.ticketStageService.saveBatch(stage);
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ mountStage ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
-
 
     private Map<String, Object> runRule1(FileParsedDTO dto) {
 
@@ -336,7 +335,7 @@ public class ProcessFileJob1 implements Runnable {
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream().filter(s-> s.getStatus().equals(TicketStatusEnum.APPROVED)).forEach(t -> {
+        success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED)).forEach(t -> {
             executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
         });
 
