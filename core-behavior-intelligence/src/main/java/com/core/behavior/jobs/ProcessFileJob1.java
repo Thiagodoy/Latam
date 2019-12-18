@@ -196,7 +196,7 @@ public class ProcessFileJob1 implements Runnable {
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
                 this.runRules2(success);
-//                this.runRules3(success);
+                this.runRules3(success);
 //                this.runRules4(success);
 //
 //                long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;

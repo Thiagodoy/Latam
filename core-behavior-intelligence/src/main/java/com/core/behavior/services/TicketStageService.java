@@ -10,6 +10,7 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketStage;
 import com.core.behavior.util.Utils;
 import static com.core.behavior.util.Utils.mountBatchInsert;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,6 +41,8 @@ public class TicketStageService {
         if (ticket.isEmpty()) {
             return;
         }
+        
+        this.callProctruncateTicketStage();
               
         try {
 
@@ -77,6 +80,20 @@ public class TicketStageService {
         }
 
         
+        
+    }
+     
+     
+             
+    private void callProctruncateTicketStage(){
+        
+          try {           
+            CallableStatement c = dataSource.getConnection().prepareCall("{call behavior.truncateTicketStage}");
+            c.execute();
+            this.dataSource.getConnection().commit();
+        } catch (Exception e) {
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ callProcDeleteTickets ]", e);
+        }        
         
     }
     
