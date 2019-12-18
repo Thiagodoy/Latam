@@ -37,12 +37,7 @@ import org.hibernate.annotations.DynamicUpdate;
         classes = @ConstructorResult(
                 targetClass = TicketValidationDTO.class,
                 columns = {
-                        @ColumnResult(name = "duplicity", type = Long.class),
-                        @ColumnResult(name = "insert", type = Long.class),
-                        @ColumnResult(name = "count", type = Long.class),                        
-                        @ColumnResult(name = "cupom", type = Long.class),
-                        @ColumnResult(name = "backoffice", type = Long.class),
-                        @ColumnResult(name = "update", type = Long.class)
+                        @ColumnResult(name = "duplicity", type = Long.class)                        
                     }))
 
 @SqlResultSetMapping(name = "TicketRulesShort",
@@ -62,12 +57,7 @@ import org.hibernate.annotations.DynamicUpdate;
                     }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select (select count(1)  from ticket_stage where  cupom = :cupom and agrupamento_a = :agrupa ) as 'update',\n" +
-                "(select count(1)  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa ) as 'duplicity',\n" +
-                "(select count(1) as value from ticket_stage where agrupamento_a = :agrupa and agrupamento_b = :agrupb ) as 'insert',\n" +
-                "(select count(1) as value from ticket_stage where agrupamento_a = :agrupa ) as count,\n" +
-                "(select ifnull(max(cupom),0) as value from ticket_stage where agrupamento_a = :agrupa ) as cupom ,\n" +
-                "(select count(1) as value from ticket_stage where agrupamento_a <> :agrupa and agrupamento_b = :agrupb ) as backoffice")
+        query = "select count(1) as duplicity  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa " )
 
 @NamedNativeQuery(name = "Ticket.rulesShort", resultSetMapping = "TicketRulesShort",
         query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
