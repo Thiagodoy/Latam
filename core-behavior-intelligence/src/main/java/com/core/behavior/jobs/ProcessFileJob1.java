@@ -163,6 +163,7 @@ public class ProcessFileJob1 implements Runnable {
                     t.setFileId(String.valueOf(idFile));
                     t.setLayout(ticketLayout.toString());
                     t.setCodigoAgencia(codigoAgencia);
+                    t.setKey(t.getCodigoAgencia() + t.getDataEmissao());
                 });
 
                 List<TicketKey> keys = dto.getTicket()
