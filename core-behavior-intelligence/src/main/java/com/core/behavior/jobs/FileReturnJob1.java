@@ -167,12 +167,12 @@ public class FileReturnJob1 implements Runnable {
            // List<LineErrorDTO> errors = this.prepareData(logsDTO);
            // logsDTO = null;
 
-           List<List<LineErrorDTO>> patitions = ListUtils.partition(null, LIMIT_ROWS);
-            List<File> filesCreated = new ArrayList<>();
+          // List<List<LineErrorDTO>> patitions = ListUtils.partition(null, LIMIT_ROWS);
+           // List<File> filesCreated = new ArrayList<>();
 
             Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Files parttions -> ]" + patitions.size());
 
-            int count = 0;
+           /// int count = 0;
 
             for (List<LineErrorDTO> partition : patitions) {
 
