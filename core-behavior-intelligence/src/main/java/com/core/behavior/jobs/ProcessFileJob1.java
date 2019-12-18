@@ -201,7 +201,7 @@ public class ProcessFileJob1 implements Runnable {
                 this.runRules4(success);
 
                 
-                ticketService.saveAll(success);
+                ticketService.saveBatch(success);
                 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
