@@ -120,11 +120,49 @@ public class FileReturnJob1 implements Runnable {
 
         try {
             //List<LogDTO> logsDTO = this.getData(id);
-            
-            List<TicketError> errors = ticketErrorService.findByFileId(id);
-            
+            //new
+            List<TicketError> errors = ticketErrorService.findByFileId(id);            
             final com.core.behavior.model.File file = fileRepository.findById(id).get();
             final Agency agency = agencyRepository.findById(file.getCompany()).get();
+            List<List<TicketError>> patitions1 = ListUtils.partition(errors, LIMIT_ROWS); 
+            
+            
+            List<List<LineErrorDTO>> patitions = ListUtils.partition(null, LIMIT_ROWS);
+            List<File> filesCreated = new ArrayList<>();
+
+            Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Files parttions -> ]" + patitions.size());
+
+            int count = 0;
+
+            for (List<TicketError> partition : patitions1) {
+
+                Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Create File -> ] " + (1 + count));
+                long startFile = System.currentTimeMillis();
+                this.createFile(agency.getLayoutFile());
+                this.writeLote1(partition);
+
+                String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
+                File temp = new File(fileNameNew + "_" + (++count) + "_error.xlsx");
+
+                FileOutputStream fileOut;
+
+                fileOut = new FileOutputStream(temp);
+                wb.write(fileOut);
+                fileOut.flush();
+                fileOut.close();
+                wb.dispose();
+
+                filesCreated.add(temp);
+                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ Created File -> ] " + (count) + " Tempo -> " + ((System.currentTimeMillis() - startFile) / 1000) + " sec");
+
+            }
+            
+            
+            
+            
+            
+            
+            //Old
 
            // List<LineErrorDTO> errors = this.prepareData(logsDTO);
            // logsDTO = null;
@@ -212,6 +250,61 @@ public class FileReturnJob1 implements Runnable {
         this.line = sheet.getLastRowNum();
 
     }
+    
+    
+        private void writeLote1(List<TicketError> errors) {
+
+        long start = System.currentTimeMillis();
+        CellStyle backgroundStyle = wb.createCellStyle();
+        backgroundStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
+        backgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        Font fontRecord = wb.createFont();
+        fontRecord.setCharSet(XSSFFont.ANSI_CHARSET);
+
+        CellStyle style = wb.createCellStyle();
+        style.setFont(fontRecord);
+        
+
+        this.lineWrited = sheet.getLastRowNum();
+
+        for (int r = 0; r < errors.size(); r++) {
+            SXSSFRow row = sheet.createRow(++this.lineWrited);
+
+            
+            
+            
+            //iterating c number of columns
+            String[] values = errors.get(r).getContent().split("\\[col\\]");
+            for (int c = 0; c < values.length; c++) {
+                SXSSFCell cell = row.createCell(c);
+                cell.setCellStyle(style);
+                
+                String v = values[c].equals("[empty]") ? "" : values[c];
+                cell.setCellValue(v);
+                
+                CellReference cellReference = new CellReference(cell);                
+                CellAddress currentCellAddress = new CellAddress(cellReference);
+
+//                String value = comments.remove(currentCellAddress.formatAsString());
+
+                //Adicionando comentarios                
+//                if (value != null) {
+//                    Comment com = createCellComment(sheet, "Behavior", value, cell);
+//                    cell.setCellComment(com);
+//                    com.setAddress(cell.getAddress());
+//                    //cell.setCellStyle(borderStyle);
+//                    cell.setCellStyle(backgroundStyle);
+//                }
+
+            }
+        }
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeLote ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+    }
+    
+    
+    
 
     private void writeLote(List<TicketError> errors) {
 
