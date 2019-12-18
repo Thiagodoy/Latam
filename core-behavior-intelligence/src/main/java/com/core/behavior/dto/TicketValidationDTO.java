@@ -19,9 +19,5 @@ public class TicketValidationDTO {
  
     
     private Long duplicity;
-    private Long insert;
-    private Long count;
-    private Long cupom;
-    private Long backoffice;
-    private Long update;    
+     
 }

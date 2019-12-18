@@ -94,7 +94,7 @@ public class ProcessFileJob1 implements Runnable {
     public static final String LIST_DATA_ERROR = "error";
     public static final int SIZE_BILHETE_BEHAVIOR = 7;
 
-    private static final int THREAD_POLL = 50;
+    private static final int THREAD_POLL = 100;
 
     private Map<String, Object> parameters = new HashMap<>();
 
