@@ -134,7 +134,7 @@ public class Validator implements IValidator {
         }
 
         try {
-            dataEmbarque = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()): formatter7.parse(ticketDTO.getDataEmbarque());
+            dataEmbarque = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()) : formatter7.parse(ticketDTO.getDataEmbarque());
             dataEmissao = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmissao()) : formatter7.parse(ticketDTO.getDataEmissao());
 
             LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
@@ -184,11 +184,11 @@ public class Validator implements IValidator {
 
         try {
             /**
-             * Solicitante : Mauricelio
-             * Data : 05/12/2019
-             * Descrição : Para contemplar datas com layout ddd/MM/yy
-             * */            
-            dataEmbarque = ticketDTO.getDataEmbarque().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()): formatter7.parse(ticketDTO.getDataEmbarque());
+             * Solicitante : Mauricelio Data : 05/12/2019 Descrição : Para
+             * contemplar datas com layout ddd/MM/yy
+             *
+             */
+            dataEmbarque = ticketDTO.getDataEmbarque().length() == 10 ? formatter4.parse(ticketDTO.getDataEmbarque()) : formatter7.parse(ticketDTO.getDataEmbarque());
             dataEmissao = ticketDTO.getDataEmissao().length() == 10 ? formatter4.parse(ticketDTO.getDataEmissao()) : formatter7.parse(ticketDTO.getDataEmissao());
 
             LocalDate date2017 = LocalDate.ofYearDay(2017, 1);
@@ -785,9 +785,9 @@ public class Validator implements IValidator {
             this.ticket.setConsolidada(null);
         }
 
-        if (hasConsolidada && this.ticketDTO.getConsolidada().length() > 0 ) {
+        if (hasConsolidada && this.ticketDTO.getConsolidada().length() > 0) {
             this.ticket.setConsolidada(ticketDTO.getConsolidada());
-        }else{
+        } else {
             this.ticket.setConsolidada(null);
         }
 
@@ -926,7 +926,6 @@ public class Validator implements IValidator {
 //        } else {
 //            ticket.setDataReserva(null);
 //        }
-
         return this;
     }
 
@@ -1107,15 +1106,7 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent() || this.ticketDTO.getClasseServico().length() == 0) {
             this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
         } else {
-
-//            Pattern p = Pattern.compile(REGEX_CLASSE_SERVICO, Pattern.CASE_INSENSITIVE);
-//            Matcher m = p.matcher(this.ticketDTO.getClasseServico());
-//            if (!m.matches()) {
-//                this.generateLog(ticketDTO, props.getProperty("fielderror.ticket.classeServico.type"), "classeServico");
-//            } else {
             this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
-//            }
-
         }
         return this;
     }
@@ -1680,7 +1671,7 @@ public class Validator implements IValidator {
             nomeEmpresa = MessageFormat.format("{0} - {1}", ticketDTO.getCodigoAgencia(), consolida.get());
         } else if (empresa.isPresent()) {
             nomeEmpresa = MessageFormat.format("{0} - {1}", ticketDTO.getCodigoAgencia(), empresa.get());
-        }else{
+        } else {
             nomeEmpresa = ticketDTO.getCodigoAgencia();
         }
 
