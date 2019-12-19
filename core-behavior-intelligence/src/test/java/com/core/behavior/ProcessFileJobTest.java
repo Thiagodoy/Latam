@@ -46,10 +46,10 @@ public class ProcessFileJobTest {
     public void process() throws IOException{
         
         
-         Agency agency = agencyService.findById(34l);
+         Agency agency = agencyService.findById(16l);
         String folder = true ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
-        File file =  clientAws.downloadFile("latam_movimento_aereo_FTG_FTF_20180101_20180131.csv", folder);
+        File file =  new File("MASTER 28-10-19 a 03-11-19.csv");//clientAws.downloadFile("MASTER 28-10-19 a 03-11-19.csv.csv", folder);
         
         
         
