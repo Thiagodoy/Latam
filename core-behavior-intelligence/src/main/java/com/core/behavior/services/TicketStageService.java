@@ -49,6 +49,11 @@ public class TicketStageService {
         }
 
         this.callProctruncateTicketStage();
+        
+        
+        int size = (int) ticket.size() / 2;
+        
+        
 
         try {
 

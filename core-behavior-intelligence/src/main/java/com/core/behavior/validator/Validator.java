@@ -578,11 +578,18 @@ public class Validator implements IValidator {
         }
 
         if (countError == 0) {
+            //Alterar a regex. Ilegivel
             Pattern p = Pattern.compile(REGEX_NUM_VOO);
             Matcher m = p.matcher(numVoo);
 
             if (!m.matches()) {
                 countError++;
+            }else{
+                try {
+                    Long.parseLong(numVoo);
+                } catch (Exception e) {
+                    countError++;
+                }
             }
         }
 
@@ -1239,7 +1246,7 @@ public class Validator implements IValidator {
             this.ticket.setLayout(TicketLayoutEnum.valueOf(ticketDTO.getLayout()));
 
             //Geração das chaves
-            if (this.ticketError.hasError()) {
+            if (!this.ticketError.hasError()) {
                 //Gera os agrupamentos
                 if (ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
                     this.generateAgrupamentoA();

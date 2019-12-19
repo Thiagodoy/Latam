@@ -242,7 +242,7 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {        
          
-        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
+        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
         processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
         processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
@@ -399,8 +399,8 @@ public class FileService {
         return !fileRepository.findByCompanyAndCreatedDateBetween(idAgency, init, end).isEmpty();
     }
 
-    public FileLinesApprovedDTO fileInfo(Long id) {        
-        return fileRepository.moveToAnalitics(id).stream().findFirst().get();
+    public Optional<FileLinesApprovedDTO> fileInfo(Long id) {        
+        return fileRepository.moveToAnalitics(id);
     }
 
 }

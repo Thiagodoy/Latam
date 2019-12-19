@@ -5,12 +5,15 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.model.Sequence;
 import com.core.behavior.model.TicketError;
+import com.core.behavior.model.TicketKey;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.SequenceService;
 import com.core.behavior.services.TicketErrorService;
+import com.core.behavior.services.TicketKeyService;
+import com.core.behavior.services.TicketService;
 import com.core.behavior.util.SequenceTableEnum;
 import com.core.behavior.util.StageEnum;
 import com.core.behavior.util.StatusEnum;
@@ -21,6 +24,7 @@ import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.Utils;
 import com.core.behavior.validator.Validator;
 import java.io.File;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,8 +36,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
-import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -41,7 +45,6 @@ import org.springframework.context.ApplicationContext;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-@DisallowConcurrentExecution
 public class ProcessFileJob implements Runnable {
 
     @Autowired
@@ -60,13 +63,16 @@ public class ProcessFileJob implements Runnable {
     private FileService fileService;
 
     @Autowired
-    private FileProcessStatusService fileProcessStatusService;    
+    private FileProcessStatusService fileProcessStatusService;
 
     @Autowired
     private SequenceService sequenceService;
 
     @Autowired
     private ApplicationContext context;
+
+    @Autowired
+    private TicketService ticketService;
 
     @Autowired
     private ThreadPoolFileIntegration threadPoolFileIntegration;
@@ -84,6 +90,9 @@ public class ProcessFileJob implements Runnable {
     private static final int THREAD_POLL = 50;
 
     private Map<String, Object> parameters = new HashMap<>();
+
+    @Autowired
+    private TicketKeyService ticketKeyService;
 
     public void setParameter(String key, Object value) {
         this.parameters.put(key, value);
@@ -145,7 +154,16 @@ public class ProcessFileJob implements Runnable {
                     t.setFileId(String.valueOf(idFile));
                     t.setLayout(ticketLayout.toString());
                     t.setCodigoAgencia(codigoAgencia);
+                    t.setKey(t.getCodigoAgencia() + t.getDataEmissao());
                 });
+
+                List<TicketKey> keys = dto.getTicket()
+                        .stream()
+                        .distinct()
+                        .map(t -> new TicketKey(t.getKey()))
+                        .collect(Collectors.toList());
+
+                this.truncateData(keys);
 
                 fileService.setStage(idFile, StageEnum.VALIDATION_CONTENT.getCode());
 
@@ -165,6 +183,8 @@ public class ProcessFileJob implements Runnable {
                 this.runRules2(success);
                 this.runRules3(success);
                 this.runRules4(success);
+
+                this.saveTickets(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
 
@@ -198,6 +218,22 @@ public class ProcessFileJob implements Runnable {
             fileService.setExecutionTime(idFile, time);
 
         }
+    }
+
+    private void truncateData(List<TicketKey> keys) throws SQLException {
+
+        long start = System.currentTimeMillis();
+
+        ticketKeyService.saveBatch(keys);
+        ticketKeyService.callProcDeleteTickets();
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ truncateData ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+    }
+
+    private void saveTickets(List<Ticket> success) throws SQLException {
+        long start = System.currentTimeMillis();
+        ticketService.saveBatch(success);
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ saveTickets ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
 
     private Map<String, Object> runRule1(FileParsedDTO dto) {
@@ -270,7 +306,7 @@ public class ProcessFileJob implements Runnable {
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream().distinct().forEach(t -> {
+        success.parallelStream().forEach(t -> {
             executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
         });
 
@@ -319,7 +355,7 @@ public class ProcessFileJob implements Runnable {
                 String ano = String.valueOf(t.getDataEmissao().getYear() >= 2020 ? t.getDataEmissao().getYear() - 2020 : t.getDataEmissao().getYear() - 110);
                 String mes = StringUtils.leftPad(String.valueOf(t.getDataEmissao().getMonth() + 1), 2, "0");
                 String id = String.valueOf(t.getId());
-                
+
                 sequencial = (id.length() < SIZE_BILHETE_BEHAVIOR) ? StringUtils.leftPad(id, SIZE_BILHETE_BEHAVIOR, "0") : id.substring(0, SIZE_BILHETE_BEHAVIOR);
 
                 bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);

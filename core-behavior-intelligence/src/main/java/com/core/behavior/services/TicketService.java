@@ -4,6 +4,7 @@ import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketDuplicityDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.dto.TicketValidationShortDTO;
+import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.TicketStatusEnum;
@@ -103,9 +104,13 @@ public class TicketService {
 
         filename = "'" + filename + "'";
         String sstatus = "'" + status.toString() + "'";
+        Long id = tickets.get(0).getFileId();
 
-        Logger.getLogger(TicketService.class.getName()).log(Level.INFO, "[ updateStatusAndFileIntegrationBatch ] -> status = " + status + ", ticket size = " + tickets.size() + " fileNae = " + filename);
+        Logger.getLogger(TicketService.class.getName()).log(Level.INFO, "[ updateStatusAndFileIntegrationBatch ] status -> " + status + ", ticket size -> " + tickets.size() + " fileId = " + id);
 
+        long start = System.currentTimeMillis();
+        long end;
+        
         boolean log = true;
 
         try {
@@ -113,8 +118,8 @@ public class TicketService {
             Connection con = dataSource.getConnection();
             List<Long> update = new ArrayList<>();
             int count = 0;
-            for (Ticket t : tickets) {
-                update.add(t.getId());
+            while (!tickets.isEmpty()) {
+                update.add(tickets.remove(0).getId());
                 count++;
                 if (count == 1000) {
                     String ids = update.stream().parallel().map((i) -> {
@@ -152,7 +157,10 @@ public class TicketService {
         } catch (Exception ex) {
             Logger.getLogger(TicketService.class.getName()).log(Level.SEVERE, "[ updateStatusAndFileIntegrationBatch ]", ex);
             throw ex;
+        }finally{
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ updateStatusAndFileIntegrationBatch ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
+        
 
     }
 

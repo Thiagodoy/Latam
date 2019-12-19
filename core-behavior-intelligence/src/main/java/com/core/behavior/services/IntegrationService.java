@@ -9,6 +9,7 @@ import com.core.behavior.dto.AirMovimentDTO;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
 import com.core.behavior.io.BeanIoWriter;
+import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.properties.AnaliticsProperties;
 import com.core.behavior.repository.FileRepository;
@@ -16,7 +17,6 @@ import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
-import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import static com.core.behavior.util.Utils.mountBatchInsert;
 import java.io.File;
@@ -30,18 +30,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -59,14 +59,12 @@ public class IntegrationService {
 
     @Autowired
     private TicketRepository ticketRepository;
-    
+
     @Autowired
     private FileRepository fileRepository;
 
     @Autowired
-    private JavaMailSender sender;
-
-    private Connection connection;
+    private JavaMailSender sender;    
 
     public void integrate(List<Ticket> tickets) throws Exception {
 
@@ -75,34 +73,31 @@ public class IntegrationService {
             this.move(tickets);
             this.callSpDataCollector();
             this.makeFileResultIntegration();
-            
-            if(tickets.size() > 0){
-                Long id  = tickets.stream().findFirst().get().getFileId();
-                this.makeFileResultDataCollector(id);              
+
+            if (tickets.size() > 0) {
+                Long id = tickets.stream().findFirst().get().getFileId();
+                this.makeFileResultDataCollector(id);
             }
-            
 
         } catch (Exception ex) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);
-        } finally {
-            this.closeConnection();
         }
     }
 
-    public  void makeFileResultDataCollector(Long idfile) {
+    public void makeFileResultDataCollector(Long idfile) {
 
         File tempFileCupom = null;
         File tempFileDuplicity = null;
         File fileDuplicity = null;
         File fileCupom = null;
         File zip = null;
-        
+
         List<File> files = new ArrayList();
+        long start = System.currentTimeMillis();
 
         try {
             List<Ticket> listticketDuplicity = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_DUPLICITY);
             List<Ticket> listticketCupom = this.ticketRepository.findByFileIdAndStatus(idfile, TicketStatusEnum.BACKOFFICE_CUPOM);
-            
 
             if (listticketDuplicity.size() > 0) {
                 FileIntegrationDTO fileIntegrationDTODuplicity = mountDto(listticketDuplicity);
@@ -118,8 +113,10 @@ public class IntegrationService {
                 files.add(fileCupom);
             }
 
-            if(files.isEmpty())return;
-            
+            if (files.isEmpty()) {
+                return;
+            }
+
             String nameFile = fileRepository.findById(idfile).get().getName();
             zip = Utils.zipFiles("Evidencia.zip", 1L, files);
 
@@ -140,6 +137,7 @@ public class IntegrationService {
             Utils.forceDeleteFile(fileDuplicity);
             Utils.forceDeleteFile(tempFileCupom);
             Utils.forceDeleteFile(tempFileDuplicity);
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ makeFileResultDataCollector ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
 
     }
@@ -159,6 +157,11 @@ public class IntegrationService {
 
     private void move(List<Ticket> tickets) {
 
+        long start = System.currentTimeMillis();
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, " Incializando integração");
+
+        int size = (int) (tickets.size() / 2);
+
         List<AirMovimentDTO> airMovimentDTOs = tickets
                 .parallelStream()
                 .map(t -> new AirMovimentDTO(t))
@@ -168,23 +171,25 @@ public class IntegrationService {
             return;
         }
 
-        this.openConnection();
+        List<AirMovimentDTO> collection = airMovimentDTOs;
+        final Connection connection = this.getConnection();
 
         try {
+
             List<String> inserts = new ArrayList<>();
             int count = 0;
-            for (AirMovimentDTO t : airMovimentDTOs) {
-                inserts.add(mountBatchInsert(t, Utils.TypeField.AIR));
+            while (!collection.isEmpty()) {
+                inserts.add(mountBatchInsert(collection.remove(0), Utils.TypeField.AIR));
                 count++;
                 if (count == 3000) {
                     String query = "INSERT INTO `ltm_stage`.`AirMovimentDC` VALUES " + inserts.stream().collect(Collectors.joining(","));
 
-                    Statement ps = this.connection.createStatement();
+                    Statement ps = connection.createStatement();
                     ps.clearBatch();
                     ps.addBatch(query);
 
                     ps.executeBatch();
-                    this.connection.commit();
+                    connection.commit();
                     count = 0;
                     inserts.clear();
                 }
@@ -192,30 +197,36 @@ public class IntegrationService {
             }
 
             String query = "INSERT INTO `ltm_stage`.`AirMovimentDC` VALUES " + inserts.stream().collect(Collectors.joining(","));
-            Statement ps = this.connection.createStatement();
+            Statement ps = connection.createStatement();
             ps.clearBatch();
             ps.addBatch(query);
 
             ps.executeBatch();
-            this.connection.commit();
+            connection.commit();
+
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ move ]", e);
         } finally {
-            this.closeConnection();
+            this.closeConnection(connection);
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ move ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
+
     }
 
     private void callSpDataCollector() throws SQLException {
 
+        Connection connection = null;
+        long start = System.currentTimeMillis();
         try {
-            this.openConnection();
-            CallableStatement c = this.connection.prepareCall("{call SP_DataCollector}");
+            connection = this.getConnection();
+            CallableStatement c = connection.prepareCall("{call SP_DataCollector}");
             c.execute();
-            this.connection.commit();
+            connection.commit();
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ callSpDataCollector ]", e);
         } finally {
-            this.closeConnection();
+            this.closeConnection(connection);
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ callSpDataCollector ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
 
     }
@@ -223,13 +234,14 @@ public class IntegrationService {
     public void makeFileResultIntegration() throws SQLException, IOException {
 
         File file = null;
-
+        Connection connection = null;
+        long start = System.currentTimeMillis();
         try {
-            this.openConnection();
+            connection = this.getConnection();
 
             String query = "select * from `ltm_stage`.`LogErroDataCollector` where Processamento = '" + LocalDate.now().format(DateTimeFormatter.ISO_DATE) + "'";
 
-            PreparedStatement st = this.connection.prepareStatement(query);
+            PreparedStatement st = connection.prepareStatement(query);
 
             ResultSet result = st.executeQuery();
 
@@ -253,8 +265,9 @@ public class IntegrationService {
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ makeFile ]", e);
         } finally {
-            this.closeConnection();            
-            Utils.forceDeleteFile(file);            
+            this.closeConnection(connection);
+            Utils.forceDeleteFile(file);
+            Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ makeFileResultIntegration ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
 
     }
@@ -271,10 +284,10 @@ public class IntegrationService {
 
     }
 
-    public void closeConnection() {
+    public synchronized void closeConnection(Connection connection) {
         try {
-            if (!this.connection.isClosed()) {
-                this.connection.close();
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
             }
 
         } catch (Exception e) {
@@ -282,7 +295,9 @@ public class IntegrationService {
         }
     }
 
-    public void openConnection() {
+    public synchronized Connection getConnection() {
+
+        Connection connection = null;
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -291,6 +306,8 @@ public class IntegrationService {
 
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ openConnection ]", e);
+        } finally {
+            return connection;
         }
     }
 }

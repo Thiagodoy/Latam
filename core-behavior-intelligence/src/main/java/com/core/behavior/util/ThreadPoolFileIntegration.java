@@ -6,32 +6,46 @@
 package com.core.behavior.util;
 
 import com.core.behavior.jobs.IntegrationJob;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.Data;
 
 /**
  *
- * @author thiag
+ * @author thiagS
  */
 @Data
 public class ThreadPoolFileIntegration {
-     private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
-     
-     
-     public synchronized void submit(IntegrationJob job){
-         
-         Optional<IntegrationJob> integrationJob =  executor.getQueue().stream().map(q->{
-             return (IntegrationJob)q;
-         }).filter(i-> i.getFileId().equals(job.getFileId())).findFirst();
-         
-         if(!integrationJob.isPresent()){
-             executor.submit(job);
-         }
-         
-         
-     }
-     
-     
+
+    private ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
+    private Map<Long, IntegrationJob> poll = Collections.synchronizedMap(new HashMap<Long, IntegrationJob>());
+
+    public synchronized void submit(IntegrationJob job) {
+
+        
+        
+        
+        synchronized (poll) {
+            boolean isScheduled = poll.containsKey(job.getFileId());
+            
+            Logger.getLogger(ThreadPoolFileIntegration.class.getName()).log(Level.INFO, "Adiciona no poll -> " + !isScheduled );
+            
+
+            if (!isScheduled) {
+                poll.put(job.getFileId(), job);
+                job.setPool(poll);
+                executor.submit(job);
+                Logger.getLogger(ThreadPoolFileIntegration.class.getName()).log(Level.INFO, "Adicionado");
+
+            }
+
+        }
+
+    }
+
 }

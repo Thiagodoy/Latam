@@ -7,6 +7,7 @@ package com.core.behavior.services;
 
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.FileReturnJob;
+import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.repository.AgencyRepository;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.jboss.logging.Logger;
 import org.quartz.JobDataMap;
+import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -48,8 +50,7 @@ public class FileReturnService {
     private UserActivitiService userActivitiService;
     
     @Autowired
-    private FileReturnJob fileReturnJob;
-    
+    private ApplicationContext context;
     
     @Autowired
     private ThreadPoolFileReturn threadPoolFileExecutor;
@@ -86,7 +87,7 @@ public class FileReturnService {
             return;
         }
 
-             
+        FileReturnJob1 fileReturnJob = this.context.getBean(FileReturnJob1.class);
         
         fileReturnJob.setParameter(FileReturnJob.DATA_FILE_ID, id);
         fileReturnJob.setParameter(FileReturnJob.DATA_EMAIL_ID, email);        

@@ -21,7 +21,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.poi.ss.util.CellAddress;
 
 /**
@@ -30,6 +32,7 @@ import org.apache.poi.ss.util.CellAddress;
  */
 @Entity
 @Data
+@NoArgsConstructor
 @Table(name = "ticket_error")
 public class TicketError {
 
@@ -295,6 +298,18 @@ public class TicketError {
     @PositionParameter(value = 53)
     @Column(name = "content")
     public String content;
+    
+    @Transient
+    private static List<Field> fields;
+    
+    
+    @Transient
+    private Long recordPosition;
+    
+    static{
+        TicketError.fields = Arrays.asList(TicketError.class.getDeclaredFields());
+    }
+    
 
     public TicketError(Long fileId, Long line, String content) {
         this.fileId = fileId;
@@ -312,10 +327,28 @@ public class TicketError {
         }
 
     }
+    
+    
+    
+    public boolean hasErrorByField(String field) {
+
+        long f = TicketError.fields
+                .stream()
+                .filter(fs -> fs.isAnnotationPresent(PositionColumnExcel.class) && fs.getName().equals(field))
+                .mapToLong(l -> {
+                    try {
+                        return (long)l.get(this);
+                    } catch (Exception ex) {
+                        return 0L;
+                    }
+                }).reduce(Long::sum).getAsLong();
+        
+        return f > 0;
+    }
 
     public boolean hasError() {
 
-        long f = Arrays.asList(TicketError.class.getDeclaredFields())
+        long f = TicketError.fields
                 .stream()
                 .filter(fs -> fs.isAnnotationPresent(PositionColumnExcel.class))
                 .mapToLong(l -> {
@@ -333,9 +366,9 @@ public class TicketError {
 
         String colum = cellAddress.formatAsString().replaceAll("(\\d)*", "");
 
-        List<Field> fields = Arrays.asList(TicketError.class.getDeclaredFields());
+        
 
-        Optional<Field> field = fields
+        Optional<Field> field = TicketError.fields
                 .stream()
                 .filter(f -> f.isAnnotationPresent(PositionColumnExcel.class) && f.getAnnotation(PositionColumnExcel.class).column().equals(colum))
                 .findFirst();

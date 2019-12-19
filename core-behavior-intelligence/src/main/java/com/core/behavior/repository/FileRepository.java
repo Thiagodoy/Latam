@@ -32,7 +32,7 @@ public interface FileRepository extends JpaRepository<File, Long> , JpaSpecifica
     List<FileStatusProcessDTO> statusProcesss(@Param("agencia")Long agencia, @Param("start")LocalDateTime start, @Param("end")LocalDateTime end);
     
     @Query(nativeQuery = true)
-    List<FileLinesApprovedDTO> moveToAnalitics(@Param("file") Long id);   
+    Optional<FileLinesApprovedDTO> moveToAnalitics(@Param("file") Long id);   
     
     Optional<File> findByNameAndCompany(String name, Long company);
     

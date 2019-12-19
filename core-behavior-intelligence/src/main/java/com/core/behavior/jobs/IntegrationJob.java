@@ -7,6 +7,8 @@ import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.IntegrationService;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Data;
@@ -24,20 +26,20 @@ public class IntegrationJob implements Runnable {
     private TicketService ticketService;
 
     @Autowired
-    private FileService fileService;    
-    
-    @Autowired
-    private IntegrationService integrationService;    
+    private FileService fileService;
 
-    
-    
+    @Autowired
+    private IntegrationService integrationService;
+
+    private Map<Long, IntegrationJob> pool;
 
     private Long fileId;
 
     public IntegrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService) {
         this.ticketService = ticketService;
         this.fileService = fileService;
-        this.integrationService = integrationService; 
+        this.integrationService = integrationService;
+
     }
 
     @Override
@@ -45,8 +47,17 @@ public class IntegrationJob implements Runnable {
 
         try {
 
-            FileLinesApprovedDTO file = fileService.fileInfo(this.fileId);            
-            this.getValues(file);
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Inciando integração arquivo ->" + fileId);
+
+            Optional<FileLinesApprovedDTO> file = fileService.fileInfo(this.fileId);
+
+            if (file.isPresent()) {
+
+                this.getValues(file.get());
+                this.removeFromPoll();
+            }
+
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "Finalizado integração arquivo ->" + fileId);
 
         } catch (Exception e) {
             Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[run] -> id = " + this.fileId, e);
@@ -54,21 +65,29 @@ public class IntegrationJob implements Runnable {
 
     }
 
+    private void removeFromPoll() {
+        synchronized (this.pool) {
+            this.pool.remove(this.fileId);
+        }
+    }
+
     private void getValues(FileLinesApprovedDTO file) throws Exception {
 
         long start = System.currentTimeMillis();
         PageRequest page = PageRequest.of(0, file.getQtd().intValue());
 
-        List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);       
+        //Sujeito arealizar a parallelização
+        List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);
 
         try {
             integrationService.integrate(tickets);
             ticketService.updateStatusAndFileIntegrationBatch(TicketStatusEnum.WRITED, tickets, "");
         } catch (Exception e) {
             Logger.getLogger(IntegrationJob.class.getName()).log(Level.SEVERE, "[ integrate ] -> id = " + this.fileId, e);
-        }       
+        } finally {
+            Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ getValues ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        }
 
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, "[ IntegrationJob ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
-    }      
+    }
 
 }

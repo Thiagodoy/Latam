@@ -183,6 +183,7 @@ public class ProcessFileJob1 implements Runnable {
                 List<Ticket> success = (List<Ticket>) resul.get(LIST_DATA_SUCCESS);
                 List<Log> error = (List<Log>) resul.get(LIST_DATA_ERROR);
 
+                boolean integra = success.size() > 0;
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });
@@ -206,10 +207,12 @@ public class ProcessFileJob1 implements Runnable {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_SUCCESS);
                 fileService.setStage(idFile, StageEnum.FINISHED.getCode());
 
-                IntegrationJob job = context.getBean(IntegrationJob.class);
-                job.setFileId(idFile);
-                threadPoolFileIntegration.submit(job);
-                
+                if (integra) {
+                    IntegrationJob job = context.getBean(IntegrationJob.class);
+                    job.setFileId(idFile);
+                    threadPoolFileIntegration.submit(job);
+                }
+
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);
             }

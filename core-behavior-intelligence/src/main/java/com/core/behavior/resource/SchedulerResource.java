@@ -6,6 +6,9 @@
 package com.core.behavior.resource;
 
 import com.core.behavior.services.SchedulerService;
+import com.core.behavior.util.ThreadPoolFileIntegration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +32,11 @@ public class SchedulerResource {
     public ResponseEntity generateFileIntegration(@PathVariable("fileId")Long fileId){
         
         try {
+            Logger.getLogger(SchedulerResource.class.getName()).log(Level.INFO, "[generateFileIntegration] ->" + fileId );
             service.processFile(fileId);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            Logger.getLogger(SchedulerResource.class.getName()).log(Level.SEVERE, "[generateFileIntegration] ->" + fileId, e );
             return ResponseEntity.status(HttpStatus.resolve(500)).body(e);
         }
         

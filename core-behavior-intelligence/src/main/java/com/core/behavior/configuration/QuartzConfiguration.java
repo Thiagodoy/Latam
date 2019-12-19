@@ -5,6 +5,7 @@ import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.FileReturnJob;
+import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.jobs.ProcessFileJob1;
@@ -129,6 +130,11 @@ public class QuartzConfiguration {
     @Bean
     public FileReturnJob fileReturnJob(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
         return new FileReturnJob(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
+    }
+    
+    @Bean
+    public FileReturnJob1 fileReturnJob1(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
+        return new FileReturnJob1(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
     }
 
     @Bean
