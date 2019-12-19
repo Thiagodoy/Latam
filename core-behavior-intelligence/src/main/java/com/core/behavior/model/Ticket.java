@@ -4,16 +4,22 @@ import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.dto.TicketValidationShortDTO;
+import com.core.behavior.jobs.ProcessFileJob;
+import static com.core.behavior.jobs.ProcessFileJob1.SIZE_BILHETE_BEHAVIOR;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
 import com.core.behavior.util.Utils;
 import java.io.Serializable;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
@@ -27,6 +33,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
@@ -37,33 +44,31 @@ import org.hibernate.annotations.DynamicUpdate;
         classes = @ConstructorResult(
                 targetClass = TicketValidationDTO.class,
                 columns = {
-                        @ColumnResult(name = "duplicity", type = Long.class)                        
-                    }))
+                    @ColumnResult(name = "duplicity", type = Long.class)
+                }))
 
 @SqlResultSetMapping(name = "TicketRulesShort",
         classes = @ConstructorResult(
                 targetClass = TicketValidationShortDTO.class,
-                columns = {                        
-                        @ColumnResult(name = "insert", type = Long.class),
+                columns = {
+                    @ColumnResult(name = "insert", type = Long.class)
+                    ,
                         @ColumnResult(name = "update", type = Long.class)
-                    }))
-
+                }))
 
 @SqlResultSetMapping(name = "TicketRulesCountCupom",
         classes = @ConstructorResult(
                 targetClass = TicketCountCupomDTO.class,
                 columns = {
-                        @ColumnResult(name = "count", type = Long.class)                       
-                    }))
+                    @ColumnResult(name = "count", type = Long.class)
+                }))
 
 @NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select count(1) as duplicity  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa " )
+        query = "select count(1) as duplicity  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa ")
 
 @NamedNativeQuery(name = "Ticket.rulesShort", resultSetMapping = "TicketRulesShort",
-        query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n" +
-                "(select count(1) as value from ticket where agrupamento_c = :agrupac and cupom = :cupom  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update'\n")
-
-
+        query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n"
+        + "(select count(1) as value from ticket where agrupamento_c = :agrupac and cupom = :cupom  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update'\n")
 
 @NamedNativeQuery(name = "Ticket.rulesCountCupom", resultSetMapping = "TicketRulesCountCupom",
         query = "select count(cupom) count  from ticket where agrupamento_a = :agrupa and cupom <= :cupom and type = 'INSERT'")
@@ -113,7 +118,7 @@ public class Ticket {
     @PositionParameter(value = 8)
     @Column(name = "CIA_VOO")
     public String ciaVoo;
-    
+
     @PositionParameter(value = 9)
     @Column(name = "CABINE")
     public String cabine;
@@ -264,7 +269,7 @@ public class Ticket {
 
     @PositionParameter(value = 46)
     @Id
-   // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     public Long id;
 
@@ -305,43 +310,42 @@ public class Ticket {
     @PositionParameter(value = 55)
     @Column(name = "GRUPO_CONSOLIDADA")
     public String grupoConsolidada;
-    
+
     @PositionParameter(value = 56)
     @Column(name = "FILE_INTEGRATION")
     public String fileIntegration;
-    
+
     @PositionParameter(value = 57)
     @Column(name = "CODE_AGENCY")
     public String codeAgencia;
-    
+
     @PositionParameter(value = 58)
     @Column(name = "AGRUPAMENTO_A")
     public String agrupamentoA;
-    
+
     @PositionParameter(value = 59)
     @Column(name = "AGRUPAMENTO_B")
     public String agrupamentoB;
-    
+
     @PositionParameter(value = 60)
     @Column(name = "AGRUPAMENTO_C")
     public String agrupamentoC;
-    
+
     @PositionParameter(value = 61)
     @Column(name = "BILHETE_BEHAVIOR")
     public String bilheteBehavior;
-    
+
     @PositionParameter(value = 62)
     @Enumerated(EnumType.STRING)
     @Column(name = "TYPE")
     public TicketTypeEnum type;
-    
-    @PositionParameter(value = 63)    
+
+    @PositionParameter(value = 63)
     @Column(name = "KEY")
     public String key;
-    
-    
+
     @Transient
-    private List<Log>errors;
+    private List<Log> errors;
 
     public Ticket() {
         this.createdAt = LocalDateTime.now();
@@ -384,10 +388,10 @@ public class Ticket {
                 this.consolidada);
 
         if (this.layout.equals(TicketLayoutEnum.FULL)) {
-            reg += MessageFormat.format(";{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26};{27};{28}", 
-                    Utils.formatDate(this.dataExtracao) ,
+            reg += MessageFormat.format(";{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26};{27};{28}",
+                    Utils.formatDate(this.dataExtracao),
                     this.horaEmissao,
-                    Utils.formatDate(this.dataReserva) ,
+                    Utils.formatDate(this.dataReserva),
                     this.horaReserva,
                     this.horaPouso,
                     this.baseTarifaria,
@@ -418,4 +422,35 @@ public class Ticket {
 
         return reg;
     }
+
+    public void setId(Long id) {
+
+        this.id = id;
+        
+        try {
+            String bilheteBehavior = "";
+            SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
+            String dataEmissao = formmaterDate.format(this.getDataEmissao());
+            String ano = dataEmissao.substring(dataEmissao.length() - 1);
+            String mes = dataEmissao.substring(2, 4);
+
+            String sequencial = "";
+            String ids = String.valueOf(this.getId());
+
+            if (ids.length() < SIZE_BILHETE_BEHAVIOR) {
+                sequencial = StringUtils.leftPad(ids, SIZE_BILHETE_BEHAVIOR, "0");
+            } else {
+                sequencial = ids.substring(ids.length() - SIZE_BILHETE_BEHAVIOR);
+            }
+
+            bilheteBehavior = this.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);            
+            
+            
+            this.setBilheteBehavior(bilheteBehavior);
+        } catch (Exception e) {
+            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
+        }
+
+    }
+
 }

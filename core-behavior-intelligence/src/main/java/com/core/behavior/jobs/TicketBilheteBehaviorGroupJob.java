@@ -37,7 +37,9 @@ public class TicketBilheteBehaviorGroupJob implements Runnable {
             Optional<TicketStage> ticketStage = this.service.getByAgrupamentoAAndCupom(ticket);
             
             if(ticketStage.isPresent()){
-                ticket.setBilheteBehavior(ticketStage.get().getBilhetBehavior());    
+                synchronized(ticketStage){
+                    ticket.setBilheteBehavior(ticketStage.get().getBilhetBehavior());    
+                }
             }           
             
         } catch (Exception e) {            

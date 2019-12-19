@@ -192,10 +192,9 @@ public class ProcessFileJob1 implements Runnable {
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
                 });                
-                
+
                 this.writeErrors(error);
-                this.generateIds(success);
-                this.generateBilheteBehavior(success);
+                this.generateIds(success);                
                 this.mountStage(success);
                 this.runRules2(success);
                 this.runRules3(success);
@@ -344,7 +343,7 @@ public class ProcessFileJob1 implements Runnable {
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED)).forEach(t -> {
+        success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED) && !s.getCupom().equals(1L)).forEach(t -> {
             synchronized(executorService){
                 executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
             }            
@@ -386,7 +385,7 @@ public class ProcessFileJob1 implements Runnable {
 
     private void generateBilheteBehavior(List<Ticket> tickets) {
 
-        tickets.parallelStream().forEach(t -> {
+        tickets.forEach(t -> {
 
             try {
                 String bilheteBehavior = "";
@@ -414,5 +413,6 @@ public class ProcessFileJob1 implements Runnable {
         });
 
     }
+    
 
 }

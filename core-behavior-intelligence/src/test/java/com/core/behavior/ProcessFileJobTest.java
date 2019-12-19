@@ -51,7 +51,7 @@ public class ProcessFileJobTest {
          Agency agency = agencyService.findById(25l);
         String folder = true ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
-        File file =  new File("latam_movimento_aereo_FBT_20191001_20191031.csv");//clientAws.downloadFile("MASTER 28-10-19 a 03-11-19.csv.csv", folder);
+        File file =  new File("teste_thiago.csv");//clientAws.downloadFile("MASTER 28-10-19 a 03-11-19.csv.csv", folder);
         
         
         
