@@ -29,6 +29,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -190,8 +191,8 @@ public class ProcessFileJob1 implements Runnable {
                 boolean integra = success.size() > 0;
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
-                });
-
+                });                
+                
                 this.writeErrors(error);
                 this.generateIds(success);
                 this.generateBilheteBehavior(success);
@@ -261,7 +262,7 @@ public class ProcessFileJob1 implements Runnable {
         List<TicketStage> stage = success
                 .stream()
                 .parallel()
-                .map(s -> new TicketStage(null, s.getCupom(), s.getAgrupamentoA(), s.getAgrupamentoB(), s.getBilheteBehavior()))
+                .map(s -> new TicketStage(null, s.getCupom(), s.getAgrupamentoA(), s.getAgrupamentoB(), s.getBilheteBehavior(), LocalDateTime.now()))
                 .collect(Collectors.toList());
 
         this.ticketStageService.saveBatch(stage);
@@ -302,8 +303,10 @@ public class ProcessFileJob1 implements Runnable {
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream().forEach(t -> {
-            executorService.submit(new TicketDuplicityValidationJob(context.getBean(TicketService.class), t));
+        success.parallelStream().forEach(t -> {            
+            synchronized(executorService){
+                executorService.submit(new TicketDuplicityValidationJob(context.getBean(TicketService.class), t));
+            }            
         });
 
         executorService.shutdown();
@@ -321,8 +324,10 @@ public class ProcessFileJob1 implements Runnable {
 
         success.parallelStream()
                 .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
-                .forEach(t -> {
-                    executorService.submit(new TicketCupomValidationJob(ticketService, t));
+                .forEach(t -> {                    
+                    synchronized(executorService){
+                        executorService.submit(new TicketCupomValidationJob(ticketService, t));
+                    }
                 });
 
         executorService.shutdown();
@@ -340,7 +345,9 @@ public class ProcessFileJob1 implements Runnable {
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
         success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED)).forEach(t -> {
-            executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
+            synchronized(executorService){
+                executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
+            }            
         });
 
         executorService.shutdown();

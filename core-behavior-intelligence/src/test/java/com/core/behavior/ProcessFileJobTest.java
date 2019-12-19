@@ -9,6 +9,8 @@ package com.core.behavior;
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.jobs.ProcessFileJob1;
+
+
 import com.core.behavior.model.Agency;
 import com.core.behavior.services.AgencyService;
 import com.core.behavior.util.ThreadPoolFileValidation;
@@ -46,10 +48,10 @@ public class ProcessFileJobTest {
     public void process() throws IOException{
         
         
-         Agency agency = agencyService.findById(16l);
+         Agency agency = agencyService.findById(25l);
         String folder = true ? agency.getS3Path().split("\\\\")[1] + "/ORIGINAL" : agency.getS3Path().split("\\\\")[1];
 
-        File file =  new File("MASTER 28-10-19 a 03-11-19.csv");//clientAws.downloadFile("MASTER 28-10-19 a 03-11-19.csv.csv", folder);
+        File file =  new File("latam_movimento_aereo_FBT_20191001_20191031.csv");//clientAws.downloadFile("MASTER 28-10-19 a 03-11-19.csv.csv", folder);
         
         
         
@@ -63,12 +65,12 @@ public class ProcessFileJobTest {
           
         ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, "thiagodoy@hotmail.com");
-        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 43L);
+        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 25L);
         
         
         
         processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
-        processFileJob.setParameter(ProcessFileJob.DATA_FILE_ID, 131L);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE_ID, 5504L);
         processFileJob.setParameter(ProcessFileJob.DATA_LAYOUT_FILE, 2L);
 
         threadPoolFileValidation.getExecutor().submit(processFileJob);
