@@ -67,8 +67,7 @@ public class Utils {
     private static SimpleDateFormat formmatDate;
     private static SimpleDateFormat formmatDate2;
     private static Tika tika;
-    private static final Map<String, String> entitiesHtml = new HashMap<String, String>();
-    private static final Map<String, String> positionColumnByField = new HashMap<String, String>();
+    private static final Map<String, String> entitiesHtml = new HashMap<String, String>();    
 
     public static final List<String> layoutMin = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada");
     public static final List<String> layoutFull = Arrays.asList("dataEmissao", "dataEmbarque", "horaEmbarque", "ciaBilhete", "trecho", "origem", "destino", "cupom", "bilhete", "tipo", "cabine", "ciaVoo", "valorBrl", "empresa", "cnpj", "iataAgencia", "baseVenda", "qtdPax", "numVoo", "consolidada", "dataExtracao", "horaEmissao", "dataReserva", "horaReserva", "horaPouso", "baseTarifaria", "tktDesignator", "familiaTarifaria", "classeTarifa", "classeServico", "ondDirecional", "tourCode", "rtOw", "valorUs", "tarifaPublica", "tarifaPublicUs", "pnrAgencia", "pnrCiaArea", "selfBookingOffiline", "nomePax", "tipoPax", "cpfPax", "emailPax", "cellPax", "tierFidelidadePax", "tipoPagamento", "digitoVerificadorCC", "grupoEmpresa", "grupoConsolidada");
@@ -172,61 +171,8 @@ public class Utils {
         entitiesHtml.put("Ü", "&#220;");
         entitiesHtml.put("ç", "&#231;");
 
-        positionColumnByField.put("dataEmissao", "B");
-        positionColumnByField.put("dataEmbarque", "C");
-        positionColumnByField.put("horaEmbarque", "D");
-        positionColumnByField.put("ciaBilhete", "E");
-        positionColumnByField.put("trecho", "F");
-        positionColumnByField.put("origem", "G");
-        positionColumnByField.put("destino", "H");
-        positionColumnByField.put("cupom", "I");
-        positionColumnByField.put("bilhete", "J");
-        positionColumnByField.put("tipo", "K");
-        positionColumnByField.put("cabine", "L");
-        positionColumnByField.put("ciaVoo", "M");
-        positionColumnByField.put("valorBrl", "N");
-        positionColumnByField.put("empresa", "O");
-        positionColumnByField.put("cnpj", "P");
-        positionColumnByField.put("iataAgencia", "Q");
-        positionColumnByField.put("baseVenda", "R");
-        positionColumnByField.put("qtdPax", "S");
-        positionColumnByField.put("numVoo", "T");
-        positionColumnByField.put("consolidada", "U");
-        positionColumnByField.put("dataExtracao", "V");
-        positionColumnByField.put("horaEmissao", "W");
-        positionColumnByField.put("dataReserva", "X");
-        positionColumnByField.put("horaReserva", "Y");
-        positionColumnByField.put("horaPouso", "Z");
-        positionColumnByField.put("baseTarifaria", "AA");
-        positionColumnByField.put("tktDesignator", "AB");
-        positionColumnByField.put("familiaTarifaria", "AC");
-        positionColumnByField.put("classeTarifa", "AD");
-        positionColumnByField.put("classeServico", "AE");
-        positionColumnByField.put("ondDirecional", "AF");
-        positionColumnByField.put("tourCode", "AG");
-        positionColumnByField.put("rtOw", "AH");
-        positionColumnByField.put("valorUs", "AI");
-        positionColumnByField.put("tarifaPublica", "AJ");
-        positionColumnByField.put("tarifaPublicUs", "AK");
-        positionColumnByField.put("pnrAgencia", "AL");
-        positionColumnByField.put("pnrCiaArea", "AM");
-        positionColumnByField.put("selfBookingOffiline", "AN");
-        positionColumnByField.put("nomePax", "AO");
-        positionColumnByField.put("tipoPax", "AP");
-        positionColumnByField.put("cpfPax", "AQ");
-        positionColumnByField.put("emailPax", "AR");
-        positionColumnByField.put("cellPax", "AS");
-        positionColumnByField.put("tierFidelidadePax", "AT");
-        positionColumnByField.put("tipoPagamento", "AU");
-        positionColumnByField.put("digitoVerificadorCC", "AV");
-        positionColumnByField.put("grupoEmpresa", "AW");
-        positionColumnByField.put("grupoConsolidada", "AX");
 
-    }
-
-    public synchronized static String getPositionExcelColumn(String field) {
-        return positionColumnByField.get(field);
-    }
+    }   
 
     public static String formatDateSqlToString(java.sql.Date date) {
         return formmatDate2.format(date);
@@ -303,8 +249,7 @@ public class Utils {
             parameters.add(values.get(key));
         }
 
-        String retono = "(" + parameters.stream().collect(Collectors.joining(",")) + ")";
-        // Logger.getLogger(Utils.class.getName()).log(Level.INFO,retono);
+        String retono = "(" + parameters.stream().collect(Collectors.joining(",")) + ")";        
         return retono;
     }
 

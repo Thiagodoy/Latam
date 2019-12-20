@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -364,9 +363,7 @@ public class TicketError {
 
     public Optional<String> hasComments(CellAddress cellAddress) {
 
-        String colum = cellAddress.formatAsString().replaceAll("(\\d)*", "");
-
-        
+        String colum = cellAddress.formatAsString().replaceAll("(\\d)*", "");        
 
         Optional<Field> field = TicketError.fields
                 .stream()

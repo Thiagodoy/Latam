@@ -111,7 +111,7 @@ public class FileReturnJob1 implements Runnable {
         String emailUser = (String) parameters.get(DATA_EMAIL_ID);
 
         try {
-            //List<LogDTO> logsDTO = this.getData(id);
+            
             //Ordena os dados
             List<TicketError> errors = ticketErrorService
                     .findByFileId(id)
@@ -259,15 +259,10 @@ public class FileReturnJob1 implements Runnable {
         notificacao.setLayout(LayoutEmailEnum.NOTIFICACAO_FILE_RETURN);
 
         Map<String, String> parameter = new HashMap<String, String>();
-        parameter.put(":email", emailUser);
-
-        //:FIXME Colocar o endereço no arquivo de configurações
+        parameter.put(":email", emailUser);        
         String link = "https://api.dataquality.behaviorintelligence.com.br/file/download/arquivo-retorno?company=" + String.valueOf(agency.getId()) + "&fileName=" + fileNameReturn;
-
         parameter.put(":link", link);
-
         String nameUser = userActivitiService.getUser(emailUser).getFirstName();
-
         parameter.put(":nome", Utils.replaceAccentToEntityHtml(nameUser));
         parameter.put(":arquivo", fileName);
 
