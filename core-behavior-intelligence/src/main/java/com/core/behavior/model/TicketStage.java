@@ -6,6 +6,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
@@ -22,6 +24,7 @@ import lombok.Data;
 @Entity
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "ticket_stage")
 public class TicketStage {
 
@@ -46,5 +49,9 @@ public class TicketStage {
     @PositionParameter(value = 4)
     @Column(name = "bilhete_behavior")
     public String bilhetBehavior;
+    
+    @PositionParameter(value = 5)
+    @Column(name = "created_at")
+    public LocalDateTime createdAt;
 
 }

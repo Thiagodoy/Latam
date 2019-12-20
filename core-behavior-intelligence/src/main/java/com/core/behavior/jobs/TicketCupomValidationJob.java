@@ -8,9 +8,6 @@ package com.core.behavior.jobs;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.context.ApplicationContext;
 
 /**

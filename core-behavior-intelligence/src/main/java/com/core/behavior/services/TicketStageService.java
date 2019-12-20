@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -37,9 +38,9 @@ public class TicketStageService {
     @Autowired
     private TicketStageRepository repository;
 
-    public TicketStage getByAgrupamentoAAndCupom(String agrupamentoA) {
+    public Optional<TicketStage> getByAgrupamentoAAndCupom(Ticket ticket) {
 
-        return repository.findByAgrupamentoAAndCupom(agrupamentoA, 1L);
+        return repository.findByAgrupamentoAAndCupom(ticket.getAgrupamentoA(), 1L, ticket.getBilheteBehavior());
     }
 
     public void saveBatch(List<TicketStage> ticket) throws SQLException {
@@ -50,18 +51,14 @@ public class TicketStageService {
 
         this.callProctruncateTicketStage();
         
-        
-        int size = (int) ticket.size() / 2;
-        
-        
 
         try {
 
             Connection con = dataSource.getConnection();
             List<String> inserts = new ArrayList<>();
             int count = 0;
-            for (TicketStage t : ticket) {
-                inserts.add(mountBatchInsert(t, Utils.TypeField.TICKET_STAGE));
+            while (!ticket.isEmpty()) {
+                inserts.add(mountBatchInsert(ticket.remove(0), Utils.TypeField.TICKET_STAGE));
                 count++;
                 if (count == 3000) {
                     String query = "INSERT INTO `behavior`.`ticket_stage` VALUES " + inserts.stream().collect(Collectors.joining(","));

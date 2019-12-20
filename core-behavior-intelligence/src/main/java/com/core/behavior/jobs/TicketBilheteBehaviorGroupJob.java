@@ -7,10 +7,13 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketStage;
+import com.core.behavior.services.IntegrationService;
 import com.core.behavior.services.TicketStageService;
 import com.core.behavior.util.TicketLayoutEnum;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -30,12 +33,18 @@ public class TicketBilheteBehaviorGroupJob implements Runnable {
     @Override
     public void run() {
 
-        if (this.ticket.getLayout().equals(TicketLayoutEnum.FULL)) {
-            TicketStage ticketStage = this.service.getByAgrupamentoAAndCupom(ticket.getAgrupamentoA());
-            ticket.setBilheteBehavior(ticketStage.getBilhetBehavior());
-        } else {
-            // TODO implmentar para o Layout 20 Colunas
-        }
+        try {
+            Optional<TicketStage> ticketStage = this.service.getByAgrupamentoAAndCupom(ticket);
+            
+            if(ticketStage.isPresent()){
+                synchronized(ticketStage){
+                    ticket.setBilheteBehavior(ticketStage.get().getBilhetBehavior());    
+                }
+            }           
+            
+        } catch (Exception e) {            
+             Logger.getLogger(TicketBilheteBehaviorGroupJob.class.getName()).log(Level.SEVERE, "[ run ]", e);            
+        }       
 
     }
 
