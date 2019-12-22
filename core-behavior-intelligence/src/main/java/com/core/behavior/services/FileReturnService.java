@@ -21,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
-import org.jboss.logging.Logger;
-import org.quartz.JobDataMap;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -94,28 +91,6 @@ public class FileReturnService {
         threadPoolFileExecutor.getExecutor().submit(fileReturnJob);
         
         
-
-//        JobDetail detail = JobBuilder
-//                .newJob(FileReturnJob.class)
-//                .withIdentity("FILE-RETURN-JOB-" + String.valueOf(id), "process-file-return")
-//                .withDescription("Processing Return file")
-//                .usingJobData(data)
-//                .build();
-//
-//        SimpleTrigger trigger = TriggerBuilder
-//                .newTrigger()
-//                .withIdentity("FILE-RETURN-TRIGGER-" + String.valueOf(id), "process-file-return")
-//                .startAt(new Date())
-//                .withSchedule(simpleSchedule())
-//                .build();
-//
-//        Optional<JobExecutionContext> opt = bean.getScheduler().getCurrentlyExecutingJobs().stream().filter((jj) -> jj.getJobDetail().getKey().getName().equals(detail.getKey().getName())).findFirst();
-//
-//        if (opt.isPresent()) {
-//            throw new ApplicationException(MessageCode.JOB_IS_RUNNING);
-//        } else {
-//            bean.getScheduler().scheduleJob(detail, trigger);
-//        }
 
     }
     
