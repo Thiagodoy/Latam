@@ -50,6 +50,7 @@ public class TicketService {
         this.saveBatch(Arrays.asList(ticke));
     }
 
+    @Transactional
     public void saveBatch(List<Ticket> ticket) throws SQLException {
 
         if (ticket.isEmpty()) {

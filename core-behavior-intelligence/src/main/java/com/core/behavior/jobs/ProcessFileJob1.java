@@ -377,38 +377,6 @@ public class ProcessFileJob1 implements Runnable {
             logService.saveBatch(error);
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
-    }
-
-    private void generateBilheteBehavior(List<Ticket> tickets) {
-
-        tickets.forEach(t -> {
-
-            try {
-                String bilheteBehavior = "";
-                final SimpleDateFormat formmaterDate = new SimpleDateFormat("ddMMyyyy", new Locale("pt", "BR"));
-                String dataEmissao = formmaterDate.format(t.getDataEmissao());
-                String ano = dataEmissao.substring(dataEmissao.length() - 1);
-                String mes = dataEmissao.substring(2, 4);
-
-                String sequencial = "";
-                String id = String.valueOf(t.getId());
-
-                if (id.length() < SIZE_BILHETE_BEHAVIOR) {
-                    sequencial = StringUtils.leftPad(id, SIZE_BILHETE_BEHAVIOR, "0");
-                } else {
-                    sequencial = id.substring(0, SIZE_BILHETE_BEHAVIOR);
-                }
-
-                bilheteBehavior = t.getLayout().equals(TicketLayoutEnum.FULL) ? MessageFormat.format("2{0}{1}{2}", ano, mes, sequencial) : MessageFormat.format("1{0}{1}{2}", ano, mes, sequencial);
-
-                t.setBilheteBehavior(bilheteBehavior);
-            } catch (Exception e) {
-                Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
-            }
-
-        });
-
-    }
-    
+    }    
 
 }

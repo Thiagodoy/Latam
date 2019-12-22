@@ -71,6 +71,7 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setInitializationFailTimeout(-1);
+        
         hikariConfig.setMinimumIdle(behaviorProperties.getDatasource().getMinimumIdle());
         hikariConfig.setMaximumPoolSize((behaviorProperties.getDatasource().getMaximumPoolSize()));
         hikariConfig.setValidationTimeout((behaviorProperties.getDatasource().getValidationTimeout()));
