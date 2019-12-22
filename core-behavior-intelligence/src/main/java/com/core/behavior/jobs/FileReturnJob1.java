@@ -127,13 +127,18 @@ public class FileReturnJob1 implements Runnable {
 
             Logger.getLogger(FileReturnJob1.class.getName()).log(Level.INFO, "[ Files parttions] -> " + patitions1.size());
 
+            
+            
             int count = 0;
 
-            for (List<TicketError> partition : patitions1) {
+            while (!patitions1.isEmpty()) {
 
+                
+                
+                
                 long startFile = System.currentTimeMillis();
                 this.createFile(agency.getLayoutFile());
-                this.writeLote1(partition);
+                this.writeLote1(patitions1.get(0));
 
                 String fileNameNew = file.getName().replaceAll(".(csv|CSV)", "");
                 File temp = new File(fileNameNew + "_" + (++count) + "_error.xlsx");
@@ -220,9 +225,9 @@ public class FileReturnJob1 implements Runnable {
 
         this.lineWrited = sheet.getLastRowNum();
 
-        for (int r = 0; r < errors.size(); r++) {
+        while (!errors.isEmpty()) {
 
-            TicketError ticketError = errors.remove(r);
+            TicketError ticketError = errors.remove(0);
 
             SXSSFRow row = sheet.createRow(++this.lineWrited);
 

@@ -242,7 +242,7 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {        
          
-        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
+        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
         processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
         processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
         processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
