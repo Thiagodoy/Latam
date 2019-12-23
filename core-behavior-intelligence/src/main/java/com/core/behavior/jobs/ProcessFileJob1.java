@@ -6,6 +6,7 @@ import com.core.behavior.model.Log;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.model.Sequence;
+import com.core.behavior.model.TicketError;
 import com.core.behavior.model.TicketKey;
 import com.core.behavior.model.TicketStage;
 import com.core.behavior.services.AgencyService;
@@ -13,6 +14,7 @@ import com.core.behavior.services.FileProcessStatusService;
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.services.SequenceService;
+import com.core.behavior.services.TicketErrorService;
 import com.core.behavior.services.TicketKeyService;
 import com.core.behavior.services.TicketService;
 import com.core.behavior.services.TicketStageService;
@@ -87,6 +89,9 @@ public class ProcessFileJob1 implements Runnable {
     public static final String LIST_DATA_SUCCESS = "success";
     public static final String LIST_DATA_ERROR = "error";
     public static final int SIZE_BILHETE_BEHAVIOR = 7;
+    
+    @Autowired
+    private TicketErrorService ticketErrorService;
 
     private static final int THREAD_POLL = 100;
 
@@ -178,7 +183,7 @@ public class ProcessFileJob1 implements Runnable {
                 Map<String, Object> resul = this.runRule1(dto);
 
                 List<Ticket> success = (List<Ticket>) resul.get(LIST_DATA_SUCCESS);
-                List<Log> error = (List<Log>) resul.get(LIST_DATA_ERROR);
+                List<TicketError> error = (List<TicketError>) resul.get(LIST_DATA_ERROR);
 
                 boolean integra = success.size() > 0;
                 success.parallelStream().forEach(t -> {
@@ -266,7 +271,7 @@ public class ProcessFileJob1 implements Runnable {
 
         Map<String, Object> map = new HashMap<>();
         List<Ticket> success = Collections.synchronizedList(new ArrayList<Ticket>());
-        List<Log> error = Collections.synchronizedList(new ArrayList<Log>());
+        List<TicketError> error = Collections.synchronizedList(new ArrayList<TicketError>());
 
         long start = System.currentTimeMillis();
 
@@ -278,7 +283,7 @@ public class ProcessFileJob1 implements Runnable {
             if (!validator.getTicketError().hasError()) {
                 success.add(validator.getTicket());
             } else if (validator.getTicketError().hasError()) {
-               // error.add(validator.getTicketError());
+                error.add(validator.getTicketError());
             }
 
         });
@@ -368,13 +373,13 @@ public class ProcessFileJob1 implements Runnable {
 
     }
 
-    private void writeErrors(List<Log> error) {
+    private void writeErrors(List<TicketError> error) {
 
         if (!error.isEmpty()) {
             long start = System.currentTimeMillis();
-            logService.saveBatch(error);
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+            ticketErrorService.saveBatch(error);
+            Logger.getLogger(ProcessFileJob2.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
-    }    
+    } 
 
 }

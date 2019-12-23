@@ -708,30 +708,14 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public IValidator checkHoraPouso() {
-
-        Pattern p = Pattern.compile(REGEX_HORA_VOO);
-        int countError = 0;
+    public IValidator checkHoraPouso() {        
 
         if (!Optional.ofNullable(ticketDTO.getHoraPouso()).isPresent()) {
-            countError++;
-        }
-
-        try {
-            Matcher m = p.matcher(ticketDTO.getHoraPouso());
-            if (!m.matches()) {
-                countError++;
-            }
-        } catch (Exception e) {
-            countError++;
-        }
-
-        if (countError > 0) {
-            this.ticketError.activeError("horaPouso");
-        } else {
+            ticket.setHoraPouso("");
+        }else{
             ticket.setHoraPouso(ticketDTO.getHoraPouso());
-        }
-
+        }   
+        
         return this;
     }
 
@@ -784,7 +768,7 @@ public class Validator implements IValidator {
     public IValidator checkClasseServico() {
 
         if (!Optional.ofNullable(this.ticketDTO.getClasseServico()).isPresent() || this.ticketDTO.getClasseServico().length() == 0) {
-            this.ticketError.activeError("classeServico");
+            this.ticket.setClasseServico("");
         } else {
             this.ticket.setClasseServico(this.ticketDTO.getClasseServico());
         }

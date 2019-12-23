@@ -9,7 +9,6 @@ import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.jobs.ProcessFileJob1;
-import com.core.behavior.quartz.listenner.BehaviorJobListenner;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.AgencyService;
@@ -52,9 +51,7 @@ public class QuartzConfiguration {
 
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
-        Scheduler scheduler = bean.getScheduler();
-
-        scheduler.getListenerManager().addJobListener(new BehaviorJobListenner(), GroupMatcher.jobGroupEquals("fg_jobgroup_01"));
+        Scheduler scheduler = bean.getScheduler();       
 
         scheduler.start();
 
