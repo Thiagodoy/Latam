@@ -27,14 +27,11 @@ import com.core.behavior.util.Utils;
 import com.core.behavior.validator.Validator;
 import java.io.File;
 import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -42,7 +39,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -212,6 +208,8 @@ public class ProcessFileJob1 implements Runnable {
                     job.setFileId(idFile);
                     threadPoolFileIntegration.submit(job);
                 }
+                
+                System.gc();
 
             } else if (logService.fileHasError(fileId)) {
                 fileService.setStatus(idFile, StatusEnum.VALIDATION_ERROR);

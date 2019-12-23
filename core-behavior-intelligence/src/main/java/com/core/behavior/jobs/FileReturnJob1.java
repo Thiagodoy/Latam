@@ -131,9 +131,7 @@ public class FileReturnJob1 implements Runnable {
             
             int count = 0;
 
-            while (!patitions1.isEmpty()) {
-
-                
+            while (!patitions1.isEmpty()) {              
                 
                 
                 long startFile = System.currentTimeMillis();
@@ -166,6 +164,8 @@ public class FileReturnJob1 implements Runnable {
             filesCreated.add(zipedFile);
 
             this.deleteFiles(filesCreated);
+            
+            System.gc();
 
         } catch (Exception ex) {
             Logger.getLogger(FileReturnJob1.class.getName()).log(Level.SEVERE, "[ executeInternal ]", ex);
