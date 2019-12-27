@@ -10,8 +10,6 @@ import com.core.behavior.repository.SequenceRepository;
 import com.core.behavior.util.SequenceTableEnum;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

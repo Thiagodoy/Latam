@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +39,12 @@ public class TicketStageService {
     @Autowired
     private TicketStageRepository repository;
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<TicketStage> getByAgrupamentoAAndCupom(Ticket ticket) {
-
-        return repository.findByAgrupamentoAAndCupom(ticket.getAgrupamentoA(), 1L, ticket.getBilheteBehavior());
+        return repository.findByAgrupamentoAAndCupom(ticket.getAgrupamentoA(), 1L);
     }
 
+    @Transactional
     public void saveBatch(List<TicketStage> ticket) throws SQLException {
 
         if (ticket.isEmpty()) {

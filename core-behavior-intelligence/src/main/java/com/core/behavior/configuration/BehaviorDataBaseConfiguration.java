@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -41,7 +42,7 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         this.environment = e;
     }
 
-    
+    @Primary
     @Bean
     public LocalContainerEntityManagerFactoryBean behaviorEntityManager() {
         LocalContainerEntityManagerFactoryBean em
@@ -64,6 +65,7 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         return em;
     }
     
+    @Primary
     @Bean
     public DataSource dataSourceBehavior() {
 
@@ -91,7 +93,8 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         return dataSource;
     }
     
-     @Bean
+    @Primary
+    @Bean
     public PlatformTransactionManager behaviorTransactionManager() {
   
         JpaTransactionManager transactionManager

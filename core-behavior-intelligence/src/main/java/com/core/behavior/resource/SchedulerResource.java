@@ -6,7 +6,6 @@
 package com.core.behavior.resource;
 
 import com.core.behavior.services.SchedulerService;
-import com.core.behavior.util.ThreadPoolFileIntegration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

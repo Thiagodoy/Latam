@@ -1,5 +1,7 @@
 package com.core.activiti.model;
 
+import com.amazonaws.services.rds.model.Option;
+import com.google.common.base.Optional;
 import javax.annotation.PostConstruct;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -54,7 +56,9 @@ public class UserInfo {
 
     @PostConstruct
     @PrePersist
-    public void setIdG(){    
-        this.id = String.valueOf(hashCode());
+    public void setIdG(){   
+        if(!Optional.fromNullable(id).isPresent()){
+            this.id = String.valueOf(hashCode());
+        }        
     }
 }

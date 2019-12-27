@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ public class TicketErrorService {
         return repository.findByFileId(id);
     }
     
+    @Transactional
     public void saveBatch(List<TicketError> logs) {
 
         try {

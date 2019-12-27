@@ -41,42 +41,8 @@ public class TicketDuplicityValidationJob implements Runnable {
                 ticket.setBilheteBehavior(null);
             } else{
                 ticket.setType(TicketTypeEnum.INSERT);
-            }
-            
-            
-//            
-//
-//            switch (this.ticket.getLayout()) {
-//                case FULL:
-//
-//                    TicketValidationDTO rules = this.service.checkRules(ticket);
-//
-//                    if(rules.getDuplicity() > 0){
-//                        ticket.setStatus(TicketStatusEnum.BACKOFFICE_DUPLICITY);
-//                        ticket.setBilheteBehavior(null);
-//                    }else if ((rules.getInsert() == 0 || rules.getInsert() > 0) && rules.getUpdate() == 0) {
-//                        ticket.setType(TicketTypeEnum.INSERT);
-//                    } else if (rules.getBackoffice() > 0) {
-//                        ticket.setStatus(TicketStatusEnum.BACKOFFICE);
-//                        ticket.setBilheteBehavior(null);
-//                    }
-//
-//                    break;
-//                case SHORT:                   
-//                    TicketValidationShortDTO rulesShort = this.service.rulesShort(ticket);
-//                    
-//                    if(rulesShort.getInsert() == 0){
-//                        ticket.setType(TicketTypeEnum.INSERT);
-//                    }else if(rulesShort.getUpdate() > 0){
-//                        ticket.setType(TicketTypeEnum.UPDATE);      
-//                        List<Ticket> listUpdates = service.findByAgrupamentoC(ticket);
-//                        Ticket tOld = listUpdates.parallelStream().sorted(Comparator.comparing(Ticket::getCreatedAt)).findFirst().get();                        
-//                        ticket.setBilheteBehavior(tOld.getBilheteBehavior());
-//                    }
-//                    break;
-//            }
-
-           // service.save(ticket);
+            }            
+  
 
         } catch (Exception e) {
             Logger.getLogger(TicketDuplicityValidationJob.class.getName()).log(Level.SEVERE, MessageFormat.format("id -> {0}", ticket.getId()));

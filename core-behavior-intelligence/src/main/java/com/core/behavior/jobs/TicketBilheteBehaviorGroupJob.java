@@ -7,10 +7,7 @@ package com.core.behavior.jobs;
 
 import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketStage;
-import com.core.behavior.services.IntegrationService;
 import com.core.behavior.services.TicketStageService;
-import com.core.behavior.util.TicketLayoutEnum;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +40,7 @@ public class TicketBilheteBehaviorGroupJob implements Runnable {
             }           
             
         } catch (Exception e) {            
-             Logger.getLogger(TicketBilheteBehaviorGroupJob.class.getName()).log(Level.SEVERE, "[ run ]", e);            
+             Logger.getLogger(TicketBilheteBehaviorGroupJob.class.getName()).log(Level.SEVERE, "[ run ] ticket id -> " + this.ticket.getId(), e);            
         }       
 
     }

@@ -134,11 +134,11 @@ public class QuartzConfiguration {
         return new FileReturnJob1(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
     }
 
-    @Bean
-    public ProcessFileJob processFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
-            FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
-        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, sequenceService);
-    }
+//    @Bean
+//    public ProcessFileJob processFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+//            FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
+//        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, sequenceService);
+//    }
 
     @Bean
     public ProcessFileJob1 processFileJob1(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TicketStageRepository extends JpaRepository<TicketStage, Long> {   
-    @Query( nativeQuery = true, value = "select * from ticket_stage t where t.agrupamento_a = :agrupa and t.bilhete_behavior != :bilhete and t.cupom = :cupo ")
-    Optional<TicketStage> findByAgrupamentoAAndCupom(@Param("agrupa")String agrpamentoA, @Param("cupo")Long Cupom, @Param("bilhete")String bilhete);
+    @Query( nativeQuery = true, value = "select * from ticket_stage t where t.agrupamento_a = :agrupa  and t.cupom = :cupo")
+    Optional<TicketStage> findByAgrupamentoAAndCupom(@Param("agrupa")String agrpamentoA, @Param("cupo")Long Cupom);
     
 }

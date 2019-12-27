@@ -211,6 +211,7 @@ public class TicketService {
         return null;//ticketRepository.listDuplicityByDateEmission(start, end);
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public TicketValidationDTO checkRules(Ticket ticket) {
         return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getCupom());
     }
@@ -243,6 +244,7 @@ public class TicketService {
         return ticketRepository.findByAgrupamentoA(t.getAgrupamentoA());
     }
     
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public boolean checkCupom(Ticket ticket){        
         return this.ticketRepository.checkCupom(ticket.getAgrupamentoA()).longValue() == 1L;
     }
