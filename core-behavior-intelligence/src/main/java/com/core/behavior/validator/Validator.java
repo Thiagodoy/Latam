@@ -1184,7 +1184,7 @@ public class Validator implements IValidator {
                     checkBilhete().
                     checkTipoVenda().
                     checkClasseCabine().
-                    checkCiaVoo().
+                    checkCiaVoo(). //Para Alterar remover a validação
                     checkValorBrl().
                     checkClienteEmpresa().
                     checkCnpjClienteEmpresa().

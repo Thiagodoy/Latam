@@ -67,7 +67,7 @@ public class UserInfoService {
         infoRepository.deleteAll(list);
     } 
     
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     public void deleteByUserId(String id){
         infoRepository.deleteByUserId(id);
     }
@@ -81,5 +81,8 @@ public class UserInfoService {
         UserInfo passwordExpiration = new UserInfo(id, Constantes.EXPIRATION_PASSWORD, "true");
         infoRepository.save(passwordExpiration);
     }
+    
+   
+    
 
 }

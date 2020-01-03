@@ -2,6 +2,9 @@ package com.core.activiti.model;
 
 import com.amazonaws.services.rds.model.Option;
 import com.google.common.base.Optional;
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
 import javax.annotation.PostConstruct;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,15 +53,16 @@ public class UserInfo {
         this.key = key;
         this.value = value;
         this.userId = userId;    
-        this.id = String.valueOf(hashCode());       
+       // this.id = String.valueOf(hashCode());       
                 
     }    
 
     @PostConstruct
     @PrePersist
-    public void setIdG(){   
-        if(!Optional.fromNullable(id).isPresent()){
-            this.id = String.valueOf(hashCode());
-        }        
+    public void setIdG(){           
+        String idTemp = MessageFormat
+                .format("{0}:{1}", hashCode(), Calendar.getInstance().getTimeInMillis())
+                .replaceAll("\\.", "");
+        this.id = idTemp;      
     }
 }

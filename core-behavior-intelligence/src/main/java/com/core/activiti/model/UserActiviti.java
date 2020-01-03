@@ -82,10 +82,10 @@ public class UserActiviti {
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
+    @OneToMany( cascade = CascadeType.ALL,orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
     private Set<GroupMemberActiviti> groups;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
+    @OneToMany( mappedBy = "userId", fetch = FetchType.EAGER)
     private List<UserInfo> info;
 
     public UserActiviti(UserRequest request) {
@@ -96,15 +96,11 @@ public class UserActiviti {
         this.password = request.getPassword();
         this.picture = request.getPhoto();
         this.userMasterId = request.getUserMaster();
+        this.status = UserStatusEnum.ACTIVE; 
 
         this.groups = new HashSet<>();
         request.getGroups().forEach(g -> {
             this.groups.add(new GroupMemberActiviti(this.id, g));
-        });
-
-        this.info = request.getInfo();
-        this.info.forEach(e -> {
-            e.setUserId(this.email);
         });
 
         this.createdAt = LocalDateTime.now();
@@ -113,44 +109,5 @@ public class UserActiviti {
     public UserActiviti() {
     }
 
-    public void merge(UserRequest user) {
-
-        if (user.getFirstName() != null && !user.getFirstName().equals(this.getFirstName())) {
-            this.firstName = user.getFirstName();
-        }
-
-        if (user.getLastName() != null && !user.getLastName().equals(this.getLastName())) {
-            this.lastName = user.getLastName();
-        }
-
-        if (user.getPassword() != null && !user.getPassword().equals(this.getPassword())) {
-            String p = DigestUtils.md5Hex(user.getPassword());
-            this.password = p;
-        }
-        
-        this.picture = user.getPhoto();
-        
-        if (this.groups != null) {
-            this.groups.clear();
-        } else {
-            this.groups = new HashSet<>();
-        }
-
-        user.getGroups().forEach(g -> {
-            this.groups.add(new GroupMemberActiviti(this.id, g));
-        });
-
-        if (this.info != null) {
-            this.info.clear();
-        } else {
-            this.info = new ArrayList<>();
-        }
-
-        user.getInfo().forEach(i -> {
-            i.setUserId(this.email);
-            this.info.add(i);
-        });
-
-    }
 
 }

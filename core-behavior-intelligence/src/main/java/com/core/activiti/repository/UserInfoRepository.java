@@ -8,6 +8,7 @@ package com.core.activiti.repository;
 import com.core.activiti.model.UserInfo;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 
 /**
  *
@@ -19,6 +20,7 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     List<UserInfo> findByUserId(String userId);
 
+    @Modifying
     void deleteByUserId(String id);
     
     void deleteByKeyAndValue(String key,String value);

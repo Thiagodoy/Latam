@@ -5,9 +5,7 @@
  */
 package com.core.behavior.jobs;
 
-import com.core.behavior.annotations.PositionColumnExcel;
 import com.core.behavior.aws.client.ClientAws;
-import com.core.behavior.dto.LineErrorDTO;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.model.TicketError;
@@ -17,20 +15,16 @@ import com.core.behavior.services.NotificacaoService;
 import com.core.behavior.services.TicketErrorService;
 import com.core.behavior.services.UserActivitiService;
 import com.core.behavior.util.LayoutEmailEnum;
-import com.core.behavior.util.MessageErrors;
 import com.core.behavior.util.Utils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;

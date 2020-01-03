@@ -6,6 +6,7 @@ import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
 import com.core.activiti.repository.GroupActivitiRepository;
 import com.core.activiti.repository.UserActivitiRepository;
+import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.request.LoginRequest;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.GroupResponse;
@@ -51,6 +52,9 @@ public class UserActivitiService {
     private UserActivitiRepository userActivitiRepository;
 
     @Autowired
+    private UserInfoRepository userInfoRepository;
+
+    @Autowired
     private GroupActivitiRepository groupActivitiRepository;
 
     @Autowired
@@ -64,20 +68,30 @@ public class UserActivitiService {
 
     @Transactional
     public void deleteUser(String idUser) {
-        UserActiviti userActiviti = userActivitiRepository.findById(idUser).get();        
-        infoService.deleteAll(userActiviti.getInfo());        
-        userActivitiRepository.deleteById(idUser);        
+        Optional<UserActiviti> opt = userActivitiRepository.findById(idUser);
+
+        if (opt.isPresent()) {
+            infoService.deleteAll(opt.get().getInfo());
+            userActivitiRepository.deleteById(idUser);
+        }
+
     }
 
-    @Transactional
+    @Transactional()
     public void updateUser(UserRequest user) {
 
-        groupMemberSevice.deleteByUserId(user.getId());
-        infoService.deleteByUserId(user.getId());
+        List<UserInfo> infos = userInfoRepository.findByUserId(user.getEmail());
+        
+        user.getInfo().forEach(i->{            
+            i.setUserId(user.getEmail());        
+        });
+        
+        userInfoRepository.deleteInBatch(infos);
+        
+        userInfoRepository.saveAll(user.getInfo());
+        
 
-        UserActiviti userActiviti = userActivitiRepository.findById(user.getId()).orElseThrow(() -> new ApplicationException(MessageCode.USER_NOT_FOUND_ERROR));
-
-        userActiviti.merge(user);
+        UserActiviti userActiviti = new UserActiviti(user);
         userActivitiRepository.save(userActiviti);
     }
 
@@ -188,6 +202,12 @@ public class UserActivitiService {
         UserActiviti userActiviti = new UserActiviti(user);
         userActiviti.setStatus(UserStatusEnum.ACTIVE);
         userActivitiRepository.save(userActiviti);
+        
+        user.getInfo().forEach(i->{            
+            i.setUserId(user.getEmail());       
+        });
+        
+        userInfoRepository.saveAll(user.getInfo());
 
         Map<String, String> parameter = new HashMap<String, String>();
         parameter.put(":name", Utils.replaceAccentToEntityHtml(user.getFirstName()));

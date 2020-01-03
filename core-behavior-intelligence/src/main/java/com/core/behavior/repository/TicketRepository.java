@@ -36,10 +36,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     TicketValidationShortDTO rulesShort(@Param("agrupac") String agrupamentoC, @Param("cupom") Long cupom);       
     
     @Query(nativeQuery = true)
-    TicketCountCupomDTO rulesCountCupom(@Param("agrupa") String agrupamentoA,Long cupom);
+    TicketCountCupomDTO rulesCountCupom(@Param("agrupa") String agrupamentoA,@Param("cupom") Long cupom);
     
     @Query(nativeQuery = true)
-    TicketCountCupomDTO rulesCountCupomShort(@Param("agrupc") String agrupamentoC, Long cupom);
+    TicketCountCupomDTO rulesCountCupomShort(@Param("agrupc") String agrupamentoC,@Param("cupom") Long cupom);
     
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa")
