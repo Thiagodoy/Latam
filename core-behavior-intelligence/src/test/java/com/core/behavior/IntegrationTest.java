@@ -1,13 +1,18 @@
 package com.core.behavior;
 
-import com.core.behavior.jobs.TicketCupomValidationJob;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.services.IntegrationService;
 import com.core.behavior.services.TicketService;
+import com.core.behavior.util.TicketStatusEnum;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -57,4 +62,19 @@ public class IntegrationTest {
          
          
     }
+    
+    @Test
+    public void verifyIntegration(){
+        
+        
+        List<Ticket> tickets = service.listByFileIdAndStatus(6242L, TicketStatusEnum.WRITED, PageRequest.of(0, 76879));
+        
+        try {
+            integrationService.integrate(tickets);
+        } catch (Exception ex) {
+            Logger.getLogger(IntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
 }

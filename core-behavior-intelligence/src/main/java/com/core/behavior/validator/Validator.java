@@ -584,7 +584,7 @@ public class Validator implements IValidator {
 
             if (!m.matches()) {
                 countError++;
-            }else{
+            } else {
                 try {
                     Long.parseLong(numVoo);
                 } catch (Exception e) {
@@ -708,14 +708,26 @@ public class Validator implements IValidator {
     }
 
     @Override
-    public IValidator checkHoraPouso() {        
+    public IValidator checkHoraPouso() {
 
         if (!Optional.ofNullable(ticketDTO.getHoraPouso()).isPresent()) {
-            ticket.setHoraPouso("");
-        }else{
-            ticket.setHoraPouso(ticketDTO.getHoraPouso());
-        }   
-        
+            ticket.setHoraPouso(null);
+        } else {
+            Pattern p = Pattern.compile(REGEX_HORA_VOO);
+
+            try {
+                Matcher m = p.matcher(ticketDTO.getHoraPouso());
+                if (!m.matches()) {
+                    ticket.setHoraPouso(null);
+                } else {
+                    ticket.setHoraPouso(ticketDTO.getHoraPouso());
+                }
+            } catch (Exception e) {
+                ticket.setHoraPouso(null);
+            }
+
+        }
+
         return this;
     }
 
@@ -1166,7 +1178,7 @@ public class Validator implements IValidator {
     public void validate(TicketDTO ticketDTO) {
         this.ticketDTO = ticketDTO;
         this.ticketError = new TicketError(Long.valueOf(this.ticketDTO.getFileId()), Long.valueOf(this.ticketDTO.getLineFile()), this.ticketDTO.toString());
-        
+
         this.ticket.setCodeAgencia(this.ticketDTO.getCodigoAgencia());
         this.ticket.setLineFile(Long.valueOf(this.ticketDTO.getLineFile()));
         this.ticket.setKey(ticketDTO.getKey());
@@ -1240,11 +1252,11 @@ public class Validator implements IValidator {
                 }
 
                 this.generateNameClient();
-            }           
+            }
 
         } catch (Exception e) {
             Logger.getLogger(com.core.behavior.validator.Validator.class
-                    .getName()).log(Level.SEVERE, "[ validate ]", e);            
+                    .getName()).log(Level.SEVERE, "[ validate ]", e);
         }
     }
 

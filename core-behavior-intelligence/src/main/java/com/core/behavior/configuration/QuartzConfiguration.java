@@ -5,10 +5,8 @@ import com.core.behavior.io.BeanIoReader;
 import com.core.behavior.jobs.AgenciaFactoryJob;
 import com.core.behavior.jobs.ConsumerEmailJob;
 import com.core.behavior.jobs.FileReturnJob;
-import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.jobs.ProcessFileJob;
-import com.core.behavior.jobs.ProcessFileJob1;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.services.AgencyService;
@@ -32,7 +30,6 @@ import org.quartz.SchedulerException;
 import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
@@ -44,10 +41,6 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 @EnableAutoConfiguration
 public class QuartzConfiguration {
-
-//    private ThreadPoolFileIntegration threadPoolFileIntegration;
-//    private ThreadPoolFileValidation threadPoolFileValidation;
-//    private ThreadPoolFileReturn threadPoolFileReturn;
 
     public QuartzConfiguration(SchedulerFactoryBean bean) throws SchedulerException {
 
@@ -74,25 +67,7 @@ public class QuartzConfiguration {
 
         scheduler.scheduleJob(detail1, crontrigger1);
 
-        //:FIXME
-//        JobDetail detail2 = JobBuilder.newJob(IntegrationJob.class).withIdentity("IntegrationJob", "integration-job")
-//                .withDescription("Integrador")
-//                .build();
-//        CronTrigger crontrigger2 = TriggerBuilder.newTrigger().withIdentity("IntegrationJob", "integration-job")
-//                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/3 * 1/1 * ? *")
-//                        .withMisfireHandlingInstructionFireAndProceed())
-//                .build();
-//
-//        scheduler.scheduleJob(detail2, crontrigger2);
-//        JobDetail detail3 = JobBuilder.newJob(MonthlyJob.class).withIdentity("FilePurgingJob", "purging-job")
-//                .withDescription("Purging file")
-//                .build();
-//        CronTrigger crontrigger3 = TriggerBuilder.newTrigger().withIdentity("FilePurgingJob", "purging-job")
-//                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 1 ? 1/1 SUN#1 *")
-//                        .withMisfireHandlingInstructionFireAndProceed())
-//                .build();
-//
-//        scheduler.scheduleJob(detail3, crontrigger3);
+     
 
     }
 
@@ -124,32 +99,19 @@ public class QuartzConfiguration {
     
     
 
-    @Bean
-    public FileReturnJob fileReturnJob(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
-        return new FileReturnJob(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
-    }
+   
     
     @Bean
-    public FileReturnJob1 fileReturnJob1(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
-        return new FileReturnJob1(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
+    public FileReturnJob fileReturnJob1(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
+        return new FileReturnJob(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
     }
 
-//    @Bean
-//    public ProcessFileJob processFileJob(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
-//            FileProcessStatusService fileProcessStatusService, SequenceService sequenceService) {
-//        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, sequenceService);
-//    }
+
 
     @Bean
-    public ProcessFileJob1 processFileJob1(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+    public ProcessFileJob processFileJob1(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
             FileProcessStatusService fileProcessStatusService, TicketService ticketService, SequenceService sequenceService) {
-        return new ProcessFileJob1(reader, logService, agencyService, fileService, fileProcessStatusService, ticketService, sequenceService);
+        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, ticketService, sequenceService);
     }
-//    @PreDestroy
-//    public void preDestroy() {
-//        threadPoolFileIntegration.getExecutor().shutdownNow();
-//        threadPoolFileReturn.getExecutor().shutdownNow();
-//        threadPoolFileValidation.getExecutor().shutdownNow();
-//    }
 
 }

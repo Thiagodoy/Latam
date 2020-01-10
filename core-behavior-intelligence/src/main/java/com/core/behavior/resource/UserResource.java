@@ -5,7 +5,6 @@
  */
 package com.core.behavior.resource;
 
-import com.core.behavior.activiti.response.PageResponse;
 import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.request.UserRequest;
 import com.core.behavior.response.Response;
@@ -43,7 +42,7 @@ public class UserResource {
     private UserInfoService infoService;
 
     @RequestMapping(method = RequestMethod.GET)
-    @ApiOperation(value = "List users", response = PageResponse.class)
+    @ApiOperation(value = "List users")
     public ResponseEntity listAllUser(
             @RequestParam(name = "firstName", required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName,

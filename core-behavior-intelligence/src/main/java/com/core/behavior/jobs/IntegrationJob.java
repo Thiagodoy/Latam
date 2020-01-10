@@ -52,7 +52,6 @@ public class IntegrationJob implements Runnable {
             Optional<FileLinesApprovedDTO> file = fileService.fileInfo(this.fileId);
 
             if (file.isPresent()) {
-
                 this.getValues(file.get());
                 this.removeFromPoll();
             }

@@ -58,8 +58,7 @@ public class AuthenticationResource {
     public ResponseEntity login(@RequestBody LoginRequest user){
         try {
             return ResponseEntity.ok(service.login(user));
-        } catch (ApplicationException ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ApplicationException ex) {            
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
         }
        
@@ -73,14 +72,13 @@ public class AuthenticationResource {
         try {            
             service.forgotAccess(request.getEmail());            
             return ResponseEntity.ok().build();
-        } catch (ApplicationException ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ApplicationException ex) {            
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
         } catch (MessagingException ex) {
-            Logger.getLogger(AuthenticationResource.class.getName()).log(Level.SEVERE, null, ex);
+            
             return ResponseEntity.status(500).body(Response.build(ex.getMessage(), 500l));
         } catch (IOException ex) {
-            Logger.getLogger(AuthenticationResource.class.getName()).log(Level.SEVERE, null, ex);
+            
              return ResponseEntity.status(500).body(Response.build(ex.getMessage(), 500l));
         }
        
@@ -92,11 +90,9 @@ public class AuthenticationResource {
         try {            
             infoService.expiredPassword(email);            
             return ResponseEntity.ok().build();
-        } catch (ApplicationException ex) {
-            Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ApplicationException ex) {            
             return ResponseEntity.status(500).body(Response.build("Error", ex.getCodeMessage()));
-        }  catch (Exception ex) {
-            Logger.getLogger(AuthenticationResource.class.getName()).log(Level.SEVERE, null, ex);
+        }  catch (Exception ex) {            
              return ResponseEntity.status(500).body(Response.build(ex.getMessage(), 500l));
         }
             

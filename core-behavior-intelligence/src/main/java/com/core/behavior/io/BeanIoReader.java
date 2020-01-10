@@ -1,10 +1,9 @@
 package com.core.behavior.io;
 
 import com.core.behavior.dto.FileParsedDTO;
-import com.core.behavior.dto.HeaderDTO;
 import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.exception.ApplicationException;
-import com.core.behavior.jobs.ProcessFileJob;
+
 import com.core.behavior.services.FileService;
 import com.core.behavior.services.LogService;
 import com.core.behavior.util.MessageCode;
@@ -28,7 +27,6 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.mail.Message;
 import org.apache.commons.io.FileUtils;
 import org.beanio.BeanReader;
 import org.beanio.InvalidRecordException;
@@ -122,9 +120,9 @@ public class BeanIoReader {
             return --count;
 
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 readerLine.close();

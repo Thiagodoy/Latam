@@ -27,7 +27,7 @@
                 <spring-boot.run.mainClass>com.core.behavior.BehaviorApplication</spring-boot.run.mainClass>
                 <Env.SPRING_OUTPUT_ANSI_ENABLED>always</Env.SPRING_OUTPUT_ANSI_ENABLED>
                 <jpda.listen>true</jpda.listen>
-                <spring.profiles.active>hmg</spring.profiles.active>
+                
                 
                 
                 

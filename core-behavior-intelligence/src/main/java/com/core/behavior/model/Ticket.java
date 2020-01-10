@@ -4,8 +4,7 @@ import com.core.behavior.annotations.PositionParameter;
 import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.dto.TicketValidationShortDTO;
-import com.core.behavior.jobs.ProcessFileJob;
-import static com.core.behavior.jobs.ProcessFileJob1.SIZE_BILHETE_BEHAVIOR;
+import static com.core.behavior.jobs.ProcessFileJob.SIZE_BILHETE_BEHAVIOR;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
 import com.core.behavior.util.TicketTypeEnum;
@@ -448,7 +447,7 @@ public class Ticket {
             
             this.setBilheteBehavior(bilheteBehavior);
         } catch (Exception e) {
-            Logger.getLogger(ProcessFileJob.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
+            Logger.getLogger(Ticket.class.getName()).log(Level.SEVERE, "[ generateBilheteBehavior ]", e);
         }
 
     }

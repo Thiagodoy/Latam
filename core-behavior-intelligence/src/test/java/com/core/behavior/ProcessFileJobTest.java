@@ -7,7 +7,7 @@ package com.core.behavior;
 
 
 import com.core.behavior.aws.client.ClientAws;
-import com.core.behavior.jobs.ProcessFileJob1;
+import com.core.behavior.jobs.ProcessFileJob;
 
 
 import com.core.behavior.model.Agency;
@@ -62,15 +62,15 @@ public class ProcessFileJobTest {
 //        writer.flush();
 //        writer.close();
           
-        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
-        processFileJob.setParameter(ProcessFileJob1.DATA_USER_ID, "thiagodoy@hotmail.com");
-        processFileJob.setParameter(ProcessFileJob1.DATA_COMPANY, 25L);
+        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
+        processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, "thiagodoy@hotmail.com");
+        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, 25L);
         
         
         
-        processFileJob.setParameter(ProcessFileJob1.DATA_FILE, file);
-        processFileJob.setParameter(ProcessFileJob1.DATA_FILE_ID, 5650L);
-        processFileJob.setParameter(ProcessFileJob1.DATA_LAYOUT_FILE, 2L);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE_ID, 5650L);
+        processFileJob.setParameter(ProcessFileJob.DATA_LAYOUT_FILE, 2L);
 
         threadPoolFileValidation.getExecutor().submit(processFileJob);
         threadPoolFileValidation.getExecutor().shutdown();

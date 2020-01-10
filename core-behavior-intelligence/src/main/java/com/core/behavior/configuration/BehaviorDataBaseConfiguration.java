@@ -4,6 +4,7 @@ import com.core.behavior.properties.BehaviorProperties;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
@@ -71,6 +72,19 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
 
         DataSource dataSource;
 
+        
+        Properties props = new Properties();
+//        props.setProperty("dataSource.cachePrepStmts", "true");
+//        props.setProperty("dataSource.prepStmtCacheSize", "250");
+//        props.setProperty("dataSource.prepStmtCacheSqlLimit", "2048");
+//        props.setProperty("dataSource.useServerPrepStmts", "true");
+//        props.setProperty("dataSource.useLocalSessionState", "true");
+//        props.setProperty("dataSource.rewriteBatchedStatements", "true");
+//        props.setProperty("dataSource.cacheResultSetMetadata", "true");
+//        props.setProperty("dataSource.cacheServerConfiguration", "true");
+//        props.setProperty("dataSource.cacheServerConfiguration", "true");
+        
+        
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setInitializationFailTimeout(-1);
         
@@ -85,7 +99,6 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
         hikariConfig.setPassword(behaviorProperties.getDatasource().getSqlserver().getDataSourcePassword());        
         hikariConfig.setPoolName("BehaviorPool");
         hikariConfig.setConnectionTestQuery(behaviorProperties.getDatasource().getSqlserver().getConnectionTestQuery());
-
         dataSource = new HikariDataSource(hikariConfig);
         
         Logger.getLogger(BehaviorDataBaseConfiguration.class.getName()).log(Level.INFO, "Profile -> " + activeProfile );

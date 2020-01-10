@@ -19,7 +19,7 @@ public class BehaviorApplicationTests {
     
     //@Test
     public void testFileResult(){
-        service.makeFileResultDataCollector(122L);
+//        service.makeFileResultDataCollector(122L);
     }
 
 //    @Test

@@ -1,6 +1,6 @@
 package com.core.behavior.dto;
 
-import lombok.AllArgsConstructor;
+
 import lombok.Data;
 
 /**

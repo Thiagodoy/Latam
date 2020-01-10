@@ -7,7 +7,6 @@ package com.core.behavior.services;
 
 import com.core.behavior.aws.client.ClientAws;
 import com.core.behavior.jobs.FileReturnJob;
-import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.repository.AgencyRepository;
@@ -84,7 +83,7 @@ public class FileReturnService {
             return;
         }
 
-        FileReturnJob1 fileReturnJob = this.context.getBean(FileReturnJob1.class);
+        FileReturnJob fileReturnJob = this.context.getBean(FileReturnJob.class);
         
         fileReturnJob.setParameter(FileReturnJob.DATA_FILE_ID, id);
         fileReturnJob.setParameter(FileReturnJob.DATA_EMAIL_ID, email);        

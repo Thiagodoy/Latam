@@ -6,8 +6,6 @@
 package com.core.behavior.validator;
 
 import com.core.behavior.dto.TicketDTO;
-import com.core.behavior.model.Ticket;
-import java.util.Optional;
 
 /**
  *
@@ -17,7 +15,7 @@ public interface IValidator {
     
     IValidator checkDataEmissao() ;
     IValidator checkDataVoo() ;
-    IValidator checkHoraVoo()  ;
+    IValidator checkHoraVoo()  ;    
     IValidator checkCiaBilhete() ;
     IValidator checkTrechoTkt() ;
     IValidator checkAtoOrigem() ;

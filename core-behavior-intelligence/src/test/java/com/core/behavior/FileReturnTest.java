@@ -6,7 +6,6 @@
 package com.core.behavior;
 
 import com.core.behavior.jobs.FileReturnJob;
-import com.core.behavior.jobs.FileReturnJob1;
 import com.core.behavior.util.ThreadPoolFileReturn;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,7 @@ public class FileReturnTest {
     @Test
     public void generateFile(){
         
-        FileReturnJob1 fileReturnJob = this.context.getBean(FileReturnJob1.class);
+        FileReturnJob fileReturnJob = this.context.getBean(FileReturnJob.class);
         
         fileReturnJob.setParameter(FileReturnJob.DATA_FILE_ID, 5648L);
         fileReturnJob.setParameter(FileReturnJob.DATA_EMAIL_ID, "thiagodoy@hotmail.com");        

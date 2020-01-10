@@ -9,12 +9,11 @@ import com.core.behavior.dto.FileStatusProcessDTO;
 import com.core.behavior.dto.LogStatusSinteticoDTO;
 import com.core.behavior.dto.FileLinesApprovedDTO;
 import com.core.behavior.exception.ApplicationException;
-import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.model.Agency;
 import com.core.behavior.model.File;
 import com.core.behavior.model.Notificacao;
 import com.core.behavior.io.BeanIoReader;
-import com.core.behavior.jobs.ProcessFileJob1;
+import com.core.behavior.jobs.ProcessFileJob;
 import com.core.behavior.repository.FileProcessStatusRepository;
 
 import com.core.behavior.repository.FileRepository;
@@ -242,12 +241,12 @@ public class FileService {
 
     private void processFile(String userId, Long id, java.io.File file, Long layout, Long fileId) throws SchedulerException {        
          
-        ProcessFileJob1 processFileJob = context.getBean(ProcessFileJob1.class);
-        processFileJob.setParameter(ProcessFileJob1.DATA_USER_ID, userId);
-        processFileJob.setParameter(ProcessFileJob1.DATA_COMPANY, id);
-        processFileJob.setParameter(ProcessFileJob1.DATA_FILE, file);
-        processFileJob.setParameter(ProcessFileJob1.DATA_FILE_ID, fileId);
-        processFileJob.setParameter(ProcessFileJob1.DATA_LAYOUT_FILE, layout);
+        ProcessFileJob processFileJob = context.getBean(ProcessFileJob.class);
+        processFileJob.setParameter(ProcessFileJob.DATA_USER_ID, userId);
+        processFileJob.setParameter(ProcessFileJob.DATA_COMPANY, id);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE, file);
+        processFileJob.setParameter(ProcessFileJob.DATA_FILE_ID, fileId);
+        processFileJob.setParameter(ProcessFileJob.DATA_LAYOUT_FILE, layout);
 
         threadPoolFileValidation.getExecutor().submit(processFileJob);
 

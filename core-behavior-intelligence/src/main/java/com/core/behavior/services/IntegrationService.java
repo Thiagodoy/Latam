@@ -8,6 +8,7 @@ package com.core.behavior.services;
 import com.core.behavior.dto.AirMovimentDTO;
 import com.core.behavior.dto.FileIntegrationDTO;
 import com.core.behavior.dto.TicketIntegrationDTO;
+import com.core.behavior.exception.ApplicationException;
 import com.core.behavior.io.BeanIoWriter;
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.model.Ticket;
@@ -62,27 +63,50 @@ public class IntegrationService {
     private FileRepository fileRepository;
 
     @Autowired
-    private JavaMailSender sender;    
+    private JavaMailSender sender;
 
     public void integrate(List<Ticket> tickets) throws Exception {
 
         try {
 
+            int total = tickets.size();
+            Long id = tickets.stream().findFirst().get().getFileId();
+            
             this.move(tickets);
             this.callSpDataCollector();
             this.makeFileResultIntegration();
 
-            if (tickets.size() > 0) {
-                Long id = tickets.stream().findFirst().get().getFileId();
-                this.makeFileResultDataCollector(id);
+            if (total > 0) {            
+                this.makeFileResultDataCollector(id, total);
             }
 
         } catch (Exception ex) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);
+
+            if (ex instanceof ApplicationException) {
+
+                Long fileId = tickets.
+                        stream()
+                        .findFirst()
+                        .get()
+                        .getId();
+
+                String fileName = this.fileRepository.findById(fileId).get().getName();
+
+                MimeMessage message = sender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                helper.setSubject("[ Data Collector ] - Erro  na Integração");
+                helper.setFrom("latamupload@behint.net.br");
+                helper.setTo(new String[]{"deniz.sanchez@behint.net.br"});
+                helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!");
+
+                sender.send(message);
+            }
+
         }
     }
 
-    public void makeFileResultDataCollector(Long idfile) {
+    public void makeFileResultDataCollector(Long idfile, int total) {
 
         File tempFileCupom = null;
         File tempFileDuplicity = null;
@@ -111,20 +135,45 @@ public class IntegrationService {
                 files.add(fileCupom);
             }
 
-            if (files.isEmpty()) {
-                return;
-            }
+            com.core.behavior.model.File file = fileRepository.findById(idfile).get();
+            String nameFile = file.getName();
 
-            String nameFile = fileRepository.findById(idfile).get().getName();
-            zip = Utils.zipFiles("Evidencia.zip", 1L, files);
+            if (!files.isEmpty()) {
+                zip = Utils.zipFiles("Evidencia.zip", 1L, files);
+            }
 
             MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("[ Data Collector ] - BackOffice (Cupom/Duplicidade)");
             helper.setFrom("latamupload@behint.net.br");
-            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br"});
-            helper.setText("Segue em anexos os tickets que não foram processados, por estarem com erros de cupom ou duplicidade.\n Referente ao arquivo : " + nameFile);
-            helper.addAttachment("Evidencia.zip", zip);
+            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com"});
+
+            long qtdTotal = file.getQtdTotalLines();
+            
+            
+            
+            double percentualAprovado =  (total / (double)qtdTotal) * 100;
+
+            long erroValidacao = file.getRepeatedLine();
+            String percentualValidação = Utils.formatDecimal((erroValidacao / (double)qtdTotal) * 100);
+
+            long erroCupom = listticketCupom.size();
+            String percentualErroCupom = Utils.formatDecimal((erroCupom / (double)qtdTotal) * 100);
+
+            long erroDuplicidade = listticketDuplicity.size();
+            String percentualErroDuplicidade = Utils.formatDecimal((erroDuplicidade / (double)qtdTotal) * 100);
+
+            String mess = "Segue em anexos os tickets que não foram processados, por estarem com erros de cupom ou duplicidade.\n Referente ao arquivo : " + nameFile;
+
+            mess += MessageFormat.format("\n\nResumo:\nTotal Arquivo : {0}\nTotal Aprovado : {1} ( {2} %)\nErro/Cupom : {3} ( {4} %)\nErro/Duplicidade : {5} ( {6} %)\nErro/Validação : {7} ( {8} %)",
+                    qtdTotal, total, percentualAprovado, erroCupom, percentualErroCupom, erroDuplicidade, percentualErroDuplicidade, erroValidacao, percentualValidação);
+
+            helper.setText(mess);
+
+            if (zip != null) {
+                helper.addAttachment("Evidencia.zip", zip);
+            }
+
             sender.send(message);
 
         } catch (Exception e) {
@@ -153,12 +202,10 @@ public class IntegrationService {
 
     }
 
-    private void move(List<Ticket> tickets) {
+    private void move(List<Ticket> tickets) throws Exception {
 
         long start = System.currentTimeMillis();
         Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, " Incializando integração");
-
-        int size = (int) (tickets.size() / 2);
 
         List<AirMovimentDTO> airMovimentDTOs = tickets
                 .parallelStream()
@@ -169,6 +216,7 @@ public class IntegrationService {
             return;
         }
 
+        tickets.clear();
         List<AirMovimentDTO> collection = airMovimentDTOs;
         final Connection connection = this.getConnection();
 
@@ -207,6 +255,11 @@ public class IntegrationService {
         } finally {
             this.closeConnection(connection);
             Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ move ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
+            if (!collection.isEmpty()) {
+                throw new ApplicationException(0l, "Não houve integração completa dos tickets!");
+            }
+
         }
 
     }
