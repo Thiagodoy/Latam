@@ -37,4 +37,33 @@ public class Constantes {
     
     public static final String DIR_UPLOAD = "upload";
     public static final String DIR_UPLOADED = "uploaded";
+    
+    
+    
+    public final  static String AGENCY_FREQUENCY_DAILY = "D";
+    public final  static String AGENCY_FREQUENCY_WEEKLY = "S";
+    public final  static String AGENCY_FREQUENCY_MONTHLY = "M";
+    
+    
+    public final  static Double PERCENT_QUALITY = 0.90D;
+    
+    
+    public final  static String AGENCY_CATEGORY_RM1 = "RM1";
+    public final  static String AGENCY_CATEGORY_RM2 = "RM2";
+    public final  static String AGENCY_CATEGORY_RM3 = "RM3";
+    
+    
+    public final  static String AGENCY_PROFILE_CORPORATE = "CORPORATE";
+    public final  static String AGENCY_PROFILE_CONSOLIDATOR = "CONSOLIDATORS";
+    
+    public final  static String WEEK_INFORMATION = "INFORMATION";
+    public final  static String WEEK_QUALITY = "QUALITY";
+    public final  static String WEEK_FREQUENCY = "FREQUENCY";
+    
+    
+    public final static String JOB_KEY_GROUP_NAME = "score-card";
+    public final static String SCHEDULER_NAME = "ScoreCardScheduler";  
+    
+    
+    
 }

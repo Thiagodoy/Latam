@@ -3,13 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.util;
+package com.core.behavior.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 /**
  *
  * @author thiag
  */
-public enum ValidatorEnum {
-    DATA_VALIDATOR,
-    DATA_DUPLICITY_VALIDATOR;
+@Data
+@AllArgsConstructor
+public class ConsolidateOrCompanyDTO {
+    private Long consolidate;
+    private Long company;
+
 }

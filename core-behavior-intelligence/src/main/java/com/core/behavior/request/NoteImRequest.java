@@ -3,12 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.core.behavior.validator;
+package com.core.behavior.request;
+
+import java.time.LocalDateTime;
+import lombok.Data;
 
 /**
  *
  * @author thiag
  */
-public interface IValidatorRecord {
-    
+@Data
+public class NoteImRequest {
+
+    private Long id;
+
+    private String delivered;
+
+    private String user;   
+
 }
