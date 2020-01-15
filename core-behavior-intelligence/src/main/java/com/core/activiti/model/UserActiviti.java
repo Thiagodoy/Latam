@@ -82,7 +82,7 @@ public class UserActiviti {
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
 
-    @OneToMany( cascade = CascadeType.ALL,orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
+    @OneToMany( cascade = CascadeType.REMOVE,orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
     private Set<GroupMemberActiviti> groups;
 
     @OneToMany( mappedBy = "userId", fetch = FetchType.EAGER)

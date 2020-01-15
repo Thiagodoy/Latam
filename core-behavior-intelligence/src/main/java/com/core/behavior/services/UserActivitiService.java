@@ -55,13 +55,10 @@ public class UserActivitiService {
     private UserInfoRepository userInfoRepository;
 
     @Autowired
-    private GroupActivitiRepository groupActivitiRepository;
+    private GroupActivitiService groupActivitiService;
 
     @Autowired
     private UserInfoService infoService;
-
-    @Autowired
-    private GroupMemberSevice groupMemberSevice;
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -81,15 +78,14 @@ public class UserActivitiService {
     public void updateUser(UserRequest user) {
 
         List<UserInfo> infos = userInfoRepository.findByUserId(user.getEmail());
-        
-        user.getInfo().forEach(i->{            
-            i.setUserId(user.getEmail());        
+
+        user.getInfo().forEach(i -> {
+            i.setUserId(user.getEmail());
         });
-        
+
         userInfoRepository.deleteInBatch(infos);
-        
+
         userInfoRepository.saveAll(user.getInfo());
-        
 
         UserActiviti userActiviti = new UserActiviti(user);
         userActivitiRepository.save(userActiviti);
@@ -174,7 +170,7 @@ public class UserActivitiService {
         }
 
         List<GroupResponse> listGroupsResponse = new ArrayList();
-        List<GroupActiviti> listGroups = groupActivitiRepository.findAll();
+        List<GroupActiviti> listGroups = groupActivitiService.findAll();
 
         user.getGroups().forEach(g -> {
             GroupActiviti group = listGroups.stream().filter(gg -> gg.getId().equals(g.getGroupId())).findFirst().get();
@@ -202,11 +198,11 @@ public class UserActivitiService {
         UserActiviti userActiviti = new UserActiviti(user);
         userActiviti.setStatus(UserStatusEnum.ACTIVE);
         userActivitiRepository.save(userActiviti);
-        
-        user.getInfo().forEach(i->{            
-            i.setUserId(user.getEmail());       
+
+        user.getInfo().forEach(i -> {
+            i.setUserId(user.getEmail());
         });
-        
+
         userInfoRepository.saveAll(user.getInfo());
 
         Map<String, String> parameter = new HashMap<String, String>();
@@ -246,19 +242,22 @@ public class UserActivitiService {
                 userActiviti.getInfo().remove(optPass.get());
                 infoService.delete(optPass.get().getId());
             }
+
         }
 
         UserInfo primeiroAcesso = Utils.valueFromUserInfo(userActiviti, Constantes.FIRST_ACCESS).get();
         primeiroAcesso.setValue("true");
+        infoService.save(primeiroAcesso);
 
         UserInfo lastAccess = Utils.valueFromUserInfo(userActiviti, Constantes.LAST_ACCESS).get();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         lastAccess.setValue(formatter.format(LocalDateTime.now()));
+        infoService.save(lastAccess);
 
         String password = Utils.generatePasswordRandom();
-        userActiviti.setPassword(DigestUtils.md5Hex(password));
 
-        userActivitiRepository.save(userActiviti);
+        this.updatePassword(userActiviti, DigestUtils.md5Hex(password));
+
         DateTimeFormatter data = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
 
         Map<String, String> parameter = new HashMap<String, String>();
@@ -272,6 +271,10 @@ public class UserActivitiService {
         notificacao.setParameters(Utils.mapToString(parameter));
         notificacaoService.save(notificacao);
 
+    }
+
+    private void updatePassword(UserActiviti user, String password) {
+        this.userActivitiRepository.updatePassWord(password, user.getId());
     }
 
     @Transactional
@@ -295,11 +298,14 @@ public class UserActivitiService {
 
         UserActiviti userActiviti = opt.get();
         String password = Utils.generatePasswordRandom();
-        userActiviti.setPassword(DigestUtils.md5Hex(password));
+
+        this.updatePassword(userActiviti, DigestUtils.md5Hex(password));
 
         Optional<UserInfo> op = Utils.valueFromUserInfo(opt.get(), Constantes.FIRST_ACCESS);
         if (op.isPresent()) {
-            op.get().setValue("true");
+            UserInfo primeiroAcesso = op.get();
+            primeiroAcesso.setValue("true");
+            infoService.save(primeiroAcesso);
         }
 
         userActivitiRepository.save(userActiviti);
@@ -355,7 +361,7 @@ public class UserActivitiService {
 
         List<UserResponse> responses = new ArrayList();
 
-        List<GroupActiviti> listGroups = groupActivitiRepository.findAll();
+        List<GroupActiviti> listGroups = groupActivitiService.findAll();
 
         list.forEach(u -> {
 
@@ -388,16 +394,22 @@ public class UserActivitiService {
             throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
         }
 
-        UserActiviti user = opt.get();
+        
+        UserActiviti user = opt.get();        
 
-        user.setPassword(request.getNewPassword());
+        this.updatePassword(user, DigestUtils.md5Hex(request.getNewPassword()));
+        
+        
 
         if (request.isFirstAccess()) {
 
             Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals("primeiro_acesso")).findFirst();
 
             if (op.isPresent()) {
-                op.get().setValue("false");
+
+                UserInfo primeiroAcesso = op.get();
+                primeiroAcesso.setValue("false");
+                infoService.save(primeiroAcesso);
             }
         }
 
@@ -405,11 +417,12 @@ public class UserActivitiService {
         Optional<UserInfo> op = user.getInfo().stream().filter(i -> i.getKey().equals(Constantes.CHANGE_PASSWORD)).findFirst();
         if (op.isPresent()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            op.get().setValue(formatter.format(LocalDateTime.now()));
+            UserInfo changePass = op.get();
+            changePass.setValue(formatter.format(LocalDateTime.now()));
+            infoService.save(changePass);
         }
 
-        userActivitiRepository.save(user);
-
+        //userActivitiRepository.save(user);
     }
 
 }

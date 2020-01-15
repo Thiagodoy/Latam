@@ -7,12 +7,13 @@ import com.core.activiti.specifications.GroupActivitiSpecification;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -41,6 +42,12 @@ public class GroupActivitiService {
         repository.save(new GroupActiviti(request));
     }
 
+    @Cacheable("groups")
+    public List<GroupActiviti> findAll(){
+        return this.repository.findAll();
+    }
+    
+    @Transactional(readOnly = true)
     public Page<GroupActiviti> getGroup(String id, String name, String type, Pageable page) {
 
         List<Specification<GroupActiviti>> specifications = new ArrayList<>();
