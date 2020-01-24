@@ -49,7 +49,7 @@ import org.springframework.context.ApplicationContext;
  */
 public class ProcessFileJob implements Runnable {
 
-    @Autowired
+    
     private BeanIoReader reader;
 
     @Autowired

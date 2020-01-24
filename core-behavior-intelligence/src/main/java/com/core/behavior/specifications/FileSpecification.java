@@ -2,7 +2,6 @@ package com.core.behavior.specifications;
 
 
 import com.core.behavior.model.File;
-
 import com.core.behavior.model.File_;
 import com.core.behavior.util.StatusEnum;
        

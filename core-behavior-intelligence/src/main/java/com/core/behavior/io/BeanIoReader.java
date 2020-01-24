@@ -5,7 +5,6 @@ import com.core.behavior.dto.TicketDTO;
 import com.core.behavior.exception.ApplicationException;
 
 import com.core.behavior.services.FileService;
-import com.core.behavior.services.LogService;
 import com.core.behavior.util.MessageCode;
 import com.core.behavior.util.StatusEnum;
 import java.io.File;
@@ -32,26 +31,28 @@ import org.beanio.BeanReader;
 import org.beanio.InvalidRecordException;
 import org.beanio.RecordContext;
 import org.beanio.StreamFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-@Service
+
 public class BeanIoReader {
 
-    private BeanErrorHandler beanErrorHandler;
-
-    @Autowired
-    private FileService fileService;
-
-    @Autowired
-    private LogService logService;
-
+    private BeanErrorHandler beanErrorHandler;    
+    private FileService fileService;    
     private final String ENCODING = "ISO-8859-1";
 
+    
+    
+    public BeanIoReader(FileService fileService){
+        this.fileService = fileService; 
+    }
+    
+    public BeanIoReader(){        
+    }
+    
+    
     public <T> Optional<T> parse(File file, com.core.behavior.model.File f, com.core.behavior.util.Stream stream) {
 
         long start = System.currentTimeMillis();
@@ -78,18 +79,19 @@ public class BeanIoReader {
 
             record = (T) reader.read();
 
-            if (beanErrorHandler.getLogs().size() > 0) {
-                logService.saveBatch(beanErrorHandler.getLogs());
-            }
             end = System.currentTimeMillis();
             fileService.setParseTime(f.getId(), (end - start) / 1000);
         } catch (Exception ex) {
             Logger.getLogger(BeanIoReader.class.getName()).log(Level.SEVERE, null, ex);
             f.setStatus(StatusEnum.VALIDATION_ERROR);
             f = fileService.saveFile(f);
+        }finally{        
+            if(reader != null){
+                reader.close();
+            }           
         }
 
-        reader.close();
+        
 
         if (record instanceof FileParsedDTO) {
             FileParsedDTO pa = (FileParsedDTO) record;

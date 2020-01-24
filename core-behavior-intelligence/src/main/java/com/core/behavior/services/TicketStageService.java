@@ -53,6 +53,7 @@ public class TicketStageService {
 
         this.callProctruncateTicketStage();
         
+        String query = null;
 
         try {
 
@@ -63,7 +64,7 @@ public class TicketStageService {
                 inserts.add(mountBatchInsert(ticket.remove(0), Utils.TypeField.TICKET_STAGE));
                 count++;
                 if (count == 3000) {
-                    String query = "INSERT INTO `behavior`.`ticket_stage` VALUES " + inserts.stream().collect(Collectors.joining(","));
+                    query = "INSERT INTO `behavior`.`ticket_stage` VALUES " + inserts.stream().collect(Collectors.joining(","));
                     Statement ps = con.createStatement();
                     ps.clearBatch();
 
@@ -76,7 +77,7 @@ public class TicketStageService {
 
             }
 
-            String query = "INSERT INTO `behavior`.`ticket_stage` VALUES " + inserts.stream().collect(Collectors.joining(","));
+            query = "INSERT INTO `behavior`.`ticket_stage` VALUES " + inserts.stream().collect(Collectors.joining(","));
             Statement ps = con.createStatement();
             ps.clearBatch();
 
@@ -86,6 +87,7 @@ public class TicketStageService {
 
         } catch (SQLException ex) {
             Logger.getLogger(TicketKeyService.class.getName()).log(Level.SEVERE, "[ saveBatch ]", ex);
+            Logger.getLogger(TicketKeyService.class.getName()).log(Level.SEVERE, "[ saveBatch query ->]\n" + query);
             throw ex;
         }
 

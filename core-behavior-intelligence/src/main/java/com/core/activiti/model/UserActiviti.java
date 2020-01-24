@@ -23,7 +23,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.SqlResultSetMapping;
 import javax.persistence.Table;
 import lombok.Data;
-import org.apache.commons.codec.digest.DigestUtils;
+
 
 /**
  *
@@ -85,7 +85,7 @@ public class UserActiviti {
     @OneToMany( cascade = CascadeType.REMOVE,orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
     private Set<GroupMemberActiviti> groups;
 
-    @OneToMany( mappedBy = "userId", fetch = FetchType.EAGER)
+    @OneToMany( mappedBy = "userId", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<UserInfo> info;
 
     public UserActiviti(UserRequest request) {

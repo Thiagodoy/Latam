@@ -95,8 +95,7 @@ public class FileService {
     @Autowired
     private ClientSftp clientSftp;
 
-    @Autowired
-    private BeanIoReader beanIoReader;
+   // private BeanIoReader beanIoReader;
 
     @Autowired
     private NotificacaoService notificacaoService;
@@ -177,7 +176,7 @@ public class FileService {
             Stream layoutHeader = agency.getLayoutFile().equals(1L) ? Stream.HEADER_LAYOUT_SHORT : Stream.HEADER_LAYOUT_FULL;
 
             //Valida o header do arquivo
-            beanIoReader.headerIsValid(file, layoutHeader);
+            new BeanIoReader().headerIsValid(file, layoutHeader);
 
             com.core.behavior.model.File f = this.persist(userId, id, file, StatusEnum.VALIDATION_UPLOADED, 1, versao,1L);
             this.processFile(userId, id, file, layout, f.getId());

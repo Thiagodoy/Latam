@@ -49,7 +49,7 @@ public class Validator implements IValidator {
     private final static String REGEX_VALOR_BRL = "^([0-9]{1,3}\\.?)+(,[0-9]{1,2})?$";
     private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";
     private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z\\(]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
-    private final static String REGEX_RT_OW = "(RT|OW){0,2}";
+    //private final static String REGEX_RT_OW = "(RT|OW){0,2}";
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
 
@@ -736,8 +736,10 @@ public class Validator implements IValidator {
 
         String classeTarifaria = ticketDTO.getClasseTarifa();
 
-        if (Optional.ofNullable(classeTarifaria).isPresent() || classeTarifaria.length() == 0) {
+        if (Optional.ofNullable(classeTarifaria).isPresent() && classeTarifaria.length() == 0) {
             ticket.setBaseTarifaria("");
+        } else if (Optional.ofNullable(classeTarifaria).isPresent() && classeTarifaria.length() > 20) {
+            ticket.setBaseTarifaria(classeTarifaria.substring(0, 20));
         } else {
             ticket.setBaseTarifaria(classeTarifaria);
         }
@@ -813,25 +815,7 @@ public class Validator implements IValidator {
     @Override
     public IValidator checkRtOw() {
 
-        int countError = 0;
-        Pattern p = Pattern.compile(REGEX_RT_OW);
-
-        if (!Optional.ofNullable(ticketDTO.getRtOw()).isPresent() || ticketDTO.getRtOw().length() == 0) {
-            countError++;
-        }
-
-        if (countError == 0) {
-            Matcher m = p.matcher(ticketDTO.getRtOw());
-            if (!m.matches()) {
-                countError++;
-            }
-        }
-
-        if (countError > 0) {
-            this.ticketError.activeError("rtOw");
-        } else {
-            this.ticket.setRtOw(ticketDTO.getRtOw());
-        }
+        this.ticket.setRtOw("");
 
         return this;
     }
@@ -1124,6 +1108,9 @@ public class Validator implements IValidator {
         } else if (this.ticket.getNomePax().length() < 17 && this.ticket.getNomePax().length() > 0) {
             nomePassageiro = ticket.getNomePax().substring(0, this.ticket.getNomePax().length() - 1);
         }
+        
+        //Correção referente a inversão da barra que estava aplicando o scape do Mysql
+        nomePassageiro = nomePassageiro.replaceAll("\\\\", " ");
 
         String agrupamento = MessageFormat.format("{0}{1}{2}{3}", codigoAgencia, this.ticket.getPnrAgencia(), dataEmissao, nomePassageiro);
         ticket.setAgrupamentoA(agrupamento);
@@ -1212,7 +1199,7 @@ public class Validator implements IValidator {
                         //.checkDataReserva()
                         .checkHoraReserva()
                         .checkHoraPouso()
-                        //.checkBaseTarifaria() Cancelado a pedido do Mauricelio 22/09/2019
+                        .checkBaseTarifaria() //Cancelado a pedido do Mauricelio 22/09/2019
                         .checkTktDesignator()
                         .checkFamiliaTarifaria()
                         //.checkClasseTarifa() Cancelado a pedido do Mauricelio 22/09/2019

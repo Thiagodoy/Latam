@@ -109,9 +109,9 @@ public class QuartzConfiguration {
 
 
     @Bean
-    public ProcessFileJob processFileJob1(BeanIoReader reader, LogService logService, AgencyService agencyService, FileService fileService,
+    public ProcessFileJob processFileJob1(LogService logService, AgencyService agencyService, FileService fileService,
             FileProcessStatusService fileProcessStatusService, TicketService ticketService, SequenceService sequenceService) {
-        return new ProcessFileJob(reader, logService, agencyService, fileService, fileProcessStatusService, ticketService, sequenceService);
+        return new ProcessFileJob(new BeanIoReader(fileService), logService, agencyService, fileService, fileProcessStatusService, ticketService, sequenceService);
     }
 
 }

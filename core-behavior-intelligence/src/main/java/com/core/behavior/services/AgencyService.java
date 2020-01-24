@@ -1,10 +1,16 @@
 package com.core.behavior.services;
 
+import com.core.behavior.dto.ConsolidateOrCompanyDTO;
+import com.core.behavior.dto.DayStatusDTO;
+import com.core.behavior.dto.FrequencyStatusDTO;
+import com.core.behavior.dto.ResultRules2;
 import com.core.behavior.model.Agency;
+import com.core.behavior.model.Calendar;
 import com.core.behavior.repository.AgencyRepository;
 import com.core.behavior.request.AgencyRequest;
 import com.core.behavior.response.UserResponse;
 import com.core.behavior.specifications.AgenciaSpecification;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -96,5 +102,22 @@ public class AgencyService {
         userInfoService.deleteByKeyAndValue("agencia", String.valueOf(id));
         agencyRepository.deleteById(id);
     }
+    
+    public ConsolidateOrCompanyDTO checkConsolidateOrCompanyStatus(LocalDate start, LocalDate end, String codeAgency){
+        return agencyRepository.checkConsolidateOrCompanyStatus(start, end, codeAgency);
+    }
+    
+     public DayStatusDTO checkDay(LocalDate date, Agency agency){
+        return agencyRepository.checkDayStatus(date, agency.getAgencyCode(), agency.getId());
+    }
+    
+    public ResultRules2 checkRules2(Calendar calendar, Agency agency){
+        return agencyRepository.checkRules2(calendar.getDateInit(),calendar.getDateEnd(),agency.getId());
+    }    
+    
+    
+    public List<FrequencyStatusDTO> checkStatusFrequency(LocalDate start, LocalDate end, String code){
+        return agencyRepository.checkStatusFrequency(start, end, code);
+    } 
 
 }
