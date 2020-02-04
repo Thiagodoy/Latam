@@ -62,7 +62,9 @@ public class Constantes {
     
     
     public final static String JOB_KEY_GROUP_NAME = "score-card";
-    public final static String SCHEDULER_NAME = "ScoreCardScheduler";  
+    public final static String SCHEDULER_NAME = "ScoreCardScheduler"; 
+    
+    public final static int MAX_HOUR_FIRST_ACESSS = 72;
     
     
     

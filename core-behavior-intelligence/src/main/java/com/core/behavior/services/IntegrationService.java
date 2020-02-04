@@ -146,7 +146,7 @@ public class IntegrationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("[ Data Collector ] - BackOffice (Cupom/Duplicidade)");
             helper.setFrom("latamupload@behint.net.br");
-            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com"});
+            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br","fernando.land@behint.net.br","paulo.baptista@behint.net.br"});
 
             long qtdTotal = file.getQtdTotalLines();
             
@@ -328,7 +328,7 @@ public class IntegrationService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setSubject("[ Data Collector ] - BackOffice");
         helper.setFrom("latamupload@behint.net.br");
-        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br"});
+        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br","fernando.land@behint.net.br","paulo.baptista@behint.net.br"});
         helper.setText("Segue em anexos os erros na validação da procedure SP_DataCollector");
         helper.addAttachment("Evidencia.zip", attachment);
         sender.send(message);

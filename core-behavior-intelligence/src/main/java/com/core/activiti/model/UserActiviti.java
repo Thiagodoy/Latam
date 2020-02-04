@@ -82,10 +82,10 @@ public class UserActiviti {
     @Column(name = "created_at_")
     private LocalDateTime createdAt;
 
-    @OneToMany( cascade = CascadeType.REMOVE,orphanRemoval = true, mappedBy = "userId", fetch = FetchType.EAGER)
+    @OneToMany( mappedBy = "userId", fetch = FetchType.EAGER)
     private Set<GroupMemberActiviti> groups;
 
-    @OneToMany( mappedBy = "userId", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @OneToMany( mappedBy = "userId",  fetch = FetchType.EAGER)
     private List<UserInfo> info;
 
     public UserActiviti(UserRequest request) {
@@ -98,10 +98,10 @@ public class UserActiviti {
         this.userMasterId = request.getUserMaster();
         this.status = UserStatusEnum.ACTIVE; 
 
-        this.groups = new HashSet<>();
-        request.getGroups().forEach(g -> {
-            this.groups.add(new GroupMemberActiviti(this.id, g));
-        });
+//        this.groups = new HashSet<>();
+//        request.getGroups().forEach(g -> {
+//            this.groups.add(new GroupMemberActiviti(this.id, g));
+//        });
 
         this.createdAt = LocalDateTime.now();
     }

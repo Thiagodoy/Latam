@@ -8,6 +8,7 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -17,6 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"userId","groupId"})
 @Entity
 @Table(schema = "activiti", name = "act_id_membership")
 @IdClass(GroupMemberActiviti.IdClass.class)
@@ -31,6 +33,8 @@ public class GroupMemberActiviti implements Serializable {
     private String groupId;
     
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class IdClass implements Serializable {
         private String userId;
         private String groupId;

@@ -2,9 +2,10 @@ package com.core.behavior.services;
 
 import com.core.behavior.exception.ApplicationException;
 import com.core.activiti.model.GroupActiviti;
+import com.core.activiti.model.GroupMemberActiviti;
+import com.core.activiti.model.GroupMemberActiviti.IdClass;
 import com.core.activiti.model.UserActiviti;
 import com.core.activiti.model.UserInfo;
-import com.core.activiti.repository.GroupActivitiRepository;
 import com.core.activiti.repository.UserActivitiRepository;
 import com.core.activiti.repository.UserInfoRepository;
 import com.core.behavior.request.LoginRequest;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -63,6 +66,9 @@ public class UserActivitiService {
     @Autowired
     private NotificacaoService notificacaoService;
 
+    @Autowired
+    private GroupMemberSevice groupMemberSevice;
+
     @Transactional
     public void deleteUser(String idUser) {
         Optional<UserActiviti> opt = userActivitiRepository.findById(idUser);
@@ -78,17 +84,35 @@ public class UserActivitiService {
     public void updateUser(UserRequest user) {
 
         List<UserInfo> infos = userInfoRepository.findByUserId(user.getEmail());
+        Optional<UserActiviti> opt = userActivitiRepository.findById(user.getEmail());
 
         user.getInfo().forEach(i -> {
             i.setUserId(user.getEmail());
         });
 
-        userInfoRepository.deleteInBatch(infos);
+        try {
 
-        userInfoRepository.saveAll(user.getInfo());
+            UserActiviti userActiviti = opt.get();
 
-        UserActiviti userActiviti = new UserActiviti(user);
-        userActivitiRepository.save(userActiviti);
+            Optional<GroupMemberActiviti> group = userActiviti.getGroups().stream().findAny();
+            GroupMemberActiviti update = new GroupMemberActiviti(user.getId(), user.getGroups().get(0));
+            if (!group.get().equals(update)) {
+
+                groupMemberSevice.deleteByUserId(new IdClass(user.getEmail(), group.get().getGroupId()));
+                groupMemberSevice.save(update);
+
+            }
+
+            userInfoRepository.deleteInBatch(infos);
+            userInfoRepository.saveAll(user.getInfo());
+
+            UserActiviti userUpdate = new UserActiviti(user);
+            userActivitiRepository.save(userUpdate);
+
+        } catch (Exception e) {
+            Logger.getLogger(UserActivitiService.class.getName()).log(Level.SEVERE, "[updateUser]", e);
+        }
+
     }
 
     public UserResponse getUser(String id) {
@@ -140,7 +164,7 @@ public class UserActivitiService {
         Optional<UserInfo> firstAcess = Utils.valueFromUserInfo(user, Constantes.FIRST_ACCESS);
 
         if (!Utils.isMaster(user) && firstAcess.isPresent() && firstAcess.get().getValue().equals("true")) {
-            LocalDateTime time = LocalDateTime.now().minus(4, ChronoUnit.HOURS);
+            LocalDateTime time = LocalDateTime.now().minus(Constantes.MAX_HOUR_FIRST_ACESSS, ChronoUnit.HOURS);
 
             Optional<UserInfo> lastAccess = Utils.valueFromUserInfo(user, Constantes.LAST_ACCESS);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -197,7 +221,11 @@ public class UserActivitiService {
         user.setPassword(DigestUtils.md5Hex(password));
         UserActiviti userActiviti = new UserActiviti(user);
         userActiviti.setStatus(UserStatusEnum.ACTIVE);
+
         userActivitiRepository.save(userActiviti);
+
+        GroupMemberActiviti group = new GroupMemberActiviti(user.getId(), user.getGroups().get(0));
+        groupMemberSevice.save(group);
 
         user.getInfo().forEach(i -> {
             i.setUserId(user.getEmail());
@@ -394,12 +422,9 @@ public class UserActivitiService {
             throw new ApplicationException(MessageCode.USER_PASSWORD_ERROR);
         }
 
-        
-        UserActiviti user = opt.get();        
+        UserActiviti user = opt.get();
 
         this.updatePassword(user, DigestUtils.md5Hex(request.getNewPassword()));
-        
-        
 
         if (request.isFirstAccess()) {
 

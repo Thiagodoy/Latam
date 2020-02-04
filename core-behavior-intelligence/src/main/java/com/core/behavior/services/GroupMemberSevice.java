@@ -28,6 +28,17 @@ public class GroupMemberSevice {
         repository.deleteByUserId(userId);
     }
     
+    @Transactional
+    public void deleteByUserId(GroupMemberActiviti.IdClass userId){
+        repository.deleteById(userId);
+    }
+    
+    
+    @Transactional
+    public void save(GroupMemberActiviti gma){
+        this.repository.save(gma);
+    }
+    
     public List<GroupMemberActiviti>findById(List<String>ids){
         return repository.findAll(GroupMemberSpecification.ids(ids));
     }

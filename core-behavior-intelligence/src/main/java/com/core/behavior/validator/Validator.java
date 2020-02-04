@@ -78,6 +78,7 @@ public class Validator implements IValidator {
 
         Date dataEmbarque = null;
         Date dataEmissao = null;
+        LocalDate dtEm = null;
 
         if (!Optional.ofNullable(ticketDTO.getDataEmissao()).isPresent()) {
             countError++;
@@ -96,6 +97,12 @@ public class Validator implements IValidator {
             LocalDate dateEmissao = this.dateToLocalDate(dataEmissao);
 
             if (dateEmissao.isAfter(date2025) || dateEmissao.isBefore(date2017)) {
+                countError++;
+            }
+
+            dtEm = this.dateToLocalDate(dataEmissao);
+            
+            if (dtEm != null && dtEm.isAfter(LocalDate.now())) {
                 countError++;
             }
 
@@ -1108,7 +1115,7 @@ public class Validator implements IValidator {
         } else if (this.ticket.getNomePax().length() < 17 && this.ticket.getNomePax().length() > 0) {
             nomePassageiro = ticket.getNomePax().substring(0, this.ticket.getNomePax().length() - 1);
         }
-        
+
         //Correção referente a inversão da barra que estava aplicando o scape do Mysql
         nomePassageiro = nomePassageiro.replaceAll("\\\\", " ");
 

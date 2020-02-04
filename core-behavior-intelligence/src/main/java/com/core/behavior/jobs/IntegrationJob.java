@@ -75,7 +75,7 @@ public class IntegrationJob implements Runnable {
         long start = System.currentTimeMillis();
         PageRequest page = PageRequest.of(0, file.getQtd().intValue());
 
-        //Sujeito arealizar a parallelização
+        
         List<Ticket> tickets = ticketService.listByFileIdAndStatus(file.getFile(), TicketStatusEnum.APPROVED, page);
 
         try {
