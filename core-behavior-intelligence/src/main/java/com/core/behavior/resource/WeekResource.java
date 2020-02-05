@@ -23,7 +23,6 @@ import com.core.behavior.util.Constantes;
 import io.swagger.annotations.ApiOperation;
 import java.time.LocalDate;
 import java.util.logging.Level;
-import org.aspectj.bridge.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

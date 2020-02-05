@@ -49,7 +49,6 @@ import org.springframework.context.ApplicationContext;
  */
 public class ProcessFileJob implements Runnable {
 
-    
     private BeanIoReader reader;
 
     @Autowired
@@ -88,7 +87,7 @@ public class ProcessFileJob implements Runnable {
     public static final String LIST_DATA_SUCCESS = "success";
     public static final String LIST_DATA_ERROR = "error";
     public static final int SIZE_BILHETE_BEHAVIOR = 7;
-    
+
     @Autowired
     private TicketErrorService ticketErrorService;
 
@@ -109,7 +108,7 @@ public class ProcessFileJob implements Runnable {
         this.logService = logService;
         this.agencyService = agencyService;
         this.fileService = fileService;
-        this.fileProcessStatusService = fileProcessStatusService;        
+        this.fileProcessStatusService = fileProcessStatusService;
         this.ticketService = ticketService;
         this.sequenceService = sequenceService;
 
@@ -187,13 +186,19 @@ public class ProcessFileJob implements Runnable {
                 boolean integra = success.size() > 0;
                 success.parallelStream().forEach(t -> {
                     t.setStatus(TicketStatusEnum.VALIDATION);
-                });                
+                });
 
                 this.writeErrors(error);
-                this.generateIds(success);                
+                this.generateIds(success);
                 this.mountStage(success);
+
                 this.runRules2(success);
+                this.checkDuplicity(success);
+
                 this.runRules3(success);
+                this.checkCupon(success);
+                
+                
                 this.runRules4(success);
                 this.saveTickets(success);
 
@@ -212,7 +217,7 @@ public class ProcessFileJob implements Runnable {
                     job.setFileId(idFile);
                     threadPoolFileIntegration.submit(job);
                 }
-                
+
                 System.gc();
 
             } else if (logService.fileHasError(fileId)) {
@@ -274,7 +279,6 @@ public class ProcessFileJob implements Runnable {
 
         long start = System.currentTimeMillis();
 
-       
         dto.getTicket().parallelStream().forEach(t -> {
             final Validator validator = new Validator();
             validator.validate(t);
@@ -294,20 +298,36 @@ public class ProcessFileJob implements Runnable {
         return map;
     }
 
-    
-    private void checkDuplicity(List<Ticket>success){
-        
+    private void checkDuplicity(List<Ticket> success) {
+
+        Map<String, List<Ticket>> map = success.parallelStream().collect(Collectors.groupingBy(Ticket::getAgrupamentoA));
+
+        long start = System.currentTimeMillis();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
+
+        map.keySet().parallelStream().forEach(key -> {
+            synchronized (executorService) {
+                executorService.submit(new TicketDuplicityValidationJob1(map.get(key)));
+            }
+        });
+
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+        }
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ checkDuplicity ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+
     }
-    
+
     private void runRules2(List<Ticket> success) {
 
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream().forEach(t -> {            
-            synchronized(executorService){
+        success.parallelStream().forEach(t -> {
+            synchronized (executorService) {
                 executorService.submit(new TicketDuplicityValidationJob(context, t));
-            }            
+            }
         });
 
         executorService.shutdown();
@@ -318,6 +338,26 @@ public class ProcessFileJob implements Runnable {
 
     }
 
+    private void checkCupon(List<Ticket> success) {
+
+        Map<String, List<Ticket>> map = success.parallelStream().collect(Collectors.groupingBy(Ticket::getAgrupamentoA));
+
+        long start = System.currentTimeMillis();
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
+
+        map.keySet().parallelStream().forEach(key -> {
+            synchronized (executorService) {
+                executorService.submit(new TicketCupomValidationJob1(map.get(key)));
+            }
+        });
+
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+        }
+
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ checkCupon ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+    }
+
     private void runRules3(List<Ticket> success) {
 
         long start = System.currentTimeMillis();
@@ -325,9 +365,8 @@ public class ProcessFileJob implements Runnable {
 
         success.parallelStream()
                 .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
-
-                .forEach(t -> {                    
-                    synchronized(executorService){
+                .forEach(t -> {
+                    synchronized (executorService) {
                         executorService.submit(new TicketCupomValidationJob(context, t));
                     }
                 });
@@ -347,9 +386,9 @@ public class ProcessFileJob implements Runnable {
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
         success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED) && !s.getCupom().equals(1L)).forEach(t -> {
-            synchronized(executorService){
+            synchronized (executorService) {
                 executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
-            }            
+            }
         });
 
         executorService.shutdown();
@@ -384,6 +423,6 @@ public class ProcessFileJob implements Runnable {
             ticketErrorService.saveBatch(error);
             Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ writeErrors ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
         }
-    } 
+    }
 
 }
