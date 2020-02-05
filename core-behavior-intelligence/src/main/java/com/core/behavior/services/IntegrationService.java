@@ -97,8 +97,8 @@ public class IntegrationService {
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
                 helper.setSubject("[ Data Collector ] - Erro  na Integração");
                 helper.setFrom("latamupload@behint.net.br");
-                helper.setTo(new String[]{"deniz.sanchez@behint.net.br"});
-                helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!");
+                helper.setTo(new String[]{"deniz.sanchez@behint.net.br","thiagodoy@hotmail.com","marcelo.rosim@bandtec.com.br"});
+                helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!\nErro:\n" + ex.getMessage());
 
                 sender.send(message);
             }
@@ -252,14 +252,10 @@ public class IntegrationService {
 
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ move ]", e);
+            throw new ApplicationException(0l, "Não houve integração completa dos tickets!\n" + e.getMessage());
         } finally {
             this.closeConnection(connection);
             Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ move ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-            if (!collection.isEmpty()) {
-                throw new ApplicationException(0l, "Não houve integração completa dos tickets!");
-            }
-
         }
 
     }
