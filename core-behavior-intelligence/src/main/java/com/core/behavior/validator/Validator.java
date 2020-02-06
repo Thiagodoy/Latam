@@ -101,7 +101,7 @@ public class Validator implements IValidator {
             }
 
             dtEm = this.dateToLocalDate(dataEmissao);
-            
+
             if (dtEm != null && dtEm.isAfter(LocalDate.now())) {
                 countError++;
             }
@@ -916,7 +916,14 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(ticketDTO.getPnrAgencia()).isPresent() || ticketDTO.getPnrAgencia().length() == 0) {
             this.ticketError.activeError("pnrAgencia");
         } else {
-            ticket.setPnrAgencia(ticketDTO.getPnrAgencia());
+            
+            
+            if(ticketDTO.getPnrAgencia().length()<= 20){
+                ticket.setPnrAgencia(ticketDTO.getPnrAgencia());
+            }else{
+                ticket.setPnrAgencia(ticketDTO.getPnrAgencia().substring(0, 20));
+            }
+            
         }
         return this;
     }
@@ -929,7 +936,13 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(pnrCiaAgencia).isPresent()) {
             this.ticketError.activeError("pnrCiaArea");
         } else {
-            ticket.setPnrCiaArea(pnrCiaAgencia);
+            
+            if(pnrCiaAgencia.length() <= 10){
+                ticket.setPnrCiaArea(pnrCiaAgencia);
+            }else{
+                ticket.setPnrCiaArea(pnrCiaAgencia.substring(0, 10));
+            }
+            
         }
 
         return this;
@@ -1002,7 +1015,12 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(this.ticketDTO.getEmailPax()).isPresent()) {
             this.ticket.setEmailPax("");
         } else {
-            this.ticket.setEmailPax(this.ticketDTO.getEmailPax());
+            if (this.ticketDTO.getEmailPax().length() <= 40) {
+                this.ticket.setEmailPax(this.ticketDTO.getEmailPax());
+            } else {
+                this.ticket.setEmailPax(this.ticketDTO.getEmailPax().substring(0, 40));
+            }
+
         }
 
         return this;
@@ -1014,7 +1032,14 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(this.ticketDTO.getCellPax()).isPresent()) {
             this.ticket.setCellPax("");
         } else {
-            this.ticket.setCellPax(this.ticketDTO.getCellPax());
+            
+            if(this.ticketDTO.getCellPax().length() <= 20){
+                this.ticket.setCellPax(this.ticketDTO.getCellPax());    
+            }else{
+                this.ticket.setCellPax(this.ticketDTO.getCellPax().substring(0, 20));    
+            }
+            
+            
         }
 
         return this;
@@ -1043,7 +1068,12 @@ public class Validator implements IValidator {
         if (countError > 0) {
             this.ticketError.activeError("tipoPagamento");
         } else {
-            ticket.setTipoPagamento(tipoPagamento);
+            if(tipoPagamento.length() <= 30){
+                ticket.setTipoPagamento(tipoPagamento);
+            }else{
+                ticket.setTipoPagamento(tipoPagamento.substring(0, 30));
+            }
+            
         }
 
         return this;

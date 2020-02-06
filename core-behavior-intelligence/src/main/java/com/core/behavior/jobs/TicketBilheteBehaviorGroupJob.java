@@ -6,12 +6,10 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.model.Ticket;
-import com.core.behavior.model.TicketStage;
-import com.core.behavior.services.TicketStageService;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.springframework.context.ApplicationContext;
 
 /**
  *
@@ -19,29 +17,27 @@ import org.springframework.context.ApplicationContext;
  */
 public class TicketBilheteBehaviorGroupJob implements Runnable {
 
-    private TicketStageService service;
-    private Ticket ticket;
+    private List<Ticket> tickets;
 
-    public TicketBilheteBehaviorGroupJob(ApplicationContext context, Ticket ticket) {
-        this.ticket = ticket;
-        this.service = context.getBean(TicketStageService.class);
+    public TicketBilheteBehaviorGroupJob(List<Ticket> tickets) {
+        this.tickets = tickets;
     }
 
     @Override
     public void run() {
 
         try {
-            Optional<TicketStage> ticketStage = this.service.getByAgrupamentoAAndCupom(ticket);
-            
-            if(ticketStage.isPresent()){
-                synchronized(ticketStage){
-                    ticket.setBilheteBehavior(ticketStage.get().getBilhetBehavior());    
-                }
-            }           
-            
-        } catch (Exception e) {            
-             Logger.getLogger(TicketBilheteBehaviorGroupJob.class.getName()).log(Level.SEVERE, "[ run ] ticket id -> " + this.ticket.getId(), e);            
-        }       
+
+            Optional<Ticket> opt = this.tickets.stream().filter((t) -> t.getCupom().equals(1L)).findFirst();
+
+            if (opt.isPresent()) {
+                String bilheteBehavior = opt.get().getBilheteBehavior();
+                this.tickets.stream().forEach((t) -> t.setBilheteBehavior(bilheteBehavior));
+            }
+
+        } catch (Exception e) {
+            Logger.getLogger(TicketBilheteBehaviorGroupJob.class.getName()).log(Level.SEVERE, "[ run ]", e);
+        }
 
     }
 

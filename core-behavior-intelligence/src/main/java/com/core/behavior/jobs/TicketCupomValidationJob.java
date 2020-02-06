@@ -6,9 +6,10 @@
 package com.core.behavior.jobs;
 
 import com.core.behavior.model.Ticket;
-import com.core.behavior.services.TicketService;
 import com.core.behavior.util.TicketStatusEnum;
-import org.springframework.context.ApplicationContext;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,26 +17,31 @@ import org.springframework.context.ApplicationContext;
  */
 public class TicketCupomValidationJob implements Runnable {
 
-    private TicketService service;
+    private List<Ticket> tickets;
 
-    private Ticket ticket;
-
-    public TicketCupomValidationJob(ApplicationContext context, Ticket ticket) {
-        this.ticket = ticket;
-        this.service = context.getBean(TicketService.class);
+    public TicketCupomValidationJob(List<Ticket> tickets) {
+        this.tickets = tickets;
     }
 
     @Override
     public void run() {
 
         try {
-            
-            boolean isOk = service.checkCupom(ticket);
-            TicketStatusEnum status = isOk ? TicketStatusEnum.APPROVED : TicketStatusEnum.BACKOFFICE_CUPOM;
-            ticket.setStatus(status);            
+            //sum(cupom) = truncate(count(1)*(((count(1)-1) * 0.5)+1),0)
 
-        } catch (Exception e) {          
-            ticket.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM);            
+            Long sumCupom = this.tickets.stream().map((t) -> t.getCupom()).reduce(0L, Long::sum);
+            Long count = this.tickets.stream().count();
+
+            Long result = (long) (count * (((count - 1) * 0.5) + 1));
+
+            if (result.equals(sumCupom)) {
+                this.tickets.stream().forEach(t -> t.setStatus(TicketStatusEnum.APPROVED));
+            } else {
+                this.tickets.stream().forEach(t -> t.setStatus(TicketStatusEnum.BACKOFFICE_CUPOM));
+            }
+
+        } catch (Exception e) {
+            Logger.getLogger(TicketCupomValidationJob.class.getName()).log(Level.SEVERE, "[ run ]", e);
         }
 
     }

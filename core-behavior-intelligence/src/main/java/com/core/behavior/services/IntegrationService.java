@@ -15,6 +15,7 @@ import com.core.behavior.model.Ticket;
 import com.core.behavior.properties.AnaliticsProperties;
 import com.core.behavior.repository.FileRepository;
 import com.core.behavior.repository.TicketRepository;
+import com.core.behavior.util.StatusEnum;
 import com.core.behavior.util.Stream;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
@@ -67,41 +68,36 @@ public class IntegrationService {
 
     public void integrate(List<Ticket> tickets) throws Exception {
 
+        Long id = tickets.stream().findFirst().get().getFileId();
+
         try {
 
             int total = tickets.size();
-            Long id = tickets.stream().findFirst().get().getFileId();
-            
+
             this.move(tickets);
             this.callSpDataCollector();
             this.makeFileResultIntegration();
 
-            if (total > 0) {            
+            if (total > 0) {
                 this.makeFileResultDataCollector(id, total);
             }
 
         } catch (Exception ex) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ integrate ]", ex);
 
-            if (ex instanceof ApplicationException) {
+            com.core.behavior.model.File f = this.fileRepository.findById(id).get();
+            f.setStatus(StatusEnum.VALIDATION_ERROR);            
+            this.fileRepository.save(f);            
+            String fileName = f.getName();
 
-                Long fileId = tickets.
-                        stream()
-                        .findFirst()
-                        .get()
-                        .getId();
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setSubject("[ Data Collector ] - Erro  na Integração");
+            helper.setFrom("latamupload@behint.net.br");
+            helper.setTo(new String[]{"deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com", "marcelo.rosim@bandtec.com.br"});
+            helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!\nErro:\n" + ex.getMessage());
 
-                String fileName = this.fileRepository.findById(fileId).get().getName();
-
-                MimeMessage message = sender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
-                helper.setSubject("[ Data Collector ] - Erro  na Integração");
-                helper.setFrom("latamupload@behint.net.br");
-                helper.setTo(new String[]{"deniz.sanchez@behint.net.br","thiagodoy@hotmail.com","marcelo.rosim@bandtec.com.br"});
-                helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!\nErro:\n" + ex.getMessage());
-
-                sender.send(message);
-            }
+            sender.send(message);
 
         }
     }
@@ -146,22 +142,20 @@ public class IntegrationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("[ Data Collector ] - BackOffice (Cupom/Duplicidade)");
             helper.setFrom("latamupload@behint.net.br");
-            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br","fernando.land@behint.net.br","paulo.baptista@behint.net.br"});
+            helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "fernando.land@behint.net.br", "paulo.baptista@behint.net.br","thiagodoy@hotmail.com"});
 
             long qtdTotal = file.getQtdTotalLines();
-            
-            
-            
-            double percentualAprovado =  (total / (double)qtdTotal) * 100;
+
+            double percentualAprovado = (total / (double) qtdTotal) * 100;
 
             long erroValidacao = file.getRepeatedLine();
-            String percentualValidação = Utils.formatDecimal((erroValidacao / (double)qtdTotal) * 100);
+            String percentualValidação = Utils.formatDecimal((erroValidacao / (double) qtdTotal) * 100);
 
             long erroCupom = listticketCupom.size();
-            String percentualErroCupom = Utils.formatDecimal((erroCupom / (double)qtdTotal) * 100);
+            String percentualErroCupom = Utils.formatDecimal((erroCupom / (double) qtdTotal) * 100);
 
             long erroDuplicidade = listticketDuplicity.size();
-            String percentualErroDuplicidade = Utils.formatDecimal((erroDuplicidade / (double)qtdTotal) * 100);
+            String percentualErroDuplicidade = Utils.formatDecimal((erroDuplicidade / (double) qtdTotal) * 100);
 
             String mess = "Segue em anexos os tickets que não foram processados, por estarem com erros de cupom ou duplicidade.\n Referente ao arquivo : " + nameFile;
 
@@ -205,7 +199,7 @@ public class IntegrationService {
     private void move(List<Ticket> tickets) throws Exception {
 
         long start = System.currentTimeMillis();
-        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, " Incializando integração");
+        Logger.getLogger(IntegrationJob.class.getName()).log(Level.INFO, " Inicializando integração");
 
         List<AirMovimentDTO> airMovimentDTOs = tickets
                 .parallelStream()
@@ -252,7 +246,7 @@ public class IntegrationService {
 
         } catch (Exception e) {
             Logger.getLogger(IntegrationService.class.getName()).log(Level.SEVERE, "[ move ]", e);
-            throw new ApplicationException(0l, "Não houve integração completa dos tickets!\n" + e.getMessage());
+            throw new ApplicationException(0l, e.getMessage());
         } finally {
             this.closeConnection(connection);
             Logger.getLogger(IntegrationService.class.getName()).log(Level.INFO, "[ move ] -> Tempo" + ((System.currentTimeMillis() - start) / 1000) + " sec");
@@ -324,7 +318,7 @@ public class IntegrationService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setSubject("[ Data Collector ] - BackOffice");
         helper.setFrom("latamupload@behint.net.br");
-        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br","fernando.land@behint.net.br","paulo.baptista@behint.net.br"});
+        helper.setTo(new String[]{"marcelo.rosim@bandtec.com.br", "deniz.sanchez@behint.net.br", "fernando.land@behint.net.br", "paulo.baptista@behint.net.br"});
         helper.setText("Segue em anexos os erros na validação da procedure SP_DataCollector");
         helper.addAttachment("Evidencia.zip", attachment);
         sender.send(message);

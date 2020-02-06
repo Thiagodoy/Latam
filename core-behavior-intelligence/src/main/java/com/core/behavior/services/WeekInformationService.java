@@ -64,6 +64,7 @@ public class WeekInformationService {
 
         return this.repository.findByAgencyAndCalendar(agency1, calendar1);
 
-    }
+    }  
+  
 
 }

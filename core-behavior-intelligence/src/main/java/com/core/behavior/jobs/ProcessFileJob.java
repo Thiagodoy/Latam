@@ -190,16 +190,11 @@ public class ProcessFileJob implements Runnable {
 
                 this.writeErrors(error);
                 this.generateIds(success);
-                this.mountStage(success);
 
-                this.runRules2(success);
                 this.checkDuplicity(success);
-
-                this.runRules3(success);
                 this.checkCupon(success);
-                
-                
-                this.runRules4(success);
+                this.checkBilheteBehavior(success);
+
                 this.saveTickets(success);
 
                 long timeValidation = (System.currentTimeMillis() - startValidation) / 1000;
@@ -307,7 +302,7 @@ public class ProcessFileJob implements Runnable {
 
         map.keySet().parallelStream().forEach(key -> {
             synchronized (executorService) {
-                executorService.submit(new TicketDuplicityValidationJob1(map.get(key)));
+                executorService.submit(new TicketDuplicityValidationJob(map.get(key)));
             }
         });
 
@@ -316,25 +311,6 @@ public class ProcessFileJob implements Runnable {
         }
 
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ checkDuplicity ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-    }
-
-    private void runRules2(List<Ticket> success) {
-
-        long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
-
-        success.parallelStream().forEach(t -> {
-            synchronized (executorService) {
-                executorService.submit(new TicketDuplicityValidationJob(context, t));
-            }
-        });
-
-        executorService.shutdown();
-        while (!executorService.isTerminated()) {
-        }
-
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules2 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 
@@ -347,7 +323,12 @@ public class ProcessFileJob implements Runnable {
 
         map.keySet().parallelStream().forEach(key -> {
             synchronized (executorService) {
-                executorService.submit(new TicketCupomValidationJob1(map.get(key)));
+                List<Ticket> tickets = map.get(key)
+                        .stream()
+                        .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
+                        .collect(Collectors.toList());
+
+                executorService.submit(new TicketCupomValidationJob(tickets));
             }
         });
 
@@ -358,45 +339,29 @@ public class ProcessFileJob implements Runnable {
         Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ checkCupon ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
     }
 
-    private void runRules3(List<Ticket> success) {
+    private void checkBilheteBehavior(List<Ticket> success) {
+
+        Map<String, List<Ticket>> map = success.parallelStream().collect(Collectors.groupingBy(Ticket::getAgrupamentoA));
 
         long start = System.currentTimeMillis();
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
 
-        success.parallelStream()
-                .filter(t -> t.getStatus().equals(TicketStatusEnum.VALIDATION))
-                .forEach(t -> {
-                    synchronized (executorService) {
-                        executorService.submit(new TicketCupomValidationJob(context, t));
-                    }
-                });
-
-        executorService.shutdown();
-        //Aguarda o termino do processamento
-        while (!executorService.isTerminated()) {
-        }
-
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules3 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
-
-    }
-
-    private void runRules4(List<Ticket> success) {
-
-        long start = System.currentTimeMillis();
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(THREAD_POLL);
-
-        success.parallelStream().filter(s -> s.getStatus().equals(TicketStatusEnum.APPROVED) && !s.getCupom().equals(1L)).forEach(t -> {
+        map.keySet().parallelStream().forEach(key -> {
             synchronized (executorService) {
-                executorService.submit(new TicketBilheteBehaviorGroupJob(context, t));
+                List<Ticket> tickets = map.get(key)
+                        .stream()
+                        .filter(t -> t.getStatus().equals(TicketStatusEnum.APPROVED))
+                        .collect(Collectors.toList());
+
+                executorService.submit(new TicketBilheteBehaviorGroupJob(tickets));
             }
         });
 
         executorService.shutdown();
-        //Aguarda o termino do processamento
         while (!executorService.isTerminated()) {
         }
 
-        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ runRules4 ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
+        Logger.getLogger(ProcessFileJob.class.getName()).log(Level.INFO, "[ checkCupon ] -> " + ((System.currentTimeMillis() - start) / 1000) + " sec");
 
     }
 

@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.core</groupId>
     <artifactId>behavior</artifactId>
-    <version>5.0.18-SNAPSHOT</version>
+    <version>5.0.22-SNAPSHOT</version>
     <name>behavior</name>
 
     <properties>
