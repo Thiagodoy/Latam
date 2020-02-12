@@ -5,7 +5,6 @@
  */
 package com.core.behavior.services;
 
-import com.core.behavior.dto.TicketValidationDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.model.TicketStage;
 import com.core.behavior.repository.TicketStageRepository;

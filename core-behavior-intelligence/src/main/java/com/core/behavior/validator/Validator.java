@@ -47,9 +47,8 @@ public class Validator implements IValidator {
     private final static String REGEX_CABINE = "[A-Z]*";
     private final static String REGEX_CIA_VOO = "([A-Z]{1}[0-9]{1})|([A-Z]{1}[A-Z]{1})|([0-9]{1}[A-Z]{1})";
     private final static String REGEX_VALOR_BRL = "^([0-9]{1,3}\\.?)+(,[0-9]{1,2})?$";
-    private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";
-    private final static String REGEX_NUM_VOO = "([0-9]{2,4})|([^A-Z\\(]{2,4})|(^\\d[A-Z]{2,3})|([A-Z]{1,3}\\d$)|(^\\D[0-9]{2,3})|([0-9]{1,3}\\D$)|(\\d\\D){2,4}|(\\D\\d){2,4}";
-    //private final static String REGEX_RT_OW = "(RT|OW){0,2}";
+    private final static String REGEX_QTD_PAX = "((^0*[1-9]$)|(^[1-9][0-9]$))";   
+    private final static String REGEX_NUM_VOO_EXCEPTION = "([0]{0,4})|([A-Za-z]{0,4})|((\\s){0,4})|([A-Za-z0-9]){0,1}";   
     private final static String REGEX_TIPO_PAX = "(ADT|CHD|INF){0,3}";
     private final static String REGEX_NOME_PAX = "[A-Z\\s/]+";
 
@@ -585,20 +584,33 @@ public class Validator implements IValidator {
         }
 
         if (countError == 0) {
-            //Alterar a regex. Ilegivel
-            Pattern p = Pattern.compile(REGEX_NUM_VOO);
+            Pattern p = Pattern.compile(REGEX_NUM_VOO_EXCEPTION);
             Matcher m = p.matcher(numVoo);
-
-            if (!m.matches()) {
+            
+            if(m.matches()){
                 countError++;
-            } else {
-                try {
-                    Long.parseLong(numVoo);
-                } catch (Exception e) {
-                    countError++;
+            }else{
+                if(numVoo.length() > 4){
+                    countError++;    
                 }
             }
         }
+
+//        if (countError == 0) {
+//            //Alterar a regex. Ilegivel
+//            Pattern p = Pattern.compile(REGEX_NUM_VOO);
+//            Matcher m = p.matcher(numVoo);
+//
+//            if (!m.matches()) {
+//                countError++;
+//            } else {
+//                try {
+//                    Long.parseLong(numVoo);
+//                } catch (Exception e) {
+//                    countError++;
+//                }
+//            }
+//        }
 
         if (countError > 0) {
             this.ticketError.activeError("numVoo");
@@ -916,14 +928,13 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(ticketDTO.getPnrAgencia()).isPresent() || ticketDTO.getPnrAgencia().length() == 0) {
             this.ticketError.activeError("pnrAgencia");
         } else {
-            
-            
-            if(ticketDTO.getPnrAgencia().length()<= 20){
+
+            if (ticketDTO.getPnrAgencia().length() <= 20) {
                 ticket.setPnrAgencia(ticketDTO.getPnrAgencia());
-            }else{
+            } else {
                 ticket.setPnrAgencia(ticketDTO.getPnrAgencia().substring(0, 20));
             }
-            
+
         }
         return this;
     }
@@ -936,13 +947,13 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(pnrCiaAgencia).isPresent()) {
             this.ticketError.activeError("pnrCiaArea");
         } else {
-            
-            if(pnrCiaAgencia.length() <= 10){
+
+            if (pnrCiaAgencia.length() <= 10) {
                 ticket.setPnrCiaArea(pnrCiaAgencia);
-            }else{
+            } else {
                 ticket.setPnrCiaArea(pnrCiaAgencia.substring(0, 10));
             }
-            
+
         }
 
         return this;
@@ -1004,7 +1015,13 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(cpfPax).isPresent() || cpfPax.length() == 0) {
             ticket.setCpfPax("");
         } else {
-            ticket.setCpfPax(cpfPax);
+            
+            if(cpfPax.length() <= 15){
+                ticket.setCpfPax(cpfPax);    
+            }else{
+                ticket.setCpfPax(cpfPax.substring(0, 15));    
+            }
+            
         }
         return this;
     }
@@ -1032,14 +1049,13 @@ public class Validator implements IValidator {
         if (!Optional.ofNullable(this.ticketDTO.getCellPax()).isPresent()) {
             this.ticket.setCellPax("");
         } else {
-            
-            if(this.ticketDTO.getCellPax().length() <= 20){
-                this.ticket.setCellPax(this.ticketDTO.getCellPax());    
-            }else{
-                this.ticket.setCellPax(this.ticketDTO.getCellPax().substring(0, 20));    
+
+            if (this.ticketDTO.getCellPax().length() <= 20) {
+                this.ticket.setCellPax(this.ticketDTO.getCellPax());
+            } else {
+                this.ticket.setCellPax(this.ticketDTO.getCellPax().substring(0, 20));
             }
-            
-            
+
         }
 
         return this;
@@ -1068,12 +1084,12 @@ public class Validator implements IValidator {
         if (countError > 0) {
             this.ticketError.activeError("tipoPagamento");
         } else {
-            if(tipoPagamento.length() <= 30){
+            if (tipoPagamento.length() <= 30) {
                 ticket.setTipoPagamento(tipoPagamento);
-            }else{
+            } else {
                 ticket.setTipoPagamento(tipoPagamento.substring(0, 30));
             }
-            
+
         }
 
         return this;

@@ -71,19 +71,6 @@ public class BehaviorDataBaseConfiguration implements EnvironmentAware {
     public DataSource dataSourceBehavior() {
 
         DataSource dataSource;
-
-        
-        Properties props = new Properties();
-//        props.setProperty("dataSource.cachePrepStmts", "true");
-//        props.setProperty("dataSource.prepStmtCacheSize", "250");
-//        props.setProperty("dataSource.prepStmtCacheSqlLimit", "2048");
-//        props.setProperty("dataSource.useServerPrepStmts", "true");
-//        props.setProperty("dataSource.useLocalSessionState", "true");
-//        props.setProperty("dataSource.rewriteBatchedStatements", "true");
-//        props.setProperty("dataSource.cacheResultSetMetadata", "true");
-//        props.setProperty("dataSource.cacheServerConfiguration", "true");
-//        props.setProperty("dataSource.cacheServerConfiguration", "true");
-        
         
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setInitializationFailTimeout(-1);

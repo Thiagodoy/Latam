@@ -95,18 +95,12 @@ public class QuartzConfiguration {
     @Bean
     public IntegrationJob integrationJob(TicketService ticketService, FileService fileService, IntegrationService integrationService ) {
         return new IntegrationJob(ticketService, fileService, integrationService);
-    }
-    
-    
-
-   
+    }   
     
     @Bean
     public FileReturnJob fileReturnJob1(ClientAws clientAws, UserActivitiService userActivitiService, AgencyRepository agencyRepository, FileRepository fileRepository, NotificacaoService notificacaoService) {
         return new FileReturnJob(clientAws, userActivitiService, agencyRepository, fileRepository, notificacaoService);
     }
-
-
 
     @Bean
     public ProcessFileJob processFileJob1(LogService logService, AgencyService agencyService, FileService fileService,

@@ -5,9 +5,7 @@
  */
 package com.core.behavior.repository;
 
-import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketValidationDTO;
-import com.core.behavior.dto.TicketValidationShortDTO;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.util.TicketStatusEnum;
 import java.time.LocalDate;
@@ -28,28 +26,14 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-
-    @Query(nativeQuery = true)
-    TicketValidationDTO rules(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom);
-    
-    @Query(nativeQuery = true)
-    TicketValidationShortDTO rulesShort(@Param("agrupac") String agrupamentoC, @Param("cupom") Long cupom);       
-    
-    @Query(nativeQuery = true)
-    TicketCountCupomDTO rulesCountCupom(@Param("agrupa") String agrupamentoA,@Param("cupom") Long cupom);
-    
-    @Query(nativeQuery = true)
-    TicketCountCupomDTO rulesCountCupomShort(@Param("agrupc") String agrupamentoC,@Param("cupom") Long cupom);
     
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.cupom = :cupom and t.agrupamento_a = :agrupa")
     List<Ticket> findToUpdate(@Param("agrupa") String agrupamentoA, @Param("cupom") Long cupom);
-    
 
     @Query(nativeQuery = true, value = "select * from ticket t where t.file_id = :fileId ")
     List<Ticket> findByFileId(@Param("fileId") Long fileId);
-    
-    
+
     @Query(nativeQuery = true, value = "select  sum(cupom) = truncate(count(1)*(((count(1)-1) * 0.5)+1),0)  from  behavior.ticket_stage where agrupamento_a = :agrup ")
     Long checkCupom(@Param("agrup") String agrupamento);
 
@@ -57,24 +41,22 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Transactional
     @Query(value = "delete from ticket  where file_id = :fileId", nativeQuery = true)
     void deleteByFileId(@Param("fileId") Long fileId);
-    
-    @Modifying 
+
+    @Modifying
     @Query(value = "delete from ticket  where created_at between :start and :end", nativeQuery = true)
-    void deleteByDateBetween(@Param("start") LocalDate start,@Param("end") LocalDate end);        
-    
-    
-    
+    void deleteByDateBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
 
     //@Query(nativeQuery = true,countQuery = "select count(*) from ticket where status= :status" ,value = "select * from ticket where status= :status")
     List<Ticket> findByStatus(TicketStatusEnum status, Pageable page);
 
     List<Ticket> findBydataEmissaoBetween(Date startTime, Date endTime);
-    
-    
+
     List<Ticket> findByAgrupamentoC(String agrupamento);
+
     List<Ticket> findByAgrupamentoA(String agrupamento);
-    
-    List<Ticket> findByFileIdAndStatus(Long id,TicketStatusEnum status,Pageable page);
-    List<Ticket> findByFileIdAndStatus(Long id,TicketStatusEnum status);
+
+    List<Ticket> findByFileIdAndStatus(Long id, TicketStatusEnum status, Pageable page);
+
+    List<Ticket> findByFileIdAndStatus(Long id, TicketStatusEnum status);
 
 }

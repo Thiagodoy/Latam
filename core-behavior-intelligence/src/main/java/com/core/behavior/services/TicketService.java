@@ -1,16 +1,12 @@
 package com.core.behavior.services;
 
-import com.core.behavior.dto.TicketCountCupomDTO;
-import com.core.behavior.dto.TicketDuplicityDTO;
-import com.core.behavior.dto.TicketValidationDTO;
-import com.core.behavior.dto.TicketValidationShortDTO;
+
 import com.core.behavior.jobs.IntegrationJob;
 import com.core.behavior.model.Ticket;
 import com.core.behavior.repository.TicketRepository;
 import com.core.behavior.util.TicketStatusEnum;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,36 +201,15 @@ public class TicketService {
 
     public List<Ticket> listByFileIdAndStatus(Long fileId, TicketStatusEnum status) {
         return ticketRepository.findByFileIdAndStatus(fileId, status);
-    }
-
-    public List<TicketDuplicityDTO> listDuplicityByDateEmission(LocalDate start, LocalDate end) {
-        return null;//ticketRepository.listDuplicityByDateEmission(start, end);
-    }
-
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public TicketValidationDTO checkRules(Ticket ticket) {
-        return ticketRepository.rules(ticket.getAgrupamentoA(), ticket.getCupom());
-    }
-
-    public TicketValidationShortDTO rulesShort(Ticket ticket) {
-        return ticketRepository.rulesShort(ticket.getAgrupamentoC(), ticket.getCupom());
-    }
-
+    }   
+    
     public List<Ticket> findToUpdate(Ticket ticket) {
         return ticketRepository.findToUpdate(ticket.getAgrupamentoA(), ticket.getCupom());
     }
 
     public List<Ticket> listByDateEmission(java.util.Date start, java.util.Date end, String codigoAgencia) {
         return ticketRepository.findBydataEmissaoBetween(start, end);
-    }
-
-    public TicketCountCupomDTO rulesCountCupom(Ticket ticket) {
-        return ticketRepository.rulesCountCupom(ticket.getAgrupamentoA(), ticket.getCupom());
-    }
-
-    public TicketCountCupomDTO rulesCountCupomShort(Ticket ticket) {
-        return ticketRepository.rulesCountCupomShort(ticket.getAgrupamentoC(), ticket.getCupom());
-    }
+    }   
 
     public List<Ticket> findByAgrupamentoC(Ticket t) {
         return ticketRepository.findByAgrupamentoC(t.getAgrupamentoC());

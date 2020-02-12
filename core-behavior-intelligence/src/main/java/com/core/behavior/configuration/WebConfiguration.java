@@ -17,11 +17,9 @@ public class WebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-         registry
-            .addMapping("/**")
-            .allowedMethods("*");
-         
-        //registry.addMapping("http://10.93.1.166:8002");
+        registry
+                .addMapping("/**")
+                .allowedMethods("*");
 
     }
 
@@ -38,8 +36,5 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addResourceHandler("/swagger-ui.html**").addResourceLocations("classpath:/META-INF/resources/swagger-ui.html");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
-    
-    
-   
 
 }

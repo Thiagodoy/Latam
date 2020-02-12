@@ -28,8 +28,7 @@ public class SwaggerConfiguration {
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(Predicates.not(PathSelectors.regex("/error")))
-                .build()
-               // .host("localhost:" + serverProperties.getPort())
+                .build()               
                 .apiInfo(apiInfo());
     }
 

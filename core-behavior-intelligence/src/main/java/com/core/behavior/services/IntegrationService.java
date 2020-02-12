@@ -94,7 +94,7 @@ public class IntegrationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setSubject("[ Data Collector ] - Erro  na Integração");
             helper.setFrom("latamupload@behint.net.br");
-            helper.setTo(new String[]{"deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com", "marcelo.rosim@bandtec.com.br"});
+            helper.setTo(new String[]{"deniz.sanchez@behint.net.br", "thiagodoy@hotmail.com", "marcelo.rosim@bandtec.com.br","paulo.baptista@behint.net.br","fernando.land@behint.net.br"});
             helper.setText("Não foi possivel realizar a integração do arquivo -> " + fileName + ".\n\n Favor entrar em contato com o responsável da aplicação!\nErro:\n" + ex.getMessage());
 
             sender.send(message);

@@ -1,9 +1,7 @@
 package com.core.behavior.model;
 
 import com.core.behavior.annotations.PositionParameter;
-import com.core.behavior.dto.TicketCountCupomDTO;
 import com.core.behavior.dto.TicketValidationDTO;
-import com.core.behavior.dto.TicketValidationShortDTO;
 import static com.core.behavior.jobs.ProcessFileJob.SIZE_BILHETE_BEHAVIOR;
 import com.core.behavior.util.TicketLayoutEnum;
 import com.core.behavior.util.TicketStatusEnum;
@@ -39,41 +37,7 @@ import org.hibernate.annotations.DynamicUpdate;
  *
  * @author Thiago H. Godoy <thiagodoy@hotmail.com>
  */
-@SqlResultSetMapping(name = "TicketRules",
-        classes = @ConstructorResult(
-                targetClass = TicketValidationDTO.class,
-                columns = {
-                    @ColumnResult(name = "duplicity", type = Long.class)
-                }))
 
-@SqlResultSetMapping(name = "TicketRulesShort",
-        classes = @ConstructorResult(
-                targetClass = TicketValidationShortDTO.class,
-                columns = {
-                    @ColumnResult(name = "insert", type = Long.class)
-                    ,
-                        @ColumnResult(name = "update", type = Long.class)
-                }))
-
-@SqlResultSetMapping(name = "TicketRulesCountCupom",
-        classes = @ConstructorResult(
-                targetClass = TicketCountCupomDTO.class,
-                columns = {
-                    @ColumnResult(name = "count", type = Long.class)
-                }))
-
-@NamedNativeQuery(name = "Ticket.rules", resultSetMapping = "TicketRules",
-        query = "select count(1) as duplicity  from ticket_stage where cupom = :cupom and agrupamento_a = :agrupa ")
-
-@NamedNativeQuery(name = "Ticket.rulesShort", resultSetMapping = "TicketRulesShort",
-        query = "select (select count(1) as value from ticket where agrupamento_c = :agrupac  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'insert',\n"
-        + "(select count(1) as value from ticket where agrupamento_c = :agrupac and cupom = :cupom  and status not in ('BACKOFFICE_CUPOM','BACKOFFICE', 'ERROR_EXECUTOR')) as 'update'\n")
-
-@NamedNativeQuery(name = "Ticket.rulesCountCupom", resultSetMapping = "TicketRulesCountCupom",
-        query = "select count(cupom) count  from ticket where agrupamento_a = :agrupa and cupom <= :cupom and type = 'INSERT'")
-
-@NamedNativeQuery(name = "Ticket.rulesCountCupomShort", resultSetMapping = "TicketRulesCountCupom",
-        query = "select count(cupom) count  from ticket where agrupamento_c = :agrupc and cupom <= :cupom and type = 'INSERT'")
 
 @Entity
 @Table(schema = "behavior", name = "ticket")
